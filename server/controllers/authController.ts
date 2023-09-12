@@ -36,6 +36,8 @@ export const makeLoginRequest = async (
       },
     );
 
+    // console.log(response);
+
     const accessToken = response.data.access_token;
     const refreshToken = response.data.refresh_token;
 

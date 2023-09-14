@@ -44,7 +44,15 @@ export const makeLoginRequest = async (
       refreshToken,
     };
   } catch (error: any) {
-    console.error('Error Details:', {});
+    if (error.response) {
+      console.log('☣️ Response Error:', error.response.status);
+      console.log('☣️ Response Data:', error.response.data);
+    } else if (error.request) {
+      console.log('☣️ Request Error:', error.request);
+    } else {
+      console.log('☣️ Setup Error:', error.message);
+    }
+    console.log('☣️ Config that triggered the error:', error.config);
 
     return {
       accessToken: null,

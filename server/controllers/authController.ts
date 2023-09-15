@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { CLIENT_ID, CLIENT_SECRET, IOT_ENDPOINT } from '../config';
+import { IOT_ENDPOINT } from '../config';
+import { CONTENT_TYPE_CHARSET } from '../constants';
+import { base64Credentials } from '../utils/auth.utils';
 
 interface AuthTokens {
   accessToken: string | null;
@@ -14,15 +16,9 @@ export const makeLoginRequest = async (
     username,
     password,
     grant_type: 'password',
-    client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET!,
   };
 
   const formData = new URLSearchParams(payload).toString();
-
-  const base64Credentials = Buffer.from(
-    `${CLIENT_ID}:${CLIENT_SECRET}`,
-  ).toString('base64');
 
   try {
     const response = await axios.post(
@@ -30,7 +26,7 @@ export const makeLoginRequest = async (
       formData,
       {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+          'Content-Type': `${CONTENT_TYPE_CHARSET}`,
           Authorization: `Basic ${base64Credentials}`,
         },
       },
@@ -45,14 +41,14 @@ export const makeLoginRequest = async (
     };
   } catch (error: any) {
     if (error.response) {
-      console.log('☣️ Response Error:', error.response.status);
-      console.log('☣️ Response Data:', error.response.data);
+      console.log('Response Error:', error.response.status);
+      console.log('Response Data:', error.response.data);
     } else if (error.request) {
-      console.log('☣️ Request Error:', error.request);
+      console.log('Request Error:', error.request);
     } else {
-      console.log('☣️ Setup Error:', error.message);
+      console.log('Setup Error:', error.message);
     }
-    console.log('☣️ Config that triggered the error:', error.config);
+    console.log('Config that triggered the error:', error.config);
 
     return {
       accessToken: null,

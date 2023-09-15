@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { makeLoginRequest } from '../controllers/authController';
-import { CustomSession } from '../types/customSessionTypes';
+import { makeLoginRequest } from '../../controllers/authController';
+import { CustomSession } from '../../types/customSessionTypes';
 
 const router = Router();
 

@@ -9,9 +9,9 @@ import {
   SESSION_SECRET,
 } from './config';
 import customSessionMiddleware from './middleware/customSession';
-import authRoutes from './routes/authRoutes';
+import authRoutes from './routes/auth/authRoutes';
+import oauthRoutes from './routes/auth/refreshTokenRoutes';
 import iotRoutes from './routes/iotRoutes';
-import oauthRoutes from './routes/oauthRoutes';
 
 config();
 

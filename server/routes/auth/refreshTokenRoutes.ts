@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import * as iotController from '../controllers/iotController';
+import * as iotController from '../../controllers/iotController';
 
 const router = express.Router();
 
@@ -27,17 +27,13 @@ const handleRefreshToken = async (req: Request, res: Response) => {
     refreshToken: String(refresh_token),
   });
 
-  // console.group('newAccessToken: ');
-  // console.log(newAccessToken);
-  // console.groupEnd();
-
   if (newAccessToken) {
     return res.status(200).json(newAccessToken);
   }
   return res.status(401).json({ error: 'Failed to refresh token' });
 };
 
-const handlePassword = async (req: Request, res: Response) => {
+const handleRefreshTokenByPassword = async (req: Request, res: Response) => {
   const { username, password, password_type, client_id, client_secret } =
     req.query;
   if (
@@ -76,7 +72,7 @@ router.post('/access_token', async (req, res) => {
     return handleRefreshToken(req, res);
   }
   if (grant_type === 'password') {
-    return handlePassword(req, res);
+    return handleRefreshTokenByPassword(req, res);
   }
 
   return res.status(400).json({ error: 'Invalid grant_type' });

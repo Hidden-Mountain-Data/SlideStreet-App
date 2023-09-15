@@ -5,33 +5,6 @@ export interface CustomError extends Error {
   data?: any;
 }
 
-// ============ OAuth and Token Types ============
-
-// For password grant type
-export interface AccessTokenParamsPassword {
-  grantType: string;
-  username: string;
-  password: string;
-  passwordType: string;
-  clientId: string;
-  clientSecret: string;
-}
-
-// For refresh token grant type
-export interface AccessTokenParamsRefresh {
-  grantType: string;
-  clientId: string;
-  clientSecret: string;
-  refreshToken: string;
-}
-
-export interface OAuth2Token {
-  access_token: string;
-  expires_in: number;
-  refresh_token: string;
-  token_type: string;
-}
-
 // ============ Device Configuration ============
 
 // Device Configurations

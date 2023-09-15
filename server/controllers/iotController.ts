@@ -6,12 +6,36 @@ import {
 } from '../constants';
 import { axiosCall } from '../setup/axiosSetup';
 import {
-  AccessTokenParamsPassword,
-  AccessTokenParamsRefresh,
   DevicesResponse,
   GatewayClientsResponse,
-  OAuth2Token,
 } from '../types/iot/iotDevices';
+
+// ============ OAuth and Token Types ============
+
+// For password grant type
+interface AccessTokenParamsPassword {
+  clientId: string;
+  clientSecret: string;
+  grantType: string;
+  password: string;
+  passwordType: string;
+  username: string;
+}
+
+// For refresh token grant type
+interface AccessTokenParamsRefresh {
+  clientId: string;
+  clientSecret: string;
+  grantType: string;
+  refreshToken: string;
+}
+
+interface OAuth2Token {
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  token_type: string;
+}
 
 export const getAccessTokenWithPassword = async ({
   grantType,
@@ -70,6 +94,7 @@ export const refreshAccessToken = async ({
   grantType,
   refreshToken,
 }: AccessTokenParamsRefresh): Promise<OAuth2Token | null> => {
+  const url = '/oauth2/access_token';
   const postData: Record<string, string> = {
     client_id: clientId,
     client_secret: clientSecret,
@@ -79,9 +104,5 @@ export const refreshAccessToken = async ({
 
   const payload = new URLSearchParams(postData).toString();
 
-  return await axiosCall<OAuth2Token | null>(
-    'post',
-    '/oauth2/access_token',
-    payload,
-  );
+  return await axiosCall<OAuth2Token | null>('post', url, payload);
 };

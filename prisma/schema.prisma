@@ -23,32 +23,31 @@ enum Role {
 }
 
 model FactDataUsage {
-  dataUsageId           Int          @id @default(autoincrement()) @map("data_usage_id")
-  businessId            Int          @map("business_id")
-  deviceId              Int          @map("device_id")
-  dateId                Int          @map("date_id")
-  dataUsage             BigInt       @map("data_usage")
-  createdAt             DateTime     @default(now()) @map("created_at")
-  updatedAt             DateTime     @updatedAt @map("updated_at")
-  business              DimBusiness  @relation("DataUsageBusiness", fields: [businessId], references: [businessId])
-  device                DimDevice    @relation("DataUsageDevice", fields: [deviceId], references: [deviceId])
-  date                  DimDate      @relation("DataUsageDate", fields: [dateId], references: [dateId])
-  DimBusiness           DimBusiness? @relation(fields: [dimBusinessBusinessId], references: [businessId])
-  dimBusinessBusinessId Int?
+  dataUsageId Int         @id @default(autoincrement()) @map("data_usage_id")
+  businessId  Int         @map("business_id")
+  deviceId    Int         @map("device_id")
+  dateId      Int         @map("date_id")
+  dataUsage   BigInt      @map("data_usage")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  business    DimBusiness @relation("DataUsageBusiness", fields: [businessId], references: [businessId])
+  date        DimDate     @relation("DataUsageDate", fields: [dateId], references: [dateId])
+  device      DimDevice   @relation("DataUsageDevice", fields: [deviceId], references: [deviceId])
 
   @@index([businessId])
   @@index([dateId])
   @@index([deviceId])
-  @@map("fact_data_usage")
+  @@map("fact_data_usages")
 }
 
 model DimBusiness {
   businessId       Int                   @id @default(autoincrement()) @map("business_id")
-  name             String
-  factDataUsages   FactDataUsage[]
+  name             String                @db.VarChar(100)
   businessUserMaps BusinessUserMapping[]
-  devices          DimDevice[]
-  FactDataUsage    FactDataUsage[]
+  devices          DimDevice[]           @relation("BusinessDevice")
+  dataUsages       FactDataUsage[]       @relation("DataUsageBusiness")
+
+  @@map("businesses")
 }
 
 model DimDate {
@@ -78,27 +77,34 @@ model DimDevice {
   iccid      String
   active     Boolean
 
-  business       DimBusiness      @relation(fields: [businessId], references: [businessId])
-  DeviceLocation DeviceLocation[]
-  FactDataUsage  FactDataUsage[]
+  business         DimBusiness      @relation("BusinessDevice", fields: [businessId], references: [businessId])
+  DeviceLocation   DeviceLocation[]
+  dataUsageEntries FactDataUsage[]  @relation("DataUsageDevice")
+
+  @@index([businessId])
+  @@map("dim_devices")
 }
 
 model BusinessUserMapping {
   businessUserMappingId Int         @id @default(autoincrement())
   businessId            Int
   userId                Int
-  Business              DimBusiness @relation(fields: [businessId], references: [businessId])
+  business              DimBusiness @relation(fields: [businessId], references: [businessId])
   user                  User        @relation(fields: [userId], references: [userId])
   // use role enum here?
+
+  @@map("business_user_mappings")
 }
 
 model DeviceLocation {
   locationId Int       @id @default(autoincrement())
   deviceId   Int       @map("device_id")
-  longitude  Float
-  latitude   Float
+  longitude  Float     @map("device_logitude")
+  latitude   Float     @map("device_latitude")
   time       String
   device     DimDevice @relation(fields: [deviceId], references: [deviceId])
+
+  @@map("device_locations")
 }
 
 model Address {
@@ -106,23 +112,111 @@ model Address {
   street    String
   city      String
   country   String
+  userId    Int    @unique @map("user_id")
+  user      User?  @relation("InitialAddress", fields: [userId], references: [userId])
+
+  @@map("addresses")
 }
 
 model User {
-  userId              Int                   @id @default(autoincrement())
-  email               String
-  name                String
-  password            String
-  phone               String
-  token               String
+  userId              Int                   @id @unique @default(autoincrement())
+  email               String                @db.VarChar(100)
+  firstName           String                @map("first_name") @db.VarChar(50)
+  lastName            String                @map("last_name") @db.VarChar(50)
+  password            String                @db.VarChar(200)
+  address             Address?              @relation("InitialAddress")
+  addressId           String?               @unique
+  phone               String?               @db.VarChar(20)
+  token               String?               @db.VarChar(200)
   role                Role                  @default(USER)
-  apiKey              String
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  stripeCustomerId    String
-  addressId           Int
+  apiKey              String?
+  refreshToken        String?               @map("refresh_token") @db.VarChar(200)
+  stripeCustomerId    String?
+  orders              Order[]
+  createdAt           DateTime?             @default(now())
+  updatedAt           DateTime?             @updatedAt
   BusinessUserMapping BusinessUserMapping[]
 
   @@index([email], name: "user_email_key")
   @@index([addressId], name: "user_address_key")
+  @@map("users")
+}
+
+model Category {
+  categoryId Int       @id @unique @default(autoincrement())
+  name       String
+  icon       String
+  color      String
+  products   Product[]
+}
+
+model File {
+  productId Int     @id @unique @default(autoincrement())
+  url       String
+  key       String
+  type      String
+  product   Product @relation(fields: [productId], references: [productId])
+}
+
+model Item {
+  itemId    Int     @id @unique @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int     @default(1)
+  Order     Order   @relation(fields: [orderId], references: [orderId])
+  Product   Product @relation(fields: [productId], references: [productId])
+
+  @@map("items")
+}
+
+model Order {
+  orderId   Int      @id @unique @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  total     Float
+  discount  Float?
+  items     Item[]
+  User      User     @relation(fields: [userId], references: [userId])
+
+  userId Int
+  stock  Stock[]
+
+  @@map("orders")
+}
+
+model Product {
+  productId    Int        @id @unique @default(autoincrement())
+  name         String
+  description  String
+  price        Float
+  cost         Float
+  vendor       String
+  stock        Float
+  committed    Float      @default(0)
+  onHand       Float      @default(0)
+  active       Boolean    @default(true)
+  files        File[]
+  categories   Category[]
+  stockDetails Stock[]
+  orderItems   Item[]
+
+  @@map("products")
+}
+
+model Stock {
+  stockId      Int         @id @unique @default(autoincrement())
+  imei         String      @unique
+  iccid        String      @unique
+  serialNumber String      @unique
+  sku          String
+  boxId        String?
+  status       StockStatus @default(AVAILABLE)
+  createdAt    DateTime?   @default(now())
+  updatedAt    DateTime?   @updatedAt
+  product      Product     @relation(fields: [productId], references: [productId])
+  productId    Int
+  order        Order?      @relation(fields: [orderId], references: [orderId])
+  orderId      Int?
+
+  @@map("stocks")
 }

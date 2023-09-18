@@ -32,14 +32,14 @@ enum Color {
 model FactDataUsage {
   dataUsageId Int          @id @default(autoincrement()) @map("data_usage_id")
   businessId  Int          @map("business_id")
-  deviceId    Int          @map("device_id")
   dateId      Int          @map("date_id")
+  deviceId    Int          @map("device_id")
   userId      Int          @map("user_id")
   dataUsage   BigInt       @map("data_usage")
   business    DimBusiness? @relation("DataUsageBusiness", fields: [businessId], references: [businessId])
-  user        DimUser?     @relation("DataUsageUser", fields: [userId], references: [userId])
   date        DimDate      @relation("DataUsageDate", fields: [dateId], references: [dateId])
   device      DimDevice    @relation("DataUsageDevice", fields: [deviceId], references: [deviceId])
+  user        DimUser?     @relation("DataUsageUser", fields: [userId], references: [userId])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   deletedAt   DateTime?
@@ -53,13 +53,13 @@ model FactDataUsage {
 
 model DimBusiness {
   businessId       Int                   @id @default(autoincrement()) @map("business_id")
-  name             String                @db.VarChar(100)
   addressId        Int                   @unique
   address          Address?              @relation("BusinessAddress")
   businessUserMaps BusinessUserMapping[]
   devices          DimDevice[]           @relation("BusinessDevice")
   dataUsages       FactDataUsage[]       @relation("DataUsageBusiness")
   order            Order[]               @relation("BusinessOrder")
+  name             String                @db.VarChar(100)
   createdAt        DateTime              @default(now())
   updatedAt        DateTime              @updatedAt
   deletedAt        DateTime?
@@ -99,7 +99,7 @@ model DimDevice {
   active           Boolean
   business         DimBusiness?     @relation("BusinessDevice", fields: [businessId], references: [businessId])
   user             DimUser?         @relation("UserDevice", fields: [userId], references: [userId])
-  DeviceLocation   DeviceLocation[]
+  deviceLocation   DeviceLocation[]
   dataUsageEntries FactDataUsage[]  @relation("DataUsageDevice")
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
@@ -108,6 +108,33 @@ model DimDevice {
   @@index([businessId])
   @@index([userId])
   @@map("dim_devices")
+}
+
+model DimUser {
+  userId              Int                   @id @unique @default(autoincrement())
+  addressId           String?               @unique
+  address             Address?              @relation("UserAddress")
+  email               String                @unique @db.VarChar(100)
+  firstName           String                @map("first_name") @db.VarChar(50)
+  lastName            String                @map("last_name") @db.VarChar(50)
+  password            String                @db.VarChar(200)
+  phone               String?               @db.VarChar(20)
+  token               String?               @db.VarChar(200)
+  role                Role                  @default(USER)
+  apiKey              String?               @db.VarChar(200)
+  refreshToken        String?               @map("refresh_token") @db.VarChar(200)
+  order               Order[]               @relation("UserOrder")
+  stripeCustomerId    String?               @db.VarChar(200)
+  dataUsages          FactDataUsage[]       @relation("DataUsageUser")
+  businessUserMapping BusinessUserMapping[]
+  devices             DimDevice[]           @relation("UserDevice")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  deletedAt           DateTime?
+
+  @@index([email], name: "user_email_key")
+  @@index([addressId], name: "user_address_key")
+  @@map("users")
 }
 
 model BusinessUserMapping {
@@ -143,10 +170,10 @@ model DeviceLocation {
 
 model Address {
   addressId       Int          @id @default(autoincrement())
-  userId          Int          @unique @map("user_id")
   businessId      Int          @unique @map("business_id")
-  user            DimUser?     @relation("UserAddress", fields: [userId], references: [userId])
+  userId          Int          @unique @map("user_id")
   businessAddress DimBusiness? @relation("BusinessAddress", fields: [businessId], references: [businessId])
+  user            DimUser?     @relation("UserAddress", fields: [userId], references: [userId])
   addressLine1    String       @db.VarChar(50)
   addressLine2    String       @db.VarChar(50)
   city            String       @db.VarChar(50)
@@ -160,33 +187,6 @@ model Address {
   @@index([businessId])
   @@index([userId])
   @@map("addresses")
-}
-
-model DimUser {
-  userId              Int                   @id @unique @default(autoincrement())
-  addressId           String?               @unique
-  address             Address?              @relation("UserAddress")
-  email               String                @unique @db.VarChar(100)
-  firstName           String                @map("first_name") @db.VarChar(50)
-  lastName            String                @map("last_name") @db.VarChar(50)
-  password            String                @db.VarChar(200)
-  phone               String?               @db.VarChar(20)
-  token               String?               @db.VarChar(200)
-  role                Role                  @default(USER)
-  apiKey              String?               @db.VarChar(200)
-  refreshToken        String?               @map("refresh_token") @db.VarChar(200)
-  order               Order[]               @relation("UserOrder")
-  stripeCustomerId    String?               @db.VarChar(200)
-  dataUsages          FactDataUsage[]       @relation("DataUsageUser")
-  BusinessUserMapping BusinessUserMapping[]
-  devices             DimDevice[]           @relation("UserDevice")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  deletedAt           DateTime?
-
-  @@index([email], name: "user_email_key")
-  @@index([addressId], name: "user_address_key")
-  @@map("users")
 }
 
 model Category {

@@ -40,9 +40,9 @@ model FactDataUsage {
   date        DimDate      @relation("DataUsageDate", fields: [dateId], references: [dateId])
   device      DimDevice    @relation("DataUsageDevice", fields: [deviceId], references: [deviceId])
   user        DimUser?     @relation("DataUsageUser", fields: [userId], references: [userId])
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  deletedAt   DateTime?
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  deletedAt   DateTime?    @map("deleted_at")
 
   @@index([businessId])
   @@index([dateId])
@@ -53,16 +53,16 @@ model FactDataUsage {
 
 model DimBusiness {
   businessId       Int                   @id @default(autoincrement()) @map("business_id")
-  addressId        Int                   @unique
+  addressId        Int                   @unique @map("address_id")
   address          Address?              @relation("BusinessAddress")
   businessUserMaps BusinessUserMapping[]
   devices          DimDevice[]           @relation("BusinessDevice")
   dataUsages       FactDataUsage[]       @relation("DataUsageBusiness")
   order            Order[]               @relation("BusinessOrder")
   name             String                @db.VarChar(100)
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @updatedAt
-  deletedAt        DateTime?
+  createdAt        DateTime              @default(now()) @map("created_at")
+  updatedAt        DateTime              @updatedAt @map("updated_at")
+  deletedAt        DateTime?             @map("deleted_at")
 
   @@index([addressId])
   @@map("businesses")
@@ -79,8 +79,8 @@ model DimDate {
   quarter          Int
   year             Int
   dataUsageEntries FactDataUsage[] @relation("DataUsageDate")
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
 
   @@index([date])
   @@map("dim_dates")
@@ -101,9 +101,9 @@ model DimDevice {
   user             DimUser?         @relation("UserDevice", fields: [userId], references: [userId])
   deviceLocation   DeviceLocation[]
   dataUsageEntries FactDataUsage[]  @relation("DataUsageDevice")
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  deletedAt        DateTime?
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  deletedAt        DateTime?        @map("deleted_at")
 
   @@index([businessId])
   @@index([userId])
@@ -111,8 +111,8 @@ model DimDevice {
 }
 
 model DimUser {
-  userId              Int                   @id @unique @default(autoincrement())
-  addressId           String?               @unique
+  userId              Int                   @id @unique @default(autoincrement()) @map("user_id")
+  addressId           String?               @unique @map("address_id")
   address             Address?              @relation("UserAddress")
   email               String                @unique @db.VarChar(100)
   firstName           String                @map("first_name") @db.VarChar(50)
@@ -124,13 +124,13 @@ model DimUser {
   apiKey              String?               @db.VarChar(200)
   refreshToken        String?               @map("refresh_token") @db.VarChar(200)
   order               Order[]               @relation("UserOrder")
-  stripeCustomerId    String?               @db.VarChar(200)
+  stripeCustomerId    String?               @map("stripe_customer_id") @db.VarChar(200)
   dataUsages          FactDataUsage[]       @relation("DataUsageUser")
   businessUserMapping BusinessUserMapping[]
   devices             DimDevice[]           @relation("UserDevice")
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  deletedAt           DateTime?
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+  deletedAt           DateTime?             @map("deleted_at")
 
   @@index([email], name: "user_email_key")
   @@index([addressId], name: "user_address_key")
@@ -138,15 +138,15 @@ model DimUser {
 }
 
 model BusinessUserMapping {
-  businessUserMappingId Int         @id @default(autoincrement())
+  businessUserMappingId Int         @id @default(autoincrement()) @map("business_user_mapping_id")
   businessId            Int         @unique @map("business_id")
   userId                Int         @unique @map("user_id")
   business              DimBusiness @relation(fields: [businessId], references: [businessId])
   user                  DimUser     @relation(fields: [userId], references: [userId])
   role                  Role        @default(USER)
-  createdAt             DateTime    @default(now())
-  updatedAt             DateTime    @updatedAt
-  deletedAt             DateTime?
+  createdAt             DateTime    @default(now()) @map("created_at")
+  updatedAt             DateTime    @updatedAt @map("updated_at")
+  deletedAt             DateTime?   @map("deleted_at")
 
   @@index([businessId])
   @@index([userId])
@@ -154,35 +154,35 @@ model BusinessUserMapping {
 }
 
 model DeviceLocation {
-  locationId Int       @id @default(autoincrement())
+  locationId Int       @id @default(autoincrement()) @map("location_id")
   deviceId   Int       @unique @map("device_id")
   longitude  Float     @map("device_longitude")
   latitude   Float     @map("device_latitude")
   dateTime   DateTime
   device     DimDevice @relation(fields: [deviceId], references: [deviceId])
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  deletedAt  DateTime?
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
 
   @@index([deviceId])
   @@map("device_locations")
 }
 
 model Address {
-  addressId       Int          @id @default(autoincrement())
+  addressId       Int          @id @default(autoincrement()) @map("address_id")
   businessId      Int          @unique @map("business_id")
   userId          Int          @unique @map("user_id")
   businessAddress DimBusiness? @relation("BusinessAddress", fields: [businessId], references: [businessId])
   user            DimUser?     @relation("UserAddress", fields: [userId], references: [userId])
-  addressLine1    String       @db.VarChar(50)
-  addressLine2    String       @db.VarChar(50)
-  city            String       @db.VarChar(50)
-  state           String       @db.VarChar(50)
-  zip             Int
-  country         String       @db.VarChar(100)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  deletedAt       DateTime?
+  addressLine1    String       @map("address_line_1") @db.VarChar(50)
+  addressLine2    String       @map("address_line_2") @db.VarChar(50)
+  city            String       @map("city") @db.VarChar(50)
+  state           String       @map("state") @db.VarChar(50)
+  zip             Int          @map("zip")
+  country         String       @map("country") @db.VarChar(100)
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  deletedAt       DateTime?    @map("deleted_at")
 
   @@index([businessId])
   @@index([userId])
@@ -190,14 +190,14 @@ model Address {
 }
 
 model Category {
-  categoryId Int       @id @unique @default(autoincrement())
+  categoryId Int       @id @unique @default(autoincrement()) @map("category_id")
   name       String    @unique
   icon       String // TODO: Find out if String to url on s3 or svg file or what case applies
   color      Color
   products   Product[]
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  deletedAt  DateTime?
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
 
   @@map("categories")
 }
@@ -209,24 +209,24 @@ model File {
   url       String
   key       String // TODO: S3 bucket path ooor? Unsure of use case
   type      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@index([productId])
   @@map("files")
 }
 
 model OrderItem {
-  itemId    Int       @id @unique @default(autoincrement())
-  orderId   Int
-  productId Int
+  itemId    Int       @id @unique @default(autoincrement()) @map("order_item_id")
+  orderId   Int       @map("order_id")
+  productId Int       @map("product_id")
   order     Order     @relation(fields: [orderId], references: [orderId])
   product   Product   @relation(fields: [productId], references: [productId])
   quantity  Int       @default(1)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   @@index([orderId])
   @@index([productId])
@@ -234,7 +234,7 @@ model OrderItem {
 }
 
 model Order {
-  orderId    Int          @id @unique @default(autoincrement())
+  orderId    Int          @id @unique @default(autoincrement()) @map("order_id")
   businessId Int          @unique @map("business_id")
   userId     Int          @unique @map("user_id")
   business   DimBusiness? @relation("BusinessOrder", fields: [businessId], references: [businessId])
@@ -243,9 +243,9 @@ model Order {
   stock      Stock[]
   discount   Float?
   total      Float
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  deletedAt  DateTime?
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+  deletedAt  DateTime?    @map("deleted_at")
 
   @@index([businessId])
   @@index([userId])
@@ -253,7 +253,7 @@ model Order {
 }
 
 model Product {
-  productId    Int         @id @unique @default(autoincrement())
+  productId    Int         @id @unique @default(autoincrement()) @map("product_id")
   name         String      @db.VarChar(100)
   description  String      @db.VarChar(300)
   price        Float
@@ -267,17 +267,17 @@ model Product {
   categories   Category[]
   stockDetails Stock[]
   orderItems   OrderItem[]
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  deletedAt    DateTime?
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  deletedAt    DateTime?   @map("deleted_at")
 
   @@map("products")
 }
 
 model Stock {
   stockId      Int         @id @unique @default(autoincrement())
-  productId    Int
-  orderId      Int?
+  productId    Int         @map("product_id")
+  orderId      Int?        @map("order_id")
   product      Product     @relation(fields: [productId], references: [productId])
   order        Order?      @relation(fields: [orderId], references: [orderId])
   imei         String      @unique @db.VarChar(50)
@@ -286,9 +286,9 @@ model Stock {
   sku          String      @db.VarChar(200)
   boxId        String?     @db.VarChar(200)
   status       StockStatus @default(AVAILABLE)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  deletedAt    DateTime?
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  deletedAt    DateTime?   @map("deleted_at")
 
   @@index([orderId])
   @@index([productId])

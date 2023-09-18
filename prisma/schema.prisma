@@ -156,7 +156,7 @@ model BusinessUserMapping {
 model DeviceLocation {
   locationId Int       @id @default(autoincrement())
   deviceId   Int       @unique @map("device_id")
-  longitude  Float     @map("device_logitude")
+  longitude  Float     @map("device_longitude")
   latitude   Float     @map("device_latitude")
   dateTime   DateTime
   device     DimDevice @relation(fields: [deviceId], references: [deviceId])

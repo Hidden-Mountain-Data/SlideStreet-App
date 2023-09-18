@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StockStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  RETURNED
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model FactDataUsage {
+  dataUsageId           Int          @id @default(autoincrement()) @map("data_usage_id")
+  businessId            Int          @map("business_id")
+  deviceId              Int          @map("device_id")
+  dateId                Int          @map("date_id")
+  dataUsage             BigInt       @map("data_usage")
+  createdAt             DateTime     @default(now()) @map("created_at")
+  updatedAt             DateTime     @updatedAt @map("updated_at")
+  business              DimBusiness  @relation("DataUsageBusiness", fields: [businessId], references: [businessId])
+  device                DimDevice    @relation("DataUsageDevice", fields: [deviceId], references: [deviceId])
+  date                  DimDate      @relation("DataUsageDate", fields: [dateId], references: [dateId])
+  DimBusiness           DimBusiness? @relation(fields: [dimBusinessBusinessId], references: [businessId])
+  dimBusinessBusinessId Int?
+
+  @@index([businessId])
+  @@index([dateId])
+  @@index([deviceId])
+  @@map("fact_data_usage")
+}
+
+model DimBusiness {
+  businessId       Int                   @id @default(autoincrement()) @map("business_id")
+  name             String
+  factDataUsages   FactDataUsage[]
+  businessUserMaps BusinessUserMapping[]
+  devices          DimDevice[]
+  FactDataUsage    FactDataUsage[]
+}
+
+model DimDate {
+  dateId           Int             @id @map("date_id")
+  date             String          @unique @db.VarChar(10)
+  day              Int
+  dayOfWeek        Int             @map("day_of_week")
+  dayOfYear        Int             @map("day_of_year")
+  weekOfYear       Int             @map("week_of_year")
+  month            Int
+  quarter          Int
+  year             Int
+  dataUsageEntries FactDataUsage[] @relation("DataUsageDate")
+
+  @@index([date])
+  @@map("dim_dates")
+}
+
+model DimDevice {
+  deviceId   Int     @id @default(autoincrement())
+  businessId Int     @map("business_id")
+  name       String
+  imei       String
+  device_ip  String
+  sim        String
+  notes      String
+  iccid      String
+  active     Boolean
+
+  business       DimBusiness      @relation(fields: [businessId], references: [businessId])
+  DeviceLocation DeviceLocation[]
+  FactDataUsage  FactDataUsage[]
+}
+
+model BusinessUserMapping {
+  businessUserMappingId Int         @id @default(autoincrement())
+  businessId            Int
+  userId                Int
+  Business              DimBusiness @relation(fields: [businessId], references: [businessId])
+  user                  User        @relation(fields: [userId], references: [userId])
+  // use role enum here?
+}
+
+model DeviceLocation {
+  locationId Int       @id @default(autoincrement())
+  deviceId   Int       @map("device_id")
+  longitude  Float
+  latitude   Float
+  time       String
+  device     DimDevice @relation(fields: [deviceId], references: [deviceId])
+}
+
+model Address {
+  addressId Int    @id @default(autoincrement())
+  street    String
+  city      String
+  country   String
+}
+
+model User {
+  userId              Int                   @id @default(autoincrement())
+  email               String
+  name                String
+  password            String
+  phone               String
+  token               String
+  role                Role                  @default(USER)
+  apiKey              String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  stripeCustomerId    String
+  addressId           Int
+  BusinessUserMapping BusinessUserMapping[]
+
+  @@index([email], name: "user_email_key")
+  @@index([addressId], name: "user_address_key")
+}

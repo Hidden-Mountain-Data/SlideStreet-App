@@ -1,0 +1,300 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+enum StockStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  RETURNED
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+// TODO: Check what color values to include here
+enum Color {
+  WHITE
+  BLACK
+  GRAY
+}
+
+model FactDataUsage {
+  dataUsageId Int          @id @default(autoincrement()) @map("data_usage_id")
+  businessId  Int          @map("business_id")
+  dateId      Int          @map("date_id")
+  deviceId    Int          @map("device_id")
+  userId      Int          @map("user_id")
+  dataUsage   BigInt       @map("data_usage")
+  business    DimBusiness? @relation("DataUsageBusiness", fields: [businessId], references: [businessId])
+  date        DimDate      @relation("DataUsageDate", fields: [dateId], references: [dateId])
+  device      DimDevice    @relation("DataUsageDevice", fields: [deviceId], references: [deviceId])
+  user        DimUser?     @relation("DataUsageUser", fields: [userId], references: [userId])
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  deletedAt   DateTime?    @map("deleted_at")
+
+  @@index([businessId])
+  @@index([dateId])
+  @@index([deviceId])
+  @@index([userId])
+  @@map("fact_data_usages")
+}
+
+model DimBusiness {
+  businessId       Int                   @id @default(autoincrement()) @map("business_id")
+  addressId        Int                   @unique @map("address_id")
+  address          Address?              @relation("BusinessAddress")
+  businessUserMaps BusinessUserMapping[]
+  devices          DimDevice[]           @relation("BusinessDevice")
+  dataUsages       FactDataUsage[]       @relation("DataUsageBusiness")
+  order            Order[]               @relation("BusinessOrder")
+  name             String                @db.VarChar(100)
+  createdAt        DateTime              @default(now())  @map("created_at")
+  updatedAt        DateTime              @updatedAt  @map("updated_at")
+  deletedAt        DateTime?             @map("deleted_at")
+
+  @@index([addressId])
+  @@map("businesses")
+}
+
+model DimDate {
+  dateId           Int             @id @map("date_id")
+  date             DateTime        @unique
+  day              Int
+  dayOfWeek        Int             @map("day_of_week")
+  dayOfYear        Int             @map("day_of_year")
+  weekOfYear       Int             @map("week_of_year")
+  month            Int
+  quarter          Int
+  year             Int
+  dataUsageEntries FactDataUsage[] @relation("DataUsageDate")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  @@index([date])
+  @@map("dim_dates")
+}
+
+model DimDevice {
+  deviceId         Int              @id @default(autoincrement()) @map("device_id")
+  businessId       Int?             @unique @map("business_id")
+  userId           Int?             @unique @map("user_id")
+  deviceIpAddress  String           @map("device_ip") @db.VarChar(50)
+  name             String           @db.VarChar(200)
+  imei             String           @db.VarChar(50)
+  sim              String           @db.VarChar(50)
+  notes            String           @db.VarChar(500)
+  iccid            String           @db.VarChar(200)
+  active           Boolean
+  business         DimBusiness?     @relation("BusinessDevice", fields: [businessId], references: [businessId])
+  user             DimUser?         @relation("UserDevice", fields: [userId], references: [userId])
+  deviceLocation   DeviceLocation[]
+  dataUsageEntries FactDataUsage[]  @relation("DataUsageDevice")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  deletedAt        DateTime?        @map("deleted_at")
+
+  @@index([businessId])
+  @@index([userId])
+  @@map("dim_devices")
+}
+
+model DimUser {
+  userId              Int                   @id @unique @default(autoincrement()) @map("user_id")
+  addressId           String?               @unique @map("address_id") @db.VarChar(50)
+  address             Address?              @relation("UserAddress")
+  email               String                @unique @db.VarChar(100)
+  firstName           String                @map("first_name") @db.VarChar(50)
+  lastName            String                @map("last_name") @db.VarChar(50)
+  fullName           String                 @map("full_name") @db.VarChar(255)
+  password            String                @db.VarChar(200)
+  phone               String?               @db.VarChar(20)
+  token               String?               @db.VarChar(200)
+  role                Role                  @default(USER)
+  apiKey              String?               @db.VarChar(200) @map("api_key")
+  refreshToken        String?               @map("refresh_token") @db.VarChar(200)
+  order               Order[]               @relation("UserOrder")
+  stripeCustomerId    String?               @db.VarChar(200) @map("stripe_customer_id")
+  dataUsages          FactDataUsage[]       @relation("DataUsageUser")
+  businessUserMapping BusinessUserMapping[]
+  devices             DimDevice[]           @relation("UserDevice")
+  isActive            Boolean               @db.Boolean @default(false) @map("is_active")
+  imageUuid           String?               @db.VarChar(36) @map("image_uuid") 
+  imageUrl            String?               @db.VarChar(250) @map("image_url") 
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+  deletedAt           DateTime?             @map("deleted_at")
+
+  @@index([email], name: "user_email_key")
+  @@index([addressId], name: "user_address_key")
+  @@map("users")
+}
+
+model BusinessUserMapping {
+  businessUserMappingId Int         @id @default(autoincrement())
+  businessId            Int         @unique @map("business_id")
+  userId                Int         @unique @map("user_id")
+  business              DimBusiness @relation(fields: [businessId], references: [businessId])
+  user                  DimUser     @relation(fields: [userId], references: [userId])
+  role                  Role        @default(USER)
+  createdAt             DateTime    @default(now()) @map("created_at")
+  updatedAt             DateTime    @updatedAt @map("updated_at")
+  deletedAt             DateTime?   @map("deleted_at")
+
+  @@index([businessId])
+  @@index([userId])
+  @@map("business_user_mappings")
+}
+
+model DeviceLocation {
+  locationId Int       @id @default(autoincrement()) @map("location_id")
+  deviceId   Int       @unique @map("device_id")
+  longitude  Float     @map("device_logitude")
+  latitude   Float     @map("device_latitude")
+  dateTime   DateTime
+  device     DimDevice @relation(fields: [deviceId], references: [deviceId])
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  @@index([deviceId])
+  @@map("device_locations")
+}
+
+model Address {
+  addressId       Int          @id @default(autoincrement()) @map("address_id")
+  businessId      Int          @unique @map("business_id")
+  userId          Int          @unique @map("user_id")
+  businessAddress DimBusiness? @relation("BusinessAddress", fields: [businessId], references: [businessId])
+  user            DimUser?     @relation("UserAddress", fields: [userId], references: [userId])
+  addressLine1    String       @db.VarChar(50) @map("address_line_1")
+  addressLine2    String       @db.VarChar(50) @map("address_line_2")
+  city            String       @db.VarChar(50)
+  state           String       @db.VarChar(50)
+  zip             Int
+  country         String       @db.VarChar(100)
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  deletedAt       DateTime?    @map("deleted_at")
+
+  @@index([businessId])
+  @@index([userId])
+  @@map("addresses")
+}
+
+model Category {
+  categoryId Int       @id @unique @default(autoincrement()) @map("category_id")
+  name       String    @unique
+  icon       String // TODO: Find out if String to url on s3 or svg file or what case applies
+  color      Color
+  products   Product[]
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  @@map("categories")
+}
+
+model File {
+  fileId    Int       @id @unique @default(autoincrement()) @map("file_id")
+  productId Int       @map("product_id")
+  product   Product   @relation(fields: [productId], references: [productId])
+  url       String
+  key       String // TODO: S3 bucket path ooor? Unsure of use case
+  type      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([productId])
+  @@map("files")
+}
+
+model OrderItem {
+  itemId    Int       @id @unique @default(autoincrement()) @map("item_id")
+  orderId   Int       @map("order_id")
+  productId Int       @map("product_id")
+  order     Order     @relation(fields: [orderId], references: [orderId])
+  product   Product   @relation(fields: [productId], references: [productId])
+  quantity  Int       @default(1)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("items")
+}
+
+model Order {
+  orderId    Int          @id @unique @default(autoincrement()) @map("order_id")
+  businessId Int          @unique @map("business_id")
+  userId     Int          @unique @map("user_id")
+  business   DimBusiness? @relation("BusinessOrder", fields: [businessId], references: [businessId])
+  user       DimUser?     @relation("UserOrder", fields: [userId], references: [userId])
+  items      OrderItem[]
+  stock      Stock[]
+  discount   Float?
+  total      Float
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+  deletedAt  DateTime?    @map("deleted_at")
+
+  @@index([businessId])
+  @@index([userId])
+  @@map("orders")
+}
+
+model Product {
+  productId    Int         @id @unique @default(autoincrement()) @map("product_id")
+  name         String      @db.VarChar(100)
+  description  String      @db.VarChar(300)
+  price        Float
+  cost         Float
+  vendor       String      @db.VarChar(100)
+  stock        Float
+  committed    Float       @default(0)
+  onHand       Float       @default(0)
+  active       Boolean     @default(true)
+  files        File[]
+  categories   Category[]
+  stockDetails Stock[]
+  orderItems   OrderItem[]
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  deletedAt    DateTime?   @map("deleted_at")
+
+  @@map("products")
+}
+
+model Stock {
+  stockId      Int         @id @unique @default(autoincrement()) @map("stock_id")
+  productId    Int         @map("product_id")
+  orderId      Int?        @map("order_id")
+  product      Product     @relation(fields: [productId], references: [productId])
+  order        Order?      @relation(fields: [orderId], references: [orderId])
+  imei         String      @unique @db.VarChar(50)
+  iccid        String      @unique @db.VarChar(200)
+  serialNumber String      @unique @db.VarChar(100) @map("serial_number")
+  sku          String      @db.VarChar(200)
+  boxId        String?     @db.VarChar(200) @map("box_id")
+  status       StockStatus @default(AVAILABLE)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  deletedAt    DateTime?   @map("deleted_at")
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("stocks")
+}

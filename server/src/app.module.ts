@@ -8,10 +8,9 @@ import { ExceptionInterceptor } from './interceptors/exception.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { FileService } from './services/file.service';
-import { SettingsModule } from './modules/settings/settings.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ScheduleModule.forRoot(), SettingsModule],
+  imports: [AuthModule, UsersModule, ScheduleModule.forRoot()],
   controllers: [AppController],
   providers: [
     AppService,

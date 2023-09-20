@@ -1,14 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUserDto } from 'src/users/dto/login-user.dto';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { LoginUserDto } from '../users/dto/login-user.dto';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import { PrismaService } from 'src/services/prisma.service';
 import { RegistrationStatus } from './registration-status';
 export const roundsOfHashing = 10;
 import * as bcrypt from 'bcrypt';
 import { DimUser } from '@prisma/client';
-import { User } from 'src/users/entities/user';
+import { User } from '../users/entities/user';
 import * as humps from 'humps';
 
 @Injectable()

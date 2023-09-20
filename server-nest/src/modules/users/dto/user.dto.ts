@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsEmail } from 'class-validator';
-import { Role } from '../../rbac/role.enum';
+import { Role } from '../../../rbac/role.enum';
 
 export class UserDto {
   @IsNotEmpty()

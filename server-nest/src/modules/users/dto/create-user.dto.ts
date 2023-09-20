@@ -1,12 +1,10 @@
-import { IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
-import { Expose, classToPlain, Transform } from 'class-transformer';
-import { Role } from '../../rbac/role.enum';
+import { Expose } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { Role } from '../../../rbac/role.enum';
 
 export class CreateUserDto {
-  
   @IsNotEmpty()
   @IsEmail()
-  
   email: string;
 
   @IsNotEmpty()
@@ -36,5 +34,4 @@ export class CreateUserDto {
   constructor(partial: Partial<CreateUserDto> = {}) {
     Object.assign(this, partial);
   }
-
 }

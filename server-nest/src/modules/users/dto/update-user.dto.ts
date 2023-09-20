@@ -1,9 +1,14 @@
-import { IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
 import { Expose } from 'class-transformer';
-import { Role } from '../../rbac/role.enum';
+import { IsEmail, IsOptional } from 'class-validator';
+
+// * Commented out in order to push
+// TODO: May use IsNotEmpty?
+// import { IsNotEmpty, IsEmail, IsOptional } from 'class-validator';
+
+// TODO: May need Role?
+// import { Role } from '../../../rbac/role.enum';
 
 export class UpdateUserDto {
-  
   @IsOptional()
   @IsEmail()
   email: string;

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { FileService } from './services/file.service';
 
@@ -6,12 +6,12 @@ import { FileService } from './services/file.service';
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private readonly fileService: FileService
-    ) {}
+    private readonly fileService: FileService,
+  ) {}
 
   @Get('hc')
   healthCheck(): {
-    status: string
+    status: string;
   } {
     return this.appService.healthCheck();
   }

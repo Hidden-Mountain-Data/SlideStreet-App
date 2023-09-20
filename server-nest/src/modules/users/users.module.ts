@@ -8,8 +8,15 @@ import { UserProvider } from './user.provider';
 import { FileService } from 'src/services/file.service';
 
 @Module({
-  providers: [UsersService, PrismaService, JwtStrategy, JwtService, UserProvider, FileService],
+  providers: [
+    UsersService,
+    PrismaService,
+    JwtStrategy,
+    JwtService,
+    UserProvider,
+    FileService,
+  ],
   exports: [UsersService],
-  controllers: [UsersController]
+  controllers: [UsersController],
 })
 export class UsersModule {}

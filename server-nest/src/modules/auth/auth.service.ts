@@ -16,18 +16,16 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private prisma: PrismaService
-  ) { }
+    private prisma: PrismaService,
+  ) {}
 
-  async register(data: CreateUserDto): Promise<RegistrationStatus | HttpException> {
+  async register(
+    data: CreateUserDto,
+  ): Promise<RegistrationStatus | HttpException> {
     try {
+      console.log('CAMELIZED', humps.camelizeKeys(data));
+      const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
 
-       console.log("CAMELIZED", humps.camelizeKeys(data));
-      const hashedPassword = await bcrypt.hash(
-        data.password,
-        roundsOfHashing,
-      );
-  
       data.password = hashedPassword;
 
       const userInDb = await this.usersService.findOneByUsername(data.email);
@@ -36,23 +34,36 @@ export class AuthService {
         throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
       }
 
-      const { email, password, firstName, lastName, fullName, stripeCustomerId, phone } = humps.camelizeKeys(data) as CreateUserDto;
+      const {
+        email,
+        password,
+        firstName,
+        lastName,
+        fullName,
+        stripeCustomerId,
+        phone,
+      } = humps.camelizeKeys(data) as CreateUserDto;
 
       await this.prisma.dimUser.create({
         data: {
-          email,password,firstName,lastName,fullName,stripeCustomerId,phone,
-          token: ''
-        }
+          email,
+          password,
+          firstName,
+          lastName,
+          fullName,
+          stripeCustomerId,
+          phone,
+          token: '',
+        },
       });
       return {
         success: true,
-        message: "New user Created!"
-      }
+        message: 'New user Created!',
+      };
     } catch (err) {
       console.log(err);
-      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR)
+      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
   }
 
   async login(loginUserDto: LoginUserDto): Promise<User> {
@@ -61,8 +72,7 @@ export class AuthService {
     return user;
   }
 
-  async getProfile(username: string): Promise<DimUser>{
+  async getProfile(username: string): Promise<DimUser> {
     return await this.usersService.findOneByUsername(username);
   }
-
 }

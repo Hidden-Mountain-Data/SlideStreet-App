@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { DimUser } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { Request } from 'express';
 import { comparePasswords } from 'helpers/utils';
 import * as humps from 'humps';
 import { FileService } from 'src/services/file.service';
@@ -11,13 +12,17 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserProvider } from './user.provider';
 
+interface IRequestWithUser extends Request {
+  user: DimUser;
+}
+
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
     private readonly userProvider: UserProvider,
     private fileService: FileService,
-    @Inject(REQUEST) private readonly req: any,
+    @Inject(REQUEST) private readonly req: IRequestWithUser,
   ) {}
 
   private currentUser(): DimUser {

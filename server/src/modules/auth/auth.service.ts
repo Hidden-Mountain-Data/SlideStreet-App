@@ -1,15 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUserDto } from '../users/dto/login-user.dto';
-import { CreateUserDto } from '../users/dto/create-user.dto';
+import { DimUser } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import * as humps from 'humps';
 import { PrismaService } from 'src/services/prisma.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginUserDto } from '../users/dto/login-user.dto';
+import { User } from '../users/entities/user';
+import { UsersService } from '../users/users.service';
 import { RegistrationStatus } from './registration-status';
 export const roundsOfHashing = 10;
-import * as bcrypt from 'bcrypt';
-import { DimUser } from '@prisma/client';
-import { User } from '../users/entities/user';
-import * as humps from 'humps';
 
 @Injectable()
 export class AuthService {
@@ -61,8 +61,14 @@ export class AuthService {
         message: 'New user Created!',
       };
     } catch (err) {
-      console.log(err);
-      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      if (err instanceof Error) {
+        console.log(err);
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+      throw new HttpException(
+        'An unexpected error occurred',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

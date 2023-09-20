@@ -20,6 +20,7 @@ export interface Response<T> {
 @Injectable()
 export class ExceptionInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    // Will remove any but need to figure type of err
     return next.handle().pipe(
       catchError((err) =>
         throwError(

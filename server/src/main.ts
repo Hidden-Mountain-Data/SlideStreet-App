@@ -8,13 +8,13 @@ import * as bodyParser from 'body-parser';
 import * as humps from 'humps';
 import { AppModule } from './app.module';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
   app.useGlobalPipes(
     new ValidationPipe({
-      exceptionFactory: (errors) => {
+      exceptionFactory: (errors): BadRequestException => {
         const result = errors.map((error) => ({
           [humps.decamelize(error.property)]:
             error.constraints[Object.keys(error.constraints)[0]],

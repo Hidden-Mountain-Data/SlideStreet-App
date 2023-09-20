@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { createReadStream } from 'fs';
+import { createReadStream, ReadStream } from 'fs';
 import { v4 as uuidV4 } from 'uuid';
 import sharp = require('sharp');
 
@@ -44,7 +44,7 @@ export class FileService {
     return fileUuid;
   }
 
-  async serveImage(filename: string): Promise<any> {
+  async serveImage(filename: string): Promise<ReadStream | null> {
     try {
       const imagePath = path.join(UPLOAD_PATH, filename + '.jpg');
       const imageStream = createReadStream(imagePath);
@@ -54,7 +54,7 @@ export class FileService {
     }
   }
 
-  checkAndCreateUploadsDirectory() {
+  checkAndCreateUploadsDirectory(): void {
     const directoryPath = './uploads'; // Replace with your desired directory path
 
     // Check if the directory exists
@@ -67,7 +67,7 @@ export class FileService {
     }
   }
 
-  async copyFiles(sourceDir, destinationDir) {
+  async copyFiles(sourceDir: string, destinationDir: string): Promise<void> {
     try {
       // Get a list of all files in the source directory
       const files = fs.readdirSync(sourceDir);

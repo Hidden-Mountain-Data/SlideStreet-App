@@ -8,8 +8,8 @@ import { RegistrationStatus } from './registration-status';
 export const roundsOfHashing = 10;
 import * as bcrypt from 'bcrypt';
 import { DimUser } from '@prisma/client';
-import { use } from 'passport';
 import { User } from 'src/users/entities/user';
+import * as humps from 'humps';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +22,7 @@ export class AuthService {
   async register(data: CreateUserDto): Promise<RegistrationStatus | HttpException> {
     try {
 
+       console.log("CAMELIZED", humps.camelizeKeys(data));
       const hashedPassword = await bcrypt.hash(
         data.password,
         roundsOfHashing,
@@ -35,10 +36,11 @@ export class AuthService {
         throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
       }
 
-      const { email, password, firstName, lastName, fullName } = data;
+      const { email, password, firstName, lastName, fullName, stripeCustomerId, phone } = humps.camelizeKeys(data) as CreateUserDto;
+
       await this.prisma.dimUser.create({
         data: {
-          email, password, firstName, lastName, fullName,
+          email,password,firstName,lastName,fullName,stripeCustomerId,phone,
           token: ''
         }
       });
@@ -47,7 +49,7 @@ export class AuthService {
         message: "New user Created!"
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
       throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 

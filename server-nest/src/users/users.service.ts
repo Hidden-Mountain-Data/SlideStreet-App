@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Inject } from '@nestjs/common';
 import { LoginUserDto } from './dto/login-user.dto';
-import { UserDto } from './dto/user.dto';
 import { PrismaService } from 'src/services/prisma.service';
 import { DimUser, Prisma } from '@prisma/client';
 import { comparePasswords } from 'helpers/utils';
@@ -10,6 +9,7 @@ import { REQUEST } from '@nestjs/core';
 import { FileService } from 'src/services/file.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import * as humps from 'humps';
 
 
 @Injectable()
@@ -77,7 +77,7 @@ export class UsersService {
 
   async update(updateUserDto: UpdateUserDto, id?: number): Promise<DimUser|HttpException>{
     try {
-        const { firstName, lastName, fullName, email, password, image, isActive } = updateUserDto;
+        const { firstName, lastName, fullName, email, password, image, isActive, phone, stripeCustomerId } = humps.camelizeKeys(updateUserDto) as UpdateUserDto;
         
         const image_uuid =  image ? await this.fileService.transformAndSave(image) : await this.fileService.userPlaceholderImageAndSave();
 
@@ -98,11 +98,15 @@ export class UsersService {
           isActive?: boolean;
           imageUuid: string;
           imageUrl: string;
+          phone: string;
+          stripeCustomerId: string;
         }>{
             firstName,
             lastName,
             fullName,
             email,
+            phone,
+            stripeCustomerId,
             ...(password !== undefined ? { password: hashedPassword } : {}),
             ...(isActive !== undefined ? { isActive: isActive } : {})
         }

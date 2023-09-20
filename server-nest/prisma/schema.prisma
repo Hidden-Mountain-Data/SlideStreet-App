@@ -18,6 +18,7 @@ enum StockStatus {
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
   USER
 }
@@ -53,7 +54,6 @@ model FactDataUsage {
 
 model DimBusiness {
   businessId       Int                   @id @default(autoincrement()) @map("business_id")
-  addressId        Int                   @unique @map("address_id")
   address          Address?              @relation("BusinessAddress")
   businessUserMaps BusinessUserMapping[]
   devices          DimDevice[]           @relation("BusinessDevice")
@@ -64,7 +64,6 @@ model DimBusiness {
   updatedAt        DateTime              @updatedAt  @map("updated_at")
   deletedAt        DateTime?             @map("deleted_at")
 
-  @@index([addressId])
   @@map("businesses")
 }
 

@@ -5,7 +5,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError as observableThrowError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { v4 as uuidV4 } from 'uuid';
 
@@ -19,21 +19,20 @@ export interface Response<T> {
 
 @Injectable()
 export class ExceptionInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    // Will remove any but need to figure type of err
+  intercept<T>(_context: ExecutionContext, next: CallHandler): Observable<T> {
     return next.handle().pipe(
-      catchError((err) =>
-        throwError(
+      catchError((err: HttpException) =>
+        observableThrowError(
           () =>
             new HttpException(
               {
                 version: '1.0',
                 id: uuidV4(),
-                code: err.status,
+                code: err.getStatus(),
                 message: 'Error',
-                errors: err,
+                errors: err.getResponse(),
               },
-              err.status,
+              err.getStatus(),
             ),
         ),
       ),

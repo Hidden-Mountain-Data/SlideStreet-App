@@ -1,16 +1,16 @@
-import 'package:client/pages/sign_up.dart';
 import 'package:flutter/material.dart';
+import 'sign_in.dart';
 
 final emailController = TextEditingController();
 final passwordController = TextEditingController();
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
   @override
-  LoginPageState createState() => LoginPageState();
+  SignUpPageState createState() => SignUpPageState();
 }
 
-class LoginPageState extends State<LoginPage> {
+class SignUpPageState extends State<SignUpPage> {
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
@@ -39,7 +39,7 @@ class LoginPageState extends State<LoginPage> {
                   height: 60,
                 ),
                 const Text(
-                  "Sign In",
+                  "Sign Up",
                   style: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.w900,
@@ -72,7 +72,7 @@ class LoginPageState extends State<LoginPage> {
                   child: InkWell(
                     onTap: () {},
                     child: const Text(
-                      "Welcome!",
+                      "Welcome Back!",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -87,7 +87,7 @@ class LoginPageState extends State<LoginPage> {
                   child: InkWell(
                     onTap: () {},
                     child: const Text(
-                      "To keep connected with us, please login",
+                      "To keep connected with us, please create an account",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -108,11 +108,11 @@ class LoginPageState extends State<LoginPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const SignUpPage()),
+                            builder: (context) => const LoginPage()),
                       );
                     },
                     child: const Text(
-                      "Already have an account? Sign in!",
+                      "Don't have an account? Sign up!",
                       style: TextStyle(
                         fontSize: 20,
                         color: Color.fromARGB(255, 127, 126, 128),
@@ -121,7 +121,7 @@ class LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 45),
+                const SizedBox(height: 35),
                 ElevatedButton(
                   style: raisedButtonStyle,
                   onPressed: () {},
@@ -147,78 +147,3 @@ final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
     borderRadius: BorderRadius.all(Radius.circular(20)),
   ),
 );
-
-class UsernameField extends StatelessWidget {
-  const UsernameField({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        TextFormField(
-          controller: emailController,
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-            filled: true,
-            fillColor: const Color.fromARGB(255, 225, 225, 225),
-            labelText: 'Email',
-            hintStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-            hintText: 'Enter your email address',
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class PasswordField extends StatefulWidget {
-  const PasswordField({super.key});
-
-  @override
-  State<PasswordField> createState() => _PasswordFieldState();
-}
-
-class _PasswordFieldState extends State<PasswordField> {
-  late bool _passwordVisible;
-
-  @override
-  void initState() {
-    super.initState();
-    _passwordVisible = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        TextFormField(
-          controller: passwordController,
-          keyboardType: TextInputType.text,
-          obscureText: !_passwordVisible,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            filled: true,
-            fillColor: const Color.fromARGB(255, 225, 225, 225),
-            labelText: 'Password',
-            hintText: 'Enter your password',
-            hintStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-            suffixIcon: IconButton(
-              icon: Icon(
-                // Based on passwordVisible state choose the icon
-                _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                color: Colors.black,
-              ),
-              onPressed: () {
-                // Update the state i.e. toogle the state of passwordVisible variable
-                setState(() {
-                  _passwordVisible = !_passwordVisible;
-                });
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

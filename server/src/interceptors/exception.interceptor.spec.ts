@@ -2,8 +2,7 @@ import { CallHandler, ExecutionContext, HttpException } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { ExceptionInterceptor } from './exception.interceptor';
 
-// Function to validate UUID (simple version)
-const isUUID = (str: string) => {
+const isUUID = (str: string): boolean => {
   const pattern =
     /^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
   return pattern.test(str);

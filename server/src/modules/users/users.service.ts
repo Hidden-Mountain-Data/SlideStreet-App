@@ -43,9 +43,9 @@ export class UsersService {
     });
   }
 
-  async findByLogin({ username, password }: LoginUserDto): Promise<DimUser> {
+  async findByLogin({ email, password }: LoginUserDto): Promise<DimUser> {
     const user = await this.prisma.dimUser.findUnique({
-      where: { email: username },
+      where: { email },
     });
 
     if (!user) {

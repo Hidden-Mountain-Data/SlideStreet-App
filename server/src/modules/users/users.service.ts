@@ -1,19 +1,19 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { DimUser } from '@prisma/client';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { Request } from 'express';
-import { comparePasswords } from 'helpers/utils';
 import * as humps from 'humps';
 import { FileService } from 'src/services/file.service';
 import { PrismaService } from 'src/services/prisma.service';
+import { comparePasswords } from '../../../helpers/utils';
 import { roundsOfHashing } from '../auth/auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserProvider } from './user.provider';
 
 interface IRequestWithUser extends Request {
-  user: DimUser;
+  user: User;
 }
 
 @Injectable()
@@ -25,45 +25,70 @@ export class UsersService {
     @Inject(REQUEST) private readonly req: IRequestWithUser,
   ) {}
 
-  private currentUser(): DimUser {
+  // Uncomment and import Logger to see logging in this file
+  // private readonly logger = new Logger(UsersService.name);
+
+  private currentUser(): User {
     return this.userProvider.user;
   }
 
-  async users(params: { skip?: number; take?: number }): Promise<DimUser[]> {
+  async users(params: { skip?: number; take?: number }): Promise<User[]> {
     const { skip, take } = params;
-    return this.prisma.dimUser.findMany({
+    return this.prisma.user.findMany({
       skip,
       take,
     });
   }
 
-  async findOneByUsername(email: string): Promise<DimUser> {
-    return await this.prisma.dimUser.findUnique({
+  async findOneByUsername(email: string): Promise<User> {
+    return await this.prisma.user.findUnique({
       where: { email: email },
     });
   }
 
-  async findByLogin({ email, password }: LoginUserDto): Promise<DimUser> {
-    const user = await this.prisma.dimUser.findUnique({
-      where: { email },
-    });
+  async findByLogin({ email, password }: LoginUserDto): Promise<User> {
+    // this.logger.debug(`Attempting to find user by login: ${email}`);
 
-    if (!user) {
-      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        // this.logger.debug(`No user found for username: ${email}`);
+        throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+      }
+
+      // this.logger.debug(
+      //   `  Stored password type and value: ${typeof user.password}, ${
+      //     user.password
+      //   }`,
+      // );
+      // this.logger.debug(
+      // `Entered password type and value: ${typeof password}, ${password}`,
+      // );
+
+      const areEqual = await comparePasswords(user.password, password);
+
+      if (!areEqual) {
+        // this.logger.debug(`No match on the password: ${password}`);
+        throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+      }
+
+      // this.logger.debug(`User found and authenticated: ${email}`);
+      return user;
+    } catch (err) {
+      // this.logger.error(`Error in findByLogin: ${err}`);
+      throw new HttpException(
+        'Failed to login',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    const areEqual = await comparePasswords(user.password, password);
-
-    if (!areEqual) {
-      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
-    }
-
-    return user;
   }
 
-  async me(): Promise<DimUser | HttpException> {
+  async me(): Promise<User | HttpException> {
     try {
-      return await this.prisma.dimUser.findUnique({
+      return await this.prisma.user.findUnique({
         where: { userId: this.currentUser().userId },
       });
     } catch (error) {
@@ -78,7 +103,7 @@ export class UsersService {
   async update(
     updateUserDto: UpdateUserDto,
     id?: number,
-  ): Promise<DimUser | HttpException> {
+  ): Promise<User | HttpException> {
     try {
       const {
         firstName,
@@ -134,7 +159,7 @@ export class UsersService {
           `/api/images/${image_uuid}`;
       }
 
-      const user = this.prisma.dimUser.update({
+      const user = this.prisma.user.update({
         where: {
           userId: id ? id : this.currentUser().userId,
         },

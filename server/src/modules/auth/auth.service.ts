@@ -1,14 +1,14 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { DimUser } from '@prisma/client';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as humps from 'humps';
 import { PrismaService } from 'src/services/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
-import { User } from '../users/entities/user';
 import { UsersService } from '../users/users.service';
 import { RegistrationStatus } from './registration-status';
+
 export const roundsOfHashing = 10;
 
 @Injectable()
@@ -19,43 +19,37 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
+  // * Uncomment and import Logger to see logging in this file
+  // private readonly logger = new Logger(AuthService.name);
+
   async register(
     data: CreateUserDto,
   ): Promise<RegistrationStatus | HttpException> {
+    // this.logger.debug(
+    //   `Processing registration with data: ${JSON.stringify(data)}`,
+    // );
+    console.log('CAMELIZED', humps.camelizeKeys(data));
+    const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
+
+    data.password = hashedPassword;
+
+    const { email, password, firstName, lastName } = humps.camelizeKeys(
+      data,
+    ) as CreateUserDto;
+
+    const fullName = `${firstName} ${lastName}`;
+
     try {
-      console.log('CAMELIZED', humps.camelizeKeys(data));
-      const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
-
-      data.password = hashedPassword;
-
-      const userInDb = await this.usersService.findOneByUsername(data.email);
-
-      if (userInDb) {
-        throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
-      }
-
-      const {
-        email,
-        password,
-        firstName,
-        lastName,
-        fullName,
-        stripeCustomerId,
-        phone,
-      } = humps.camelizeKeys(data) as CreateUserDto;
-
-      await this.prisma.dimUser.create({
+      await this.prisma.user.create({
         data: {
           email,
           password,
           firstName,
           lastName,
           fullName,
-          stripeCustomerId,
-          phone,
-          token: '',
         },
       });
+
       return {
         success: true,
         message: 'New user Created!',
@@ -73,12 +67,29 @@ export class AuthService {
   }
 
   async login(loginUserDto: LoginUserDto): Promise<User> {
-    const user = await this.usersService.findByLogin(loginUserDto);
-    user.token = this.jwtService.sign(loginUserDto);
-    return user;
+    // this.logger.debug(`Starting login for email: ${loginUserDto.email}`);
+
+    try {
+      const user = await this.usersService.findByLogin(loginUserDto);
+
+      // if (!user) {
+      //   this.logger.debug(`No user found for email: ${loginUserDto.email}`);
+      //   return null;
+      // }
+
+      const token = this.jwtService.sign(loginUserDto);
+      user.token = token;
+
+      // this.logger.debug(`Token generated for user: ${user.token}`);
+
+      return user;
+    } catch (err) {
+      // this.logger.debug(`Err in the catch: ${err}`);
+      throw err;
+    }
   }
 
-  async getProfile(username: string): Promise<DimUser> {
+  async getProfile(username: string): Promise<User> {
     return await this.usersService.findOneByUsername(username);
   }
 }

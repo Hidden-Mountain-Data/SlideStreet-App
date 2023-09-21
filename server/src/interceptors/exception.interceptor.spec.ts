@@ -14,14 +14,11 @@ describe('ExceptionInterceptor', () => {
   let mockCallHandler: jest.Mocked<CallHandler>;
 
   beforeEach(() => {
-    // Mock ExecutionContext
     mockExecutionContext = {
       getClass: jest.fn(),
       getHandler: jest.fn(),
-      // ... other methods
     } as unknown as jest.Mocked<ExecutionContext>;
 
-    // Mock CallHandler
     mockCallHandler = {
       handle: jest.fn(),
     } as jest.Mocked<CallHandler>;

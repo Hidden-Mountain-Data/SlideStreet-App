@@ -3,10 +3,10 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 const roundsOfHashing = 10;
 
-async function main() {
+async function main(): Promise<void> {
   const hashedPassword = await bcrypt.hash('test1234', roundsOfHashing);
 
-  const test_user = await prisma.dimUser.create({
+  const test_user = await prisma.user.create({
     data: {
       firstName: 'John',
       lastName: 'Smith',

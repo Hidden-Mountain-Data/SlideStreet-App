@@ -31,6 +31,14 @@ export class CreateUserDto {
   @Expose({ name: 'stripe_customer_id' })
   stripeCustomerId: string;
 
+  @IsOptional()
+  @Expose({ name: 'notifications' })
+  notifications: boolean;
+
+  @IsOptional()
+  @Expose({ name: 'dark_mode' })
+  darkMode: boolean;
+
   constructor(partial: Partial<CreateUserDto> = {}) {
     Object.assign(this, partial);
   }

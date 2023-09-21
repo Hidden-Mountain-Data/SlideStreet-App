@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { DimUser } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as humps from 'humps';
-import { PrismaService } from 'src/services/prisma.service';
+import { PrismaService } from '../../services/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { User } from '../users/entities/user';

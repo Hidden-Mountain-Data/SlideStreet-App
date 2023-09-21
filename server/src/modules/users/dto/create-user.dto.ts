@@ -2,8 +2,6 @@ import { Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { Role } from '../../../rbac/role.enum';
 
-// TODO: Verify what fields are required upon signing up
-
 export class CreateUserDto {
   @IsNotEmpty()
   @IsEmail()

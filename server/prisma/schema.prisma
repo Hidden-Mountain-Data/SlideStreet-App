@@ -31,19 +31,19 @@ enum Color {
 }
 
 model DataUsages {
-  dataUsageId Int        @id @default(autoincrement()) @map("data_usage_id")
-  businessId  Int        @map("business_id")
-  dateId      Int        @map("date_id")
-  deviceId    Int        @map("device_id")
-  userId      Int        @map("user_id")
-  dataUsage   BigInt     @map("data_usage")
-  business    Buesiness? @relation("DataUsageBusiness", fields: [businessId], references: [businessId])
-  date        Dates      @relation("DataUsageDate", fields: [dateId], references: [dateId])
-  device      Routers    @relation("DataUsageDevice", fields: [deviceId], references: [deviceId])
-  user        User?      @relation("DataUsageUser", fields: [userId], references: [userId])
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
-  deletedAt   DateTime?  @map("deleted_at")
+  dataUsageId Int       @id @default(autoincrement()) @map("data_usage_id")
+  businessId  Int       @map("business_id")
+  dateId      Int       @map("date_id")
+  deviceId    Int       @map("device_id")
+  userId      Int       @map("user_id")
+  dataUsage   BigInt    @map("data_usage")
+  business    Business? @relation("DataUsageBusiness", fields: [businessId], references: [businessId])
+  date        Dates     @relation("DataUsageDate", fields: [dateId], references: [dateId])
+  device      Routers   @relation("DataUsageDevice", fields: [deviceId], references: [deviceId])
+  user        User?     @relation("DataUsageUser", fields: [userId], references: [userId])
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
 
   @@index([businessId])
   @@index([dateId])
@@ -52,11 +52,11 @@ model DataUsages {
   @@map("fact_data_usages")
 }
 
-model Buesiness {
+model Business {
   businessId       Int                   @id @default(autoincrement()) @map("business_id")
   address          Addresses?            @relation("BusinessAddress")
   businessUserMaps BusinessUserMapping[]
-  devices          Routers[]             @relation("BusinessDevice")
+  routes           Routers[]             @relation("BusinessDevice")
   dataUsages       DataUsages[]          @relation("DataUsageBusiness")
   order            Order[]               @relation("BusinessOrder")
   name             String                @db.VarChar(100)
@@ -96,7 +96,7 @@ model Routers {
   notes            String            @db.VarChar(500)
   iccid            String            @db.VarChar(200)
   active           Boolean
-  business         Buesiness?        @relation("BusinessDevice", fields: [businessId], references: [businessId])
+  business         Business?         @relation("BusinessDevice", fields: [businessId], references: [businessId])
   user             User?             @relation("UserDevice", fields: [userId], references: [userId])
   deviceLocation   RouterLocations[]
   dataUsageEntries DataUsages[]      @relation("DataUsageDevice")
@@ -144,7 +144,7 @@ model BusinessUserMapping {
   businessUserMappingId Int       @id @default(autoincrement())
   businessId            Int       @unique @map("business_id")
   userId                Int       @unique @map("user_id")
-  business              Buesiness @relation(fields: [businessId], references: [businessId])
+  business              Business  @relation(fields: [businessId], references: [businessId])
   user                  User      @relation(fields: [userId], references: [userId])
   role                  Role      @default(USER)
   createdAt             DateTime  @default(now()) @map("created_at")
@@ -172,20 +172,20 @@ model RouterLocations {
 }
 
 model Addresses {
-  addressId       Int        @id @default(autoincrement()) @map("address_id")
-  businessId      Int        @unique @map("business_id")
-  userId          Int        @unique @map("user_id")
-  businessAddress Buesiness? @relation("BusinessAddress", fields: [businessId], references: [businessId])
-  user            User?      @relation("UserAddress", fields: [userId], references: [userId])
-  addressLine1    String     @map("address_line_1") @db.VarChar(50)
-  addressLine2    String     @map("address_line_2") @db.VarChar(50)
-  city            String     @db.VarChar(50)
-  state           String     @db.VarChar(50)
+  addressId       Int       @id @default(autoincrement()) @map("address_id")
+  businessId      Int       @unique @map("business_id")
+  userId          Int       @unique @map("user_id")
+  businessAddress Business? @relation("BusinessAddress", fields: [businessId], references: [businessId])
+  user            User?     @relation("UserAddress", fields: [userId], references: [userId])
+  addressLine1    String    @map("address_line_1") @db.VarChar(50)
+  addressLine2    String    @map("address_line_2") @db.VarChar(50)
+  city            String    @db.VarChar(50)
+  state           String    @db.VarChar(50)
   zip             Int
-  country         String     @db.VarChar(100)
-  createdAt       DateTime   @default(now()) @map("created_at")
-  updatedAt       DateTime   @updatedAt @map("updated_at")
-  deletedAt       DateTime?  @map("deleted_at")
+  country         String    @db.VarChar(100)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
 
   @@index([businessId])
   @@index([userId])
@@ -240,7 +240,7 @@ model Order {
   orderId    Int         @id @unique @default(autoincrement()) @map("order_id")
   businessId Int         @unique @map("business_id")
   userId     Int         @unique @map("user_id")
-  business   Buesiness?  @relation("BusinessOrder", fields: [businessId], references: [businessId])
+  business   Business?   @relation("BusinessOrder", fields: [businessId], references: [businessId])
   user       User?       @relation("UserOrder", fields: [userId], references: [userId])
   items      OrderItem[]
   stock      Stock[]

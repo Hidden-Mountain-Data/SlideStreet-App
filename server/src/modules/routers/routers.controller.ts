@@ -36,7 +36,7 @@ export class RoutersController {
     this.logger.log(
       'createRouterDto value::: ' + JSON.stringify(createRouterDto),
     );
-    createRouterDto.userId = this.currentUser().userId;
+    // createRouterDto.userId = this.currentUser().userId;
     this.logger.log(
       'createRouterDto.userId value::: ' +
         JSON.stringify(createRouterDto.userId),

@@ -11,6 +11,7 @@ import { roundsOfHashing } from '../auth/auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserProvider } from './user.provider';
+import { User } from './entities/user';
 
 interface IRequestWithUser extends Request {
   user: Users;
@@ -32,7 +33,7 @@ export class UsersService {
     return this.userProvider.user;
   }
 
-  async users(params: { skip?: number; take?: number }): Promise<Users[]> {
+  async users(params: { skip?: number; take?: number }): Promise<User[]> {
     const { skip, take } = params;
     return this.prisma.users.findMany({
       skip,

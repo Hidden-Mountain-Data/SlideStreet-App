@@ -14,7 +14,6 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RoutersModule } from './modules/routers/routers.module';
 import { UsersModule } from './modules/users/users.module';
 import { FileService } from './services/file.service';
-import { DebugMiddleware } from './middleware/debug.middleware';
 
 @Module({
   imports: [AuthModule, UsersModule, ScheduleModule.forRoot(), RoutersModule],
@@ -38,6 +37,6 @@ import { DebugMiddleware } from './middleware/debug.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(DebugMiddleware).forRoutes('*');
+    // consumer.apply(DebugMiddleware).forRoutes('*');
   }
 }

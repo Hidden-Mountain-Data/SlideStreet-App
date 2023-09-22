@@ -5,37 +5,54 @@ import {
   HttpStatus,
   Logger,
   Post,
-  Request,
 } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions/http.exception';
 import { Routers } from '@prisma/client';
+import { User } from '../users/entities/user';
+import { UserProvider } from '../users/user.provider';
 import { CreateRouterDto } from './dto/create-router.dto';
 import { RouterAddStatus } from './router-types';
 import { RoutersService } from './routers.service';
 
 @Controller('routers')
 export class RoutersController {
-  constructor(private readonly routersService: RoutersService) {}
+  constructor(
+    private readonly routersService: RoutersService,
+    private readonly userProvider: UserProvider,
+  ) {}
 
   private readonly logger = new Logger(RoutersController.name);
 
+  private currentUser(): User {
+    const user = this.userProvider.user;
+    this.logger.log('Current User: ' + JSON.stringify(user));
+    return user;
+  }
+
   @Post('add-router')
   public async addRouter(
-    @Request() req: any,
     @Body() createRouterDto: CreateRouterDto,
   ): Promise<RouterAddStatus | HttpException> {
-    this.logger.debug(
-      `Received createRouterDto: ${JSON.stringify(createRouterDto)}`,
+    this.logger.log(
+      'createRouterDto value::: ' + JSON.stringify(createRouterDto),
     );
-
-    req.user = { id: 1 };
+    createRouterDto.userId = this.currentUser().userId;
+    this.logger.log(
+      'createRouterDto.userId value::: ' +
+        JSON.stringify(createRouterDto.userId),
+    );
+    console.log('createRouterDto.userId value::: ' + createRouterDto.userId);
+    if (!createRouterDto.userId) {
+      return new HttpException(
+        JSON.stringify(createRouterDto),
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
     const result = await this.routersService.addRouterToAccount({
       ...createRouterDto,
-      userId: req.user.id,
+      userId: this.currentUser().userId,
     });
-    this.logger.debug(`Register result: ${JSON.stringify(result)}`);
-
     return result;
   }
 

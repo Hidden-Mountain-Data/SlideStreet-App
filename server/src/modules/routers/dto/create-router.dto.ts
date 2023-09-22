@@ -1,9 +1,16 @@
-import { IsAlphanumeric, IsNotEmpty, IsString } from 'class-validator';
+import { Expose } from 'class-transformer';
+import {
+  IsAlphanumeric,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+} from 'class-validator';
 
 export class CreateRouterDto {
-  // @IsNotEmpty()
-  // @Expose({ name: 'user_id' })
-  // userId: number;
+  @IsNotEmpty()
+  @IsNumber()
+  @Expose({ name: 'user_id' })
+  userId: number;
 
   @IsNotEmpty()
   @IsString()

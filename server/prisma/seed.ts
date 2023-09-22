@@ -38,7 +38,7 @@ async function main(): Promise<void> {
       imei: '5678',
       iccid: '91011',
       userId,
-    } as unknown as Routers,
+    } as Routers,
   });
 }
 main()

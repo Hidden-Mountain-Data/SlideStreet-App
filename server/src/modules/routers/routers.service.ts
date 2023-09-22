@@ -1,43 +1,45 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Routers } from '@prisma/client';
 import { PrismaService } from '../../services/prisma.service';
+import { User } from '../users/entities/user';
+import { UserProvider } from '../users/user.provider';
 import { CreateRouterDto } from './dto/create-router.dto';
 import { UpdateRouterDto } from './dto/update-router.dto';
 import { RouterAddStatus } from './router-types';
 
 @Injectable()
 export class RoutersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly userProvider: UserProvider,
+  ) {}
 
   private readonly logger = new Logger(RoutersService.name);
 
+  private currentUser(): User {
+    return this.userProvider.user;
+  }
+
   async addRouterToAccount(
-    data: CreateRouterDto & { userId: number },
+    data: CreateRouterDto,
   ): Promise<RouterAddStatus | HttpException> {
-    this.logger.log('Adding router to account');
     try {
-      await this.prisma.routers.upsert({
-        where: { userId: data.userId },
-        create: {
-          userId: data.userId,
+      this.logger.log('data value::: ' + JSON.stringify(data));
+      await this.prisma.routers.create({
+        data: {
+          userId: this.currentUser().userId,
           sim: data.sim,
           imei: data.imei,
           iccid: data.iccid,
         },
-        update: {},
       });
-      this.logger.log('Router added successfully');
       return {
         success: true,
         message: 'Router added to user account successfully!',
       };
     } catch (err: any) {
-      if (err.code === 'P2002') {
-        throw new HttpException(
-          'User ID already has a router.',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+      console.log('Catch block triggered!');
+      console.error('Full error: ', err);
       throw new HttpException(
         `Unexpected error: ${err.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -51,6 +53,9 @@ export class RoutersService {
   }): Promise<Routers[] | HttpException> {
     const { skip, take } = params;
     this.logger.log('Fetching all routers');
+    this.logger.log('skip value::: ' + skip);
+    this.logger.log('take value::: ' + take);
+    this.logger.log('params value::: ' + JSON.stringify(params));
     try {
       return await this.prisma.routers.findMany({
         skip,

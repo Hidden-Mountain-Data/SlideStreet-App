@@ -56,16 +56,16 @@ model Dates {
 model Routers {
   routerId         Int               @id @default(autoincrement()) @map("router_id")
   userId           Int               @unique @map("user_id")
-  routerIpAddress  String            @map("router_ip") @db.VarChar(50)
-  name             String            @db.VarChar(200)
+  routerIpAddress  String?           @map("router_ip") @db.VarChar(50)
+  name             String?           @db.VarChar(200)
   imei             String            @db.VarChar(50)
   sim              String            @db.VarChar(50)
-  notes            String            @db.VarChar(500)
+  notes            String?           @db.VarChar(500)
   iccid            String            @db.VarChar(200)
   user             Users             @relation("UserRouter", fields: [userId], references: [userId])
   dataUsageEntries DataUsages[]      @relation("DataUsageRouter")
   routerLocation   RouterLocations[]
-  active           Boolean
+  active           Boolean?
   createdAt        DateTime          @default(now()) @map("created_at")
   updatedAt        DateTime          @updatedAt @map("updated_at")
   deletedAt        DateTime?         @map("deleted_at")

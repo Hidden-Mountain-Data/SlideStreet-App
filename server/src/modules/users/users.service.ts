@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { User } from '@prisma/client';
+import { Users } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { Request } from 'express';
 import * as humps from 'humps';
@@ -13,7 +13,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserProvider } from './user.provider';
 
 interface IRequestWithUser extends Request {
-  user: User;
+  user: Users;
 }
 
 @Injectable()
@@ -28,29 +28,29 @@ export class UsersService {
   // Uncomment and import Logger to see logging in this file
   // private readonly logger = new Logger(UsersService.name);
 
-  private currentUser(): User {
+  private currentUser(): Users {
     return this.userProvider.user;
   }
 
-  async users(params: { skip?: number; take?: number }): Promise<User[]> {
+  async users(params: { skip?: number; take?: number }): Promise<Users[]> {
     const { skip, take } = params;
-    return this.prisma.user.findMany({
+    return this.prisma.users.findMany({
       skip,
       take,
     });
   }
 
-  async findOneByUsername(email: string): Promise<User> {
-    return await this.prisma.user.findUnique({
+  async findOneByUsername(email: string): Promise<Users> {
+    return await this.prisma.users.findUnique({
       where: { email: email },
     });
   }
 
-  async findByLogin({ email, password }: LoginUserDto): Promise<User> {
+  async findByLogin({ email, password }: LoginUserDto): Promise<Users> {
     // this.logger.debug(`Attempting to find user by login: ${email}`);
 
     try {
-      const user = await this.prisma.user.findUnique({
+      const user = await this.prisma.users.findUnique({
         where: { email },
       });
 
@@ -86,9 +86,9 @@ export class UsersService {
     }
   }
 
-  async me(): Promise<User | HttpException> {
+  async me(): Promise<Users | HttpException> {
     try {
-      return await this.prisma.user.findUnique({
+      return await this.prisma.users.findUnique({
         where: { userId: this.currentUser().userId },
       });
     } catch (error) {
@@ -103,7 +103,7 @@ export class UsersService {
   async update(
     updateUserDto: UpdateUserDto,
     id?: number,
-  ): Promise<User | HttpException> {
+  ): Promise<Users | HttpException> {
     try {
       const {
         firstName,
@@ -159,7 +159,7 @@ export class UsersService {
           `/api/images/${image_uuid}`;
       }
 
-      const user = this.prisma.user.update({
+      const user = this.prisma.users.update({
         where: {
           userId: id ? id : this.currentUser().userId,
         },

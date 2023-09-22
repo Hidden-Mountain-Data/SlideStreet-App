@@ -6,7 +6,7 @@ const roundsOfHashing = 10;
 async function main(): Promise<void> {
   const hashedPassword = await bcrypt.hash('test1234', roundsOfHashing);
 
-  await prisma.user.create({
+  await prisma.users.create({
     data: {
       firstName: 'John',
       lastName: 'Smith',

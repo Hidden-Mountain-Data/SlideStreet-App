@@ -10,61 +10,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum StockStatus {
-  AVAILABLE
-  RESERVED
-  SOLD
-  RETURNED
-}
-
-enum Role {
+enum Roles {
   SUPER_ADMIN
   ADMIN
   USER
 }
 
-// TODO: Check what color values to include here
-enum Color {
-  WHITE
-  BLACK
-  GRAY
-}
-
 model DataUsages {
   dataUsageId Int       @id @default(autoincrement()) @map("data_usage_id")
-  businessId  Int       @map("business_id")
   dateId      Int       @map("date_id")
-  deviceId    Int       @map("device_id")
+  routerId    Int       @map("router_id")
   userId      Int       @map("user_id")
   dataUsage   BigInt    @map("data_usage")
-  business    Business? @relation("DataUsageBusiness", fields: [businessId], references: [businessId])
   date        Dates     @relation("DataUsageDate", fields: [dateId], references: [dateId])
-  device      Routers   @relation("DataUsageDevice", fields: [deviceId], references: [deviceId])
-  user        User?     @relation("DataUsageUser", fields: [userId], references: [userId])
+  router      Routers   @relation("DataUsageRouter", fields: [routerId], references: [routerId])
+  user        Users     @relation("DataUsageUser", fields: [userId], references: [userId])
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
 
-  @@index([businessId])
   @@index([dateId])
-  @@index([deviceId])
+  @@index([routerId])
   @@index([userId])
-  @@map("fact_data_usages")
-}
-
-model Business {
-  businessId       Int                   @id @default(autoincrement()) @map("business_id")
-  address          Addresses?            @relation("BusinessAddress")
-  businessUserMaps BusinessUserMapping[]
-  routes           Routers[]             @relation("BusinessDevice")
-  dataUsages       DataUsages[]          @relation("DataUsageBusiness")
-  order            Order[]               @relation("BusinessOrder")
-  name             String                @db.VarChar(100)
-  createdAt        DateTime              @default(now()) @map("created_at")
-  updatedAt        DateTime              @updatedAt @map("updated_at")
-  deletedAt        DateTime?             @map("deleted_at")
-
-  @@map("businesses")
+  @@map("data_usages")
 }
 
 model Dates {
@@ -86,214 +54,84 @@ model Dates {
 }
 
 model Routers {
-  deviceId         Int               @id @default(autoincrement()) @map("device_id")
-  businessId       Int?              @unique @map("business_id")
-  userId           Int?              @unique @map("user_id")
-  deviceIpAddress  String            @map("device_ip") @db.VarChar(50)
+  routerId         Int               @id @default(autoincrement()) @map("router_id")
+  userId           Int               @unique @map("user_id")
+  routerIpAddress  String            @map("router_ip") @db.VarChar(50)
   name             String            @db.VarChar(200)
   imei             String            @db.VarChar(50)
   sim              String            @db.VarChar(50)
   notes            String            @db.VarChar(500)
   iccid            String            @db.VarChar(200)
+  user             Users             @relation("UserRouter", fields: [userId], references: [userId])
+  dataUsageEntries DataUsages[]      @relation("DataUsageRouter")
+  routerLocation   RouterLocations[]
   active           Boolean
-  business         Business?         @relation("BusinessDevice", fields: [businessId], references: [businessId])
-  user             User?             @relation("UserDevice", fields: [userId], references: [userId])
-  deviceLocation   RouterLocations[]
-  dataUsageEntries DataUsages[]      @relation("DataUsageDevice")
   createdAt        DateTime          @default(now()) @map("created_at")
   updatedAt        DateTime          @updatedAt @map("updated_at")
   deletedAt        DateTime?         @map("deleted_at")
 
-  @@index([businessId])
   @@index([userId])
   @@map("routers")
 }
 
-model User {
-  userId              Int                   @id @unique @default(autoincrement()) @map("user_id")
-  addressId           String?               @unique @map("address_id") @db.VarChar(50)
-  address             Addresses?            @relation("UserAddress")
-  email               String                @unique @db.VarChar(100)
-  firstName           String?               @map("first_name") @db.VarChar(50)
-  lastName            String?               @map("last_name") @db.VarChar(50)
-  fullName            String?               @map("full_name") @db.VarChar(100)
-  password            String                @db.VarChar(200)
-  phone               String?               @db.VarChar(20)
-  token               String?               @db.VarChar(200)
-  role                Role?                 @default(USER)
-  apiKey              String?               @map("api_key") @db.VarChar(200)
-  refreshToken        String?               @map("refresh_token") @db.VarChar(200)
-  order               Order[]               @relation("UserOrder")
-  stripeCustomerId    String?               @map("stripe_customer_id") @db.VarChar(200)
-  dataUsages          DataUsages[]          @relation("DataUsageUser")
-  businessUserMapping BusinessUserMapping[]
-  devices             Routers[]             @relation("UserDevice")
-  isActive            Boolean               @default(false) @map("is_active") @db.Boolean
-  imageUuid           String?               @map("image_uuid") @db.VarChar(36)
-  imageUrl            String?               @map("image_url") @db.VarChar(250)
-  createdAt           DateTime              @default(now()) @map("created_at")
-  updatedAt           DateTime              @updatedAt @map("updated_at")
-  deletedAt           DateTime?             @map("deleted_at")
+model Users {
+  userId           Int          @id @unique @default(autoincrement()) @map("user_id")
+  addressId        String?      @unique @map("address_id") @db.VarChar(50)
+  address          Addresses?   @relation("UserAddress")
+  email            String       @unique @db.VarChar(100)
+  firstName        String?      @map("first_name") @db.VarChar(50)
+  lastName         String?      @map("last_name") @db.VarChar(50)
+  fullName         String?      @map("full_name") @db.VarChar(100)
+  password         String       @db.VarChar(200)
+  phone            String?      @db.VarChar(20)
+  token            String?      @db.VarChar(200)
+  role             Roles?       @default(USER)
+  apiKey           String?      @map("api_key") @db.VarChar(200)
+  refreshToken     String?      @map("refresh_token") @db.VarChar(200)
+  stripeCustomerId String?      @map("stripe_customer_id") @db.VarChar(200)
+  dataUsages       DataUsages[] @relation("DataUsageUser")
+  routers          Routers[]    @relation("UserRouter")
+  isActive         Boolean      @default(false) @map("is_active") @db.Boolean
+  imageUuid        String?      @map("image_uuid") @db.VarChar(36)
+  imageUrl         String?      @map("image_url") @db.VarChar(250)
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+  deletedAt        DateTime?    @map("deleted_at")
 
   @@index([email], name: "user_email_key")
   @@index([addressId], name: "user_address_key")
   @@map("users")
 }
 
-model BusinessUserMapping {
-  businessUserMappingId Int       @id @default(autoincrement())
-  businessId            Int       @unique @map("business_id")
-  userId                Int       @unique @map("user_id")
-  business              Business  @relation(fields: [businessId], references: [businessId])
-  user                  User      @relation(fields: [userId], references: [userId])
-  role                  Role      @default(USER)
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
-  deletedAt             DateTime? @map("deleted_at")
-
-  @@index([businessId])
-  @@index([userId])
-  @@map("business_user_mappings")
-}
-
 model RouterLocations {
   locationId Int       @id @default(autoincrement()) @map("location_id")
-  deviceId   Int       @unique @map("device_id")
-  longitude  Float     @map("device_logitude")
-  latitude   Float     @map("device_latitude")
+  routerId   Int       @unique @map("router_id")
+  longitude  Float     @map("router_logitude")
+  latitude   Float     @map("router_latitude")
   dateTime   DateTime
-  device     Routers   @relation(fields: [deviceId], references: [deviceId])
+  router     Routers   @relation(fields: [routerId], references: [routerId])
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
   deletedAt  DateTime? @map("deleted_at")
 
-  @@index([deviceId])
-  @@map("device_locations")
+  @@index([routerId])
+  @@map("router_locations")
 }
 
 model Addresses {
-  addressId       Int       @id @default(autoincrement()) @map("address_id")
-  businessId      Int       @unique @map("business_id")
-  userId          Int       @unique @map("user_id")
-  businessAddress Business? @relation("BusinessAddress", fields: [businessId], references: [businessId])
-  user            User?     @relation("UserAddress", fields: [userId], references: [userId])
-  addressLine1    String    @map("address_line_1") @db.VarChar(50)
-  addressLine2    String    @map("address_line_2") @db.VarChar(50)
-  city            String    @db.VarChar(50)
-  state           String    @db.VarChar(50)
-  zip             Int
-  country         String    @db.VarChar(100)
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  deletedAt       DateTime? @map("deleted_at")
+  addressId    Int       @id @default(autoincrement()) @map("address_id")
+  userId       Int       @unique @map("user_id")
+  user         Users     @relation("UserAddress", fields: [userId], references: [userId])
+  addressLine1 String    @map("address_line_1") @db.VarChar(50)
+  addressLine2 String    @map("address_line_2") @db.VarChar(50)
+  city         String    @db.VarChar(50)
+  state        String    @db.VarChar(50)
+  zip          Int
+  country      String    @db.VarChar(100)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
 
-  @@index([businessId])
   @@index([userId])
   @@map("addresses")
-}
-
-model Category {
-  categoryId Int       @id @unique @default(autoincrement()) @map("category_id")
-  name       String    @unique
-  icon       String // TODO: Find out if String to url on s3 or svg file or what case applies
-  color      Color
-  products   Product[]
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
-  deletedAt  DateTime? @map("deleted_at")
-
-  @@map("categories")
-}
-
-model File {
-  fileId    Int       @id @unique @default(autoincrement()) @map("file_id")
-  productId Int       @map("product_id")
-  product   Product   @relation(fields: [productId], references: [productId])
-  url       String
-  key       String // TODO: S3 bucket path ooor? Unsure of use case
-  type      String
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  @@index([productId])
-  @@map("files")
-}
-
-model OrderItem {
-  itemId    Int       @id @unique @default(autoincrement()) @map("item_id")
-  orderId   Int       @map("order_id")
-  productId Int       @map("product_id")
-  order     Order     @relation(fields: [orderId], references: [orderId])
-  product   Product   @relation(fields: [productId], references: [productId])
-  quantity  Int       @default(1)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  @@index([orderId])
-  @@index([productId])
-  @@map("items")
-}
-
-model Order {
-  orderId    Int         @id @unique @default(autoincrement()) @map("order_id")
-  businessId Int         @unique @map("business_id")
-  userId     Int         @unique @map("user_id")
-  business   Business?   @relation("BusinessOrder", fields: [businessId], references: [businessId])
-  user       User?       @relation("UserOrder", fields: [userId], references: [userId])
-  items      OrderItem[]
-  stock      Stock[]
-  discount   Float?
-  total      Float
-  createdAt  DateTime    @default(now()) @map("created_at")
-  updatedAt  DateTime    @updatedAt @map("updated_at")
-  deletedAt  DateTime?   @map("deleted_at")
-
-  @@index([businessId])
-  @@index([userId])
-  @@map("orders")
-}
-
-model Product {
-  productId    Int         @id @unique @default(autoincrement()) @map("product_id")
-  name         String      @db.VarChar(100)
-  description  String      @db.VarChar(300)
-  price        Float
-  cost         Float
-  vendor       String      @db.VarChar(100)
-  stock        Float
-  committed    Float       @default(0)
-  onHand       Float       @default(0)
-  active       Boolean     @default(true)
-  files        File[]
-  categories   Category[]
-  stockDetails Stock[]
-  orderItems   OrderItem[]
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
-  deletedAt    DateTime?   @map("deleted_at")
-
-  @@map("products")
-}
-
-model Stock {
-  stockId      Int         @id @unique @default(autoincrement()) @map("stock_id")
-  productId    Int         @map("product_id")
-  orderId      Int?        @map("order_id")
-  product      Product     @relation(fields: [productId], references: [productId])
-  order        Order?      @relation(fields: [orderId], references: [orderId])
-  imei         String      @unique @db.VarChar(50)
-  iccid        String      @unique @db.VarChar(200)
-  serialNumber String      @unique @map("serial_number") @db.VarChar(100)
-  sku          String      @db.VarChar(200)
-  boxId        String?     @map("box_id") @db.VarChar(200)
-  status       StockStatus @default(AVAILABLE)
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
-  deletedAt    DateTime?   @map("deleted_at")
-
-  @@index([orderId])
-  @@index([productId])
-  @@map("stocks")
 }

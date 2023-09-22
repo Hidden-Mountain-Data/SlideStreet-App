@@ -1,14 +1,14 @@
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { User } from '@prisma/client';
+import { Users } from '@prisma/client';
 
 interface IRequestWithUser extends Request {
-  user: User;
+  user: Users;
 }
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserProvider {
-  get user(): User {
+  get user(): Users {
     return this.req.user;
   }
 

@@ -1,7 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Users } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { Request } from 'express';
 import * as humps from 'humps';
 import { PrismaService } from 'src/services/prisma.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -19,15 +20,9 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
-  // * Uncomment and import Logger to see logging in this file
-  // private readonly logger = new Logger(AuthService.name);
-
   async register(
     data: CreateUserDto,
   ): Promise<RegistrationStatus | HttpException> {
-    // this.logger.debug(
-    //   `Processing registration with data: ${JSON.stringify(data)}`,
-    // );
     console.log('CAMELIZED', humps.camelizeKeys(data));
     const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
 
@@ -66,25 +61,30 @@ export class AuthService {
     }
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<Users> {
-    // this.logger.debug(`Starting login for email: ${loginUserDto.email}`);
-
+  async login(
+    @Req() request: Request,
+    loginUserDto: LoginUserDto,
+  ): Promise<Users> {
     try {
       const user = await this.usersService.findByLogin(loginUserDto);
 
-      // if (!user) {
-      //   this.logger.debug(`No user found for email: ${loginUserDto.email}`);
-      //   return null;
-      // }
+      if (!user) {
+        console.error('User not found');
+        throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+      }
+
+      // TODO: Fix usage of 'any' type
+      (request.session as any).userId = user.userId;
+
+      console.log(request.session);
 
       const token = this.jwtService.sign(loginUserDto);
-      user.token = token;
 
-      // this.logger.debug(`Token generated for user: ${user.token}`);
+      user.token = token;
 
       return user;
     } catch (err) {
-      // this.logger.debug(`Err in the catch: ${err}`);
+      console.log('Caught an error', err);
       throw err;
     }
   }

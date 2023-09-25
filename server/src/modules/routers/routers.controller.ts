@@ -1,77 +1,78 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpException,
   HttpStatus,
-  Logger,
+  Param,
+  Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { HttpException } from '@nestjs/common/exceptions/http.exception';
 import { Routers } from '@prisma/client';
-import { User } from '../users/entities/user';
-import { UserProvider } from '../users/user.provider';
+import { Request } from 'express';
+import { SessionService } from '../../session/session.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateRouterDto } from './dto/create-router.dto';
-import { RouterAddStatus } from './router-types';
+import { UpdateRouterDto } from './dto/update-router.dto';
+import { RouterStatus } from './router-types';
 import { RoutersService } from './routers.service';
 
 @Controller('routers')
 export class RoutersController {
   constructor(
     private readonly routersService: RoutersService,
-    private readonly userProvider: UserProvider,
+    private readonly sessionService: SessionService,
   ) {}
 
-  private readonly logger = new Logger(RoutersController.name);
-
-  private currentUser(): User {
-    const user = this.userProvider.user;
-    this.logger.log('Current User: ' + JSON.stringify(user));
-    return user;
-  }
-
-  @Post('add-router')
-  public async addRouter(
-    @Body() createRouterDto: CreateRouterDto,
-  ): Promise<RouterAddStatus | HttpException> {
-    this.logger.log(
-      'createRouterDto value::: ' + JSON.stringify(createRouterDto),
-    );
-    // createRouterDto.userId = this.currentUser().userId;
-    this.logger.log(
-      'createRouterDto.userId value::: ' +
-        JSON.stringify(createRouterDto.userId),
-    );
-    console.log('createRouterDto.userId value::: ' + createRouterDto.userId);
-    if (!createRouterDto.userId) {
-      return new HttpException(
-        JSON.stringify(createRouterDto),
+  private throwIfUnauthorized(userId: number | undefined): void {
+    if (!userId) {
+      throw new HttpException(
+        'User ID not found in session',
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
 
-    const result = await this.routersService.addRouterToAccount({
-      ...createRouterDto,
-      userId: this.currentUser().userId,
-    });
-    return result;
+  private getUserId(req: Request): number | undefined {
+    const userId = this.sessionService.getUserIdFromSession(req);
+    this.throwIfUnauthorized(userId);
+    return userId;
+  }
+
+  private async ensureRouterOwnership(routerId: number, userId: number) {
+    if (!(await this.routersService.isRouterOwnedByUser(routerId, userId))) {
+      throw new HttpException(
+        'This router is not accessible to current account',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+  }
+
+  @Post('add-router')
+  @UseGuards(JwtAuthGuard)
+  public async addRouter(
+    @Req() req: Request,
+    @Body() createRouterDto: CreateRouterDto,
+  ): Promise<RouterStatus | HttpException> {
+    const userId = this.getUserId(req);
+    createRouterDto.userId = userId;
+    return this.routersService.addRouterToAccount(createRouterDto);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   public async findAllRouters(): Promise<Routers[]> {
-    this.logger.debug('Fetching all routers');
-
     try {
       const routers = await this.routersService.findAllRouters({});
       if (Array.isArray(routers)) {
-        this.logger.debug(`Found ${routers.length} routers`);
         return routers;
       } else {
-        this.logger.warn('Received unexpected non-array response');
         throw new Error('Unexpected response type');
       }
     } catch (err: any) {
-      this.logger.error(`Error adding router: ${err.message}`);
-      this.logger.error(err.stack);
       throw new HttpException(
         'Error adding router to user account',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -79,18 +80,66 @@ export class RoutersController {
     }
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.routersService.findOne(+id);
-  // }
+  @Get(':userId')
+  @UseGuards(JwtAuthGuard)
+  async findAllRoutersByUserId(
+    @Req() req: Request,
+    @Param('userId') paramUserId: number,
+  ): Promise<Routers[]> {
+    const userId = this.getUserId(req);
+    if (userId !== Number(paramUserId)) {
+      throw new HttpException(
+        'You can only see your own routers',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    return this.routersService.findAllRoutersByUserId(userId);
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateRouterDto: UpdateRouterDto) {
-  //   return this.routersService.update(+id, updateRouterDto);
-  // }
+  @Patch(':routerId')
+  @UseGuards(JwtAuthGuard)
+  async updateRouter(
+    @Req() req: Request,
+    @Param('routerId') rawRouterId: string,
+    @Body() updateRouterDto: UpdateRouterDto,
+  ): Promise<Routers | HttpException> {
+    const userId = this.getUserId(req);
+    const routerId = Number(rawRouterId);
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.routersService.remove(+id);
-  // }
+    await this.ensureRouterOwnership(routerId, userId);
+
+    if (!(await this.routersService.isRouterOwnedByUser(routerId, userId))) {
+      throw new HttpException(
+        'You are not authorized to update this router',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    try {
+      const result = await this.routersService.updateRouter(
+        routerId,
+        updateRouterDto,
+      );
+      return result;
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Delete(':routerId')
+  @UseGuards(JwtAuthGuard)
+  public async removeRouter(
+    @Req() req: Request,
+    @Param('routerId') routerId: number,
+  ): Promise<void> {
+    const userId = this.getUserId(req);
+    await this.ensureRouterOwnership(routerId, userId);
+
+    const routerExists = await this.routersService.findOneRouter(routerId);
+    if (!routerExists) {
+      throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
+    }
+
+    await this.routersService.removeRouter(routerId, userId);
+  }
 }

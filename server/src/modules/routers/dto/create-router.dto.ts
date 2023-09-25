@@ -1,4 +1,3 @@
-import { Expose } from 'class-transformer';
 import {
   IsAlphanumeric,
   IsNotEmpty,
@@ -6,23 +5,22 @@ import {
   IsString,
 } from 'class-validator';
 
+export class CreateSimDto {
+  @IsNotEmpty()
+  @IsString()
+  iccid: string;
+}
+
 export class CreateRouterDto {
   @IsNotEmpty()
   @IsNumber()
-  @Expose({ name: 'user_id' })
   userId: number;
-
-  @IsNotEmpty()
-  @IsString()
-  sim: string;
 
   @IsNotEmpty()
   @IsAlphanumeric()
   imei: string;
 
-  @IsNotEmpty()
-  @IsString()
-  iccid: string;
+  sims: CreateSimDto;
 
   constructor(partial: Partial<CreateRouterDto> = {}) {
     Object.assign(this, partial);

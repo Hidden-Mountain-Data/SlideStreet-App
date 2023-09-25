@@ -5,7 +5,9 @@ import {
 } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import * as bodyParser from 'body-parser';
+import * as session from 'express-session';
 import * as humps from 'humps';
+
 import { AppModule } from './app.module';
 
 async function bootstrap(): Promise<void> {
@@ -28,6 +30,14 @@ async function bootstrap(): Promise<void> {
   app.enableCors();
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-  await app.listen(parseInt(process.env.PORT, 10) || 3000);
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET ?? null,
+      resave: false,
+      saveUninitialized: false,
+    }),
+  );
+  const port = parseInt(process.env.PORT ?? '3000', 10);
+  await app.listen(port);
 }
 bootstrap();

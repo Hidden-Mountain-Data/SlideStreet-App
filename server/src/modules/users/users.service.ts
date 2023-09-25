@@ -10,8 +10,8 @@ import { comparePasswords } from '../../../helpers/utils';
 import { roundsOfHashing } from '../auth/auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserProvider } from './user.provider';
 import { User } from './entities/user';
+import { UserProvider } from './user.provider';
 
 interface IRequestWithUser extends Request {
   user: Users;
@@ -48,38 +48,23 @@ export class UsersService {
   }
 
   async findByLogin({ email, password }: LoginUserDto): Promise<Users> {
-    // this.logger.debug(`Attempting to find user by login: ${email}`);
-
     try {
       const user = await this.prisma.users.findUnique({
         where: { email },
       });
 
       if (!user) {
-        // this.logger.debug(`No user found for username: ${email}`);
         throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
       }
-
-      // this.logger.debug(
-      //   `  Stored password type and value: ${typeof user.password}, ${
-      //     user.password
-      //   }`,
-      // );
-      // this.logger.debug(
-      // `Entered password type and value: ${typeof password}, ${password}`,
-      // );
 
       const areEqual = await comparePasswords(user.password, password);
 
       if (!areEqual) {
-        // this.logger.debug(`No match on the password: ${password}`);
         throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
       }
 
-      // this.logger.debug(`User found and authenticated: ${email}`);
       return user;
     } catch (err) {
-      // this.logger.error(`Error in findByLogin: ${err}`);
       throw new HttpException(
         'Failed to login',
         HttpStatus.INTERNAL_SERVER_ERROR,

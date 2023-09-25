@@ -1,52 +1,69 @@
-import { PrismaClient, Routers } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 const roundsOfHashing = 10;
 
 async function main(): Promise<void> {
-  const hashedPassword = await bcrypt.hash('test1234', roundsOfHashing);
+  try {
+    const hashedPassword = await bcrypt.hash('test1234', roundsOfHashing);
 
-  const createdUser = await prisma.users.create({
-    data: {
-      firstName: 'John',
-      lastName: 'Smith',
-      fullName: 'John Smith',
-      email: 'test@gmail.com',
-      password: hashedPassword,
-      token: '',
-      //image_url: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200'
-    },
-  });
+    const createdUser = await prisma.users.create({
+      data: {
+        firstName: 'John',
+        lastName: 'Smith',
+        email: 'john@email.com',
+        password: hashedPassword,
+      },
+    });
 
-  const token = jwt.sign(
-    { userId: createdUser.userId },
-    process.env.SECRET_KEY,
-    {
+    const userId: number = createdUser.userId;
+
+    const token = jwt.sign({ userId }, process.env.SESSION_SECRET!, {
       expiresIn: '1h',
-    },
-  );
+    });
 
-  console.log(`User created. Token is ${token}`);
+    const createdSim = await prisma.sims.create({
+      data: {
+        iccid: '91011',
+        imei: '5678',
+        routerId: 0,
+      },
+    });
 
-  const userId: number = createdUser.userId;
+    const simId: number = createdSim.simId;
 
-  await prisma.routers.create({
-    data: {
-      sim: '1234',
-      imei: '5678',
-      iccid: '91011',
-      userId,
-    } as Routers,
-  });
+    const createdRouter = await prisma.routers.create({
+      data: {
+        imei: '5678',
+        userId: userId,
+        simId: simId,
+      },
+    });
+
+    const routerId: number = createdRouter.routerId;
+
+    await prisma.sims.update({
+      where: { simId: simId },
+      data: { routerId: routerId },
+    });
+
+    console.log('User, Router, and Sim created successfully!', {
+      createdUser,
+      createdRouter,
+      createdSim,
+      token,
+    });
+  } catch (error) {
+    console.error('Something exploded:', error);
+  }
 }
+
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
+  .then(() => prisma.$disconnect())
+  .catch((e) => {
+    console.error('Seeding failed:', e);
+    prisma.$disconnect();
     process.exit(1);
   });

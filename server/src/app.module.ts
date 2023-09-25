@@ -1,9 +1,4 @@
-import {
-  ClassSerializerInterceptor,
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-} from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
@@ -14,6 +9,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RoutersModule } from './modules/routers/routers.module';
 import { UsersModule } from './modules/users/users.module';
 import { FileService } from './services/file.service';
+import { PrismaService } from './services/prisma.service';
+import { SessionService } from './session/session.service';
 
 @Module({
   imports: [AuthModule, UsersModule, ScheduleModule.forRoot(), RoutersModule],
@@ -33,10 +30,14 @@ import { FileService } from './services/file.service';
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
     },
+    PrismaService,
+    SessionService,
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer): void {
-    // consumer.apply(DebugMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}
+
+// export class AppModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer): void {
+//     // consumer.apply(DebugMiddleware).forRoutes('*');
+//   }
+// }

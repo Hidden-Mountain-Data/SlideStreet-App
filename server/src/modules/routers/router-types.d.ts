@@ -1,4 +1,4 @@
-export type RouterAddStatus = {
+export type RouterStatus = {
   success: boolean;
   message: string;
 };
@@ -10,6 +10,5 @@ export interface CreateRouterWithUserId extends CreateRouterDto {
 export interface JwtRequest extends ExpressRequest {
   user: {
     userId: number;
-    // add other fields you expect in req.user here
   };
 }

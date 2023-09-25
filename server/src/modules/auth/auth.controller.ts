@@ -7,6 +7,7 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Req,
   Request,
   UseGuards,
   UseInterceptors,
@@ -37,29 +38,18 @@ export class AuthController {
   public async register(
     @Body() createUserDto: CreateUserDto,
   ): Promise<RegistrationStatus | HttpException> {
-    // * Logging incoming login request data
-    // this.logger.debug(
-    //   `Received createUserDto: ${JSON.stringify(createUserDto)}`,
-    // );
     const result = await this.authService.register(createUserDto);
-    // Logging the result of the registration attempt
-    // this.logger.debug(`Register result: ${JSON.stringify(result)}`);
 
     return result;
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto): Promise<User> {
-    // * Logging incoming login request data
-    // this.logger.debug(`Received loginUserDto: ${JSON.stringify(loginUserDto)}`);
-    const result = await this.authService.login(loginUserDto);
-    // * Logging the result of the login attempt
-    // if (result && result.token) {
-    //   this.logger.debug(`Login successful for email: ${result.email}`);
-    // } else {
-    //   this.logger.warn(`Login failed for email: ${loginUserDto.email}`);
-    // }
+  async login(
+    @Req() request: ExpressRequest,
+    @Body() loginUserDto: LoginUserDto,
+  ): Promise<User> {
+    const result = await this.authService.login(request, loginUserDto);
 
     return result;
   }

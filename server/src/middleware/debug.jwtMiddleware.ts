@@ -9,7 +9,7 @@ export class JwtMiddleware implements NestMiddleware {
 
     if (token) {
       try {
-        const decoded = jwt.verify(token, 'YOUR_SECRET_KEY');
+        const decoded = jwt.verify(token, process.env.SESSION_SECRET);
         req.user = decoded;
         next();
       } catch (err) {

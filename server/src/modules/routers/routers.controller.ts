@@ -42,7 +42,10 @@ export class RoutersController {
     return userId;
   }
 
-  private async ensureRouterOwnership(routerId: number, userId: number) {
+  private async ensureRouterOwnership(
+    routerId: number,
+    userId: number,
+  ): Promise<void> {
     if (!(await this.routersService.isRouterOwnedByUser(routerId, userId))) {
       throw new HttpException(
         'This router is not accessible to current account',
@@ -72,11 +75,18 @@ export class RoutersController {
       } else {
         throw new Error('Unexpected response type');
       }
-    } catch (err: any) {
-      throw new HttpException(
-        'Error adding router to user account',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      } else {
+        throw new HttpException(
+          'An unknown error occurred',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
@@ -121,8 +131,18 @@ export class RoutersController {
         updateRouterDto,
       );
       return result;
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      } else {
+        throw new HttpException(
+          'An unknown error occurred',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 

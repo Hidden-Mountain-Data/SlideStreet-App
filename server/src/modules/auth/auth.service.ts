@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { Request } from 'express';
 import * as humps from 'humps';
 import { PrismaService } from 'src/services/prisma.service';
+import { UserSession } from '../../interfaces/SessionWithUser';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { UsersService } from '../users/users.service';
@@ -73,10 +74,7 @@ export class AuthService {
         throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
       }
 
-      // TODO: Fix usage of 'any' type
-      (request.session as any).userId = user.userId;
-
-      console.log(request.session);
+      (request.session as UserSession).userId = user.userId;
 
       const token = this.jwtService.sign(loginUserDto);
 

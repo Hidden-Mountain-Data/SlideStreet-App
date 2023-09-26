@@ -98,12 +98,18 @@ export class RoutersService {
         `Router data for ID ${routerId}: ${JSON.stringify(router)}`,
       );
       return router?.userId === userId;
-    } catch (error: any) {
-      this.logger.error(`Error in isRouterOwnedByUser: ${error.message}`);
-      throw new HttpException(
-        'Internal Server Error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      } else {
+        throw new HttpException(
+          'An unknown error occurred',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
@@ -123,11 +129,18 @@ export class RoutersService {
         skip,
         take,
       });
-    } catch (err: any) {
-      throw new HttpException(
-        `Error adding router to user account: ${err.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      } else {
+        throw new HttpException(
+          'An unknown error occurred',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 
@@ -169,7 +182,7 @@ export class RoutersService {
     updateRouterDto: UpdateRouterDto,
   ): Promise<Routers | HttpException> {
     try {
-      const updatedData: any = {};
+      const updatedData: Partial<Routers> = {};
 
       if (updateRouterDto.name !== undefined) {
         updatedData.name = updateRouterDto.name;
@@ -232,13 +245,18 @@ export class RoutersService {
       await this.prisma.routers.delete({
         where: { routerId },
       });
-    } catch (error: any) {
-      console.error(`Error deleting router: ${error.message}`);
-      this.logger.error(`Error stack: ${error.stack}`);
-      throw new HttpException(
-        'Error deleting router',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      } else {
+        throw new HttpException(
+          'An unknown error occurred',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
 }

@@ -35,9 +35,8 @@ import { SessionService } from './session/session.service';
   ],
 })
 export class AppModule {}
-
 // export class AppModule implements NestModule {
 //   configure(consumer: MiddlewareConsumer): void {
-//     // consumer.apply(DebugMiddleware).forRoutes('*');
+//     consumer.apply(DebugMiddleware).forRoutes('*');
 //   }
 // }

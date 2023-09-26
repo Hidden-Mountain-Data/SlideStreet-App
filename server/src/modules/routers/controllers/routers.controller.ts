@@ -13,12 +13,12 @@ import {
 } from '@nestjs/common';
 import { Routers } from '@prisma/client';
 import { Request } from 'express';
-import { SessionService } from '../../session/session.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CreateRouterDto } from './dto/create-router.dto';
-import { UpdateRouterDto } from './dto/update-router.dto';
-import { RouterStatus } from './router-types';
-import { RoutersService } from './routers.service';
+import { SessionService } from '../../../session/session.service';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { CreateRouterDto } from '../dto/create-router.dto';
+import { UpdateRouterDto } from '../dto/update-router.dto';
+import { RouterStatus } from '../router-types';
+import { RoutersService } from '../services/routers.service';
 
 @Controller('routers')
 export class RoutersController {

@@ -1,15 +1,13 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Routers } from '@prisma/client';
-import { PrismaService } from '../../services/prisma.service';
-import { CreateRouterDto } from './dto/create-router.dto';
-import { UpdateRouterDto } from './dto/update-router.dto';
-import { RouterStatus } from './router-types';
+import { PrismaService } from '../../../services/prisma.service';
+import { CreateRouterDto } from '../dto/create-router.dto';
+import { UpdateRouterDto } from '../dto/update-router.dto';
+import { RouterStatus } from '../router-types';
 
 @Injectable()
 export class RoutersService {
   constructor(private prisma: PrismaService) {}
-
-  private readonly logger = new Logger(RoutersService.name);
 
   async addRouterToAccount(
     createRouterData: CreateRouterDto,
@@ -94,9 +92,7 @@ export class RoutersService {
       const router = await this.prisma.routers.findUnique({
         where: { routerId: +routerId },
       });
-      this.logger.debug(
-        `Router data for ID ${routerId}: ${JSON.stringify(router)}`,
-      );
+
       return router?.userId === userId;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -116,14 +112,9 @@ export class RoutersService {
   async findAllRouters(params: {
     skip?: number;
     take?: number;
-    userId?: number;
   }): Promise<Routers[] | HttpException> {
-    const { skip, take, userId } = params;
-    this.logger.log('Fetching all routers');
-    this.logger.log('skip value::: ' + skip);
-    this.logger.log('take value::: ' + take);
-    this.logger.log('userId value::: ' + userId);
-    this.logger.log('params value::: ' + JSON.stringify(params));
+    const { skip, take } = params;
+
     try {
       return await this.prisma.routers.findMany({
         skip,
@@ -146,20 +137,12 @@ export class RoutersService {
 
   async findAllRoutersByUserId(userId: number): Promise<Routers[]> {
     try {
-      this.logger.debug(
-        `Incoming userId type: ${typeof userId}, value: ${userId}`,
-      );
-
-      this.logger.debug(`Fetching routers for user ID: ${userId}`);
-
       const routers = await this.prisma.routers.findMany({
         where: { userId: +userId },
       });
 
-      this.logger.debug(`Fetched routers: ${JSON.stringify(routers)}`);
       return routers;
     } catch (error) {
-      this.logger.error(`Error fetching routers: ${error}`);
       throw new HttpException(
         'Internal Server Error',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -197,7 +180,6 @@ export class RoutersService {
         data: updatedData,
       });
     } catch (error) {
-      this.logger.error(`Error updating router: ${error}`);
       throw new HttpException(
         'Error updating router',
         HttpStatus.INTERNAL_SERVER_ERROR,

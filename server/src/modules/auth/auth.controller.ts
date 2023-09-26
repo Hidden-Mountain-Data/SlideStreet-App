@@ -31,9 +31,6 @@ interface CustomExpressUserRequest extends ExpressRequest {
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  // * Uncomment and import Logger to use the logging in this file
-  // private readonly logger = new Logger(AuthController.name);
-
   @Post('register')
   public async register(
     @Body() createUserDto: CreateUserDto,

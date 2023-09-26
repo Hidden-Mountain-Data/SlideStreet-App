@@ -26,9 +26,6 @@ export class UsersService {
     @Inject(REQUEST) private readonly req: IRequestWithUser,
   ) {}
 
-  // Uncomment and import Logger to see logging in this file
-  // private readonly logger = new Logger(UsersService.name);
-
   private currentUser(): Users {
     return this.userProvider.user;
   }

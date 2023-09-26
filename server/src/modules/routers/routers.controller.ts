@@ -130,9 +130,11 @@ export class RoutersController {
   @UseGuards(JwtAuthGuard)
   public async removeRouter(
     @Req() req: Request,
-    @Param('routerId') routerId: number,
+    @Param('routerId') rawRouterId: string,
   ): Promise<void> {
     const userId = this.getUserId(req);
+    const routerId = Number(rawRouterId);
+
     await this.ensureRouterOwnership(routerId, userId);
 
     const routerExists = await this.routersService.findOneRouter(routerId);

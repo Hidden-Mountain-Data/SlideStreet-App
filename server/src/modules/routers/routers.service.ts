@@ -1,25 +1,19 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Routers } from '@prisma/client';
 import { PrismaService } from '../../services/prisma.service';
-import { UserProvider } from '../users/user.provider';
 import { CreateRouterDto } from './dto/create-router.dto';
 import { UpdateRouterDto } from './dto/update-router.dto';
 import { RouterStatus } from './router-types';
 
 @Injectable()
 export class RoutersService {
-  constructor(
-    private prisma: PrismaService,
-    private readonly userProvider: UserProvider,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   private readonly logger = new Logger(RoutersService.name);
 
   async addRouterToAccount(
     createRouterData: CreateRouterDto,
   ): Promise<RouterStatus | HttpException> {
-    console.log('Calling addRouterToAccount method in service.');
-
     if (!createRouterData.sims || !createRouterData.sims.iccid) {
       throw new HttpException(
         'Missing or invalid SIM data',
@@ -52,9 +46,6 @@ export class RoutersService {
         },
       });
 
-      // Check if the dummy router was actually created.
-      console.log('Dummy router created: ', dummyRouter);
-
       const doesRouterExist = await this.prisma.routers.findUnique({
         where: { routerId: dummyRouter.routerId },
       });
@@ -73,9 +64,6 @@ export class RoutersService {
         },
       });
 
-      // Logging to make sure sim creation is valid.
-      console.log('Created SIM: ', createdSim);
-
       const updatedRouter = await this.prisma.routers.update({
         where: { routerId: dummyRouter.routerId },
         data: {
@@ -91,8 +79,6 @@ export class RoutersService {
         message: 'Router and SIM added to user account successfully!',
       };
     } catch (err: any) {
-      console.log('Catch block triggered!');
-      console.error('Error adding router:', err);
       throw new HttpException(
         `Unexpected error: ${err.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -209,10 +195,7 @@ export class RoutersService {
   async removeRouter(
     routerId: number,
     userId: number,
-  ): Promise<Routers | HttpException> {
-    // Debug: log the type and value of routerId
-    console.log('removeRouter in service', typeof routerId, routerId);
-
+  ): Promise<void | HttpException> {
     const isOwned = await this.isRouterOwnedByUser(routerId, userId);
     if (!isOwned) {
       throw new HttpException(
@@ -221,16 +204,36 @@ export class RoutersService {
       );
     }
 
+    const routerDetails = await this.prisma.routers.findUnique({
+      where: { routerId },
+      select: { simId: true },
+    });
+
+    if (!routerDetails) {
+      throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
+    }
+
+    const simDetails = await this.prisma.sims.findUnique({
+      where: { simId: routerDetails.simId },
+      select: { embedded: true },
+    });
+
+    if (!simDetails) {
+      throw new HttpException('Sim not found', HttpStatus.NOT_FOUND);
+    }
+
     try {
-      console.log('Before deletion');
-      const result = await this.prisma.routers.delete({
+      if (simDetails.embedded) {
+        await this.prisma.sims.delete({
+          where: { simId: routerDetails.simId },
+        });
+      }
+
+      await this.prisma.routers.delete({
         where: { routerId },
       });
-      console.log('After deletion', result);
-      return result;
     } catch (error: any) {
-      // Debug: log detailed error message
-      console.log(`Error deleting router: ${error.message}`);
+      console.error(`Error deleting router: ${error.message}`);
       this.logger.error(`Error stack: ${error.stack}`);
       throw new HttpException(
         'Error deleting router',

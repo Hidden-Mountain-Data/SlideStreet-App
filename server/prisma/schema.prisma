@@ -30,7 +30,7 @@ model DataUsages {
 }
 
 model Dates {
-  dateId           Int          @id @map("date_id")
+  dateId           Int          @id @default(autoincrement()) @map("date_id")
   date             DateTime     @unique
   day              Int
   dayOfWeek        Int          @map("day_of_week")
@@ -39,8 +39,6 @@ model Dates {
   month            Int
   quarter          Int
   year             Int
-  createdAt        DateTime     @default(now()) @map("created_at")
-  updatedAt        DateTime     @updatedAt @map("updated_at")
   dataUsageEntries DataUsages[] @relation("DataUsageDate")
 
   @@index([date])
@@ -49,7 +47,8 @@ model Dates {
 
 model Sims {
   simId            Int          @id @default(autoincrement()) @map("sim_id")
-  routerId         Int          @map("router_id")
+  userId           Int?         @map("user_id")
+  routerId         Int?         @map("router_id")
   iccid            String       @db.VarChar(50)
   active           Boolean?
   ipAddress        String?      @map("ip_address") @db.VarChar(50)
@@ -61,16 +60,18 @@ model Sims {
   updatedAt        DateTime     @updatedAt @map("updated_at")
   deletedAt        DateTime?    @map("deleted_at")
   dataUsageEntries DataUsages[] @relation("DataUsageSim")
-  router           Routers      @relation("RouterSims", fields: [routerId], references: [routerId])
+  router           Routers?     @relation("RouterSims", fields: [routerId], references: [routerId])
+  user             Users?       @relation("UserSim", fields: [userId], references: [userId])
 
   @@index([simId])
+  @@index([userId])
   @@index([routerId])
   @@map("sims")
 }
 
 model Routers {
   routerId         Int              @id @default(autoincrement()) @map("router_id")
-  simId            Int              @map("sim_id")
+  simId            Int?             @map("sim_id")
   userId           Int              @map("user_id")
   name             String?          @db.VarChar(200)
   notes            String?          @db.VarChar(500)
@@ -88,6 +89,10 @@ model Routers {
 }
 
 model Users {
+  userId           Int          @id @default(autoincrement())
+  addressId        String?      @unique @map("address_id") @db.VarChar(50)
+  imageUuid        String?      @map("image_uuid") @db.VarChar(36)
+  stripeCustomerId String?      @map("stripe_customer_id") @db.VarChar(200)
   email            String       @unique @db.VarChar(100)
   password         String       @db.VarChar(200)
   token            String?      @db.VarChar(200)
@@ -96,20 +101,17 @@ model Users {
   fullName         String?      @map("full_name") @db.VarChar(100)
   phone            String?      @db.VarChar(20)
   refreshToken     String?      @map("refresh_token") @db.VarChar(200)
-  addressId        String?      @unique @map("address_id") @db.VarChar(50)
-  userId           Int          @id @default(autoincrement())
   apiKey           String?      @map("api_key") @db.VarChar(200)
   createdAt        DateTime     @default(now()) @map("created_at")
   deletedAt        DateTime?    @map("deleted_at")
-  stripeCustomerId String?      @map("stripe_customer_id") @db.VarChar(200)
   updatedAt        DateTime     @updatedAt @map("updated_at")
   isActive         Boolean      @default(false) @map("is_active")
   imageUrl         String?      @map("image_url") @db.VarChar(250)
-  imageUuid        String?      @map("image_uuid") @db.VarChar(36)
   role             Roles?       @default(USER)
   address          Addresses?   @relation("UserAddress")
   dataUsages       DataUsages[] @relation("DataUsageUser")
   routers          Routers[]    @relation("UserRouter")
+  sims             Sims[]       @relation("UserSim")
 
   @@index([email], map: "user_email_key")
   @@index([addressId], map: "user_address_key")

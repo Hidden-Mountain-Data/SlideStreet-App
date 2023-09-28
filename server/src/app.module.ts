@@ -12,9 +12,10 @@ import { FileService } from './services/file.service';
 import { PrismaService } from './services/prisma.service';
 import { SessionService } from './session/session.service';
 import { DatesModule } from './modules/dates/dates.module';
+import { DataUsageModule } from './modules/data-usage/data-usage.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ScheduleModule.forRoot(), RoutersModule, DatesModule],
+  imports: [AuthModule, UsersModule, ScheduleModule.forRoot(), RoutersModule, DatesModule, DataUsageModule],
   controllers: [AppController],
   providers: [
     AppService,

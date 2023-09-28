@@ -1,15 +1,6 @@
-import {
-  IsDateString,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-} from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class RouterLocationDto {
-  @IsNotEmpty()
-  @IsNumber()
-  locationId: number;
-
   @IsNotEmpty()
   @IsNumber()
   routerId: number;
@@ -25,18 +16,6 @@ export class RouterLocationDto {
   @IsNotEmpty()
   @IsDateString()
   dateTime: Date;
-
-  @IsNotEmpty()
-  @IsDateString()
-  createdAt: Date;
-
-  @IsOptional()
-  @IsDateString()
-  updatedAt: Date;
-
-  @IsOptional()
-  @IsDateString()
-  deletedAt?: Date;
 
   constructor(partial: Partial<RouterLocationDto> = {}) {
     Object.assign(this, partial);

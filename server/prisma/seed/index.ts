@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { seedDates } from './dates';
 import { seedRouters } from './routers';
 import { seedUsers } from './users';
+import { seedDataUsages } from './dataUsage';
 
 const prisma = new PrismaClient();
 
@@ -15,6 +16,7 @@ async function main(): Promise<void> {
       const { userId } = userSeedResult;
       await seedDates();
       await seedRouters(userId);
+      await seedDataUsages(userId);
     } else {
       console.error('User seeding returned null, skipping further seeding.');
       everythingSeeded = false;

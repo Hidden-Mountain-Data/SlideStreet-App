@@ -12,3 +12,10 @@ export interface JwtRequest extends ExpressRequest {
     userId: number;
   };
 }
+
+export type RouterLocation = {
+  routerId: number;
+  longitude: number;
+  latitude: number;
+  dateTime: Date;
+};

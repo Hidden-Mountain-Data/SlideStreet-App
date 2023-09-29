@@ -1,27 +1,84 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { DataUsages } from '@prisma/client';
 import { PrismaService } from '../../services/prisma.service';
-import { DataUsageDto } from './dto/data-usage.dto';
+import { AddDataUsageDto } from './dto/add-data-usage.dto';
+import { UpdateDataUsageDto } from './dto/update-data-usage.dto';
+import { DataUsage } from './entities/data-usage.entity';
 
 @Injectable()
 export class DataUsageService {
   constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(DataUsageService.name);
 
-  async create(data: DataUsageDto): Promise<DataUsages> {
+  async createDateUsage(data: AddDataUsageDto): Promise<DataUsage> {
+    // console.log('Attempting to create data usage with:', data);
     try {
-      return await this.prisma.dataUsages.create({ data });
-    } catch (error) {
-      console.error('Error creating data usage:', error);
+      data.dataUsage = BigInt(data.dataUsage);
+      const createdData = await this.prisma.dataUsages.create({ data });
+
+      (createdData.dataUsage as unknown) = createdData.dataUsage.toString();
+      return createdData;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error Stack:', error.stack);
+      } else {
+        console.error('An unknown error occurred:', error);
+      }
       throw new HttpException(
         'Failed to create data usage',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
+  // TODO: Figure out how to pass userId, simId, and dateId to this function as Params
+  // async createDateUsage(
+  //   userId: number,
+  //   simId: number,
+  //   dateId: number,
+  //   data: AddDataUsageDto,
+  // ): Promise<DataUsage> {
+  //   this.logger.log(
+  //     `Service: Received params - userId: ${userId}, simId: ${simId}, dateId: ${dateId}`,
+  //   );
 
-  async findAll(): Promise<DataUsages[]> {
+  //   try {
+  //     this.logger.log('Trying to create data in DB');
+
+  //     const completeData = {
+  //       ...data,
+  //       userId,
+  //       simId,
+  //       dateId,
+  //       dataUsage: BigInt(data.dataUsage),
+  //     };
+
+  //     const createdData = await this.prisma.dataUsages.create({
+  //       data: completeData,
+  //     });
+  //     this.logger.log('Data successfully created in DB');
+
+  //     return createdData;
+  //   } catch (error: unknown) {
+  //     if (error instanceof Error) {
+  //       console.error('Error Stack:', error.stack);
+  //     } else {
+  //       console.error('An unknown error occurred:', error);
+  //     }
+  //     throw new HttpException(
+  //       'Failed to create data usage',
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
+
+  async findAllDataUsage(): Promise<DataUsages[]> {
     try {
-      return await this.prisma.dataUsages.findMany();
+      const foundData = await this.prisma.dataUsages.findMany();
+
+      return foundData.map((data) => ({
+        ...data,
+        dataUsage: data.dataUsage.toString(),
+      })) as unknown as DataUsages[];
     } catch (error) {
       console.error('Error finding data usages:', error);
       throw new HttpException(
@@ -31,11 +88,21 @@ export class DataUsageService {
     }
   }
 
-  async findOne(dataUsageId: number): Promise<DataUsages | null> {
+  async findDataUsageBySimId(simId: number): Promise<DataUsages[]> {
     try {
-      return await this.prisma.dataUsages.findUnique({
-        where: { dataUsageId },
+      const foundDataArray = await this.prisma.dataUsages.findMany({
+        where: { simId },
       });
+
+      if (foundDataArray.length === 0) {
+        console.log(`No data usage records found for simId ${simId}`);
+        return [];
+      }
+
+      return foundDataArray.map((data) => ({
+        ...data,
+        dataUsage: data.dataUsage.toString(),
+      })) as unknown as DataUsages[];
     } catch (error) {
       console.error('Error finding data usage:', error);
       throw new HttpException(
@@ -45,15 +112,19 @@ export class DataUsageService {
     }
   }
 
-  async update(
+  async updateDataUsage(
     dataUsageId: number,
-    updateDataUsageDto: DataUsageDto,
-  ): Promise<DataUsages> {
+    updateDataUsageDto: UpdateDataUsageDto,
+  ): Promise<DataUsage> {
     try {
-      return await this.prisma.dataUsages.update({
+      updateDataUsageDto.dataUsage = BigInt(updateDataUsageDto.dataUsage);
+      const updatedData = await this.prisma.dataUsages.update({
         where: { dataUsageId },
         data: updateDataUsageDto,
       });
+
+      (updatedData.dataUsage as unknown) = updatedData.dataUsage.toString();
+      return updatedData;
     } catch (error) {
       console.error('Error updating data usage:', error);
       throw new HttpException(
@@ -63,7 +134,7 @@ export class DataUsageService {
     }
   }
 
-  async remove(dataUsageId: number): Promise<void> {
+  async removeOneDataUsage(dataUsageId: number): Promise<void | HttpException> {
     try {
       await this.prisma.dataUsages.delete({
         where: { dataUsageId },

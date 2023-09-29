@@ -24,7 +24,7 @@ export async function seedUsers(): Promise<{
       return null;
     });
 
-  console.log('Debug - Hashed Password:', hashedPassword);
+  // console.log('Debug - Hashed Password:', hashedPassword);
 
   const createdUser = await prisma.users
     .upsert({

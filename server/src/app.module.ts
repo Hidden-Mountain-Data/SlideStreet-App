@@ -6,16 +6,23 @@ import { AppService } from './app.service';
 import { ApiResponseInterceptor } from './interceptors/api-response.interceptor';
 import { ExceptionInterceptor } from './interceptors/exception.interceptor';
 import { AuthModule } from './modules/auth/auth.module';
+import { DataUsageModule } from './modules/data-usage/data-usage.module';
+import { DatesModule } from './modules/dates/dates.module';
 import { RoutersModule } from './modules/routers/routers.module';
 import { UsersModule } from './modules/users/users.module';
 import { FileService } from './services/file.service';
 import { PrismaService } from './services/prisma.service';
 import { SessionService } from './session/session.service';
-import { DatesModule } from './modules/dates/dates.module';
-import { DataUsageModule } from './modules/data-usage/data-usage.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ScheduleModule.forRoot(), RoutersModule, DatesModule, DataUsageModule],
+  imports: [
+    AuthModule,
+    UsersModule,
+    ScheduleModule.forRoot(),
+    RoutersModule,
+    DatesModule,
+    DataUsageModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,

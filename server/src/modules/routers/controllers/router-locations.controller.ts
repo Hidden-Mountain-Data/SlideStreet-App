@@ -3,9 +3,9 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -19,13 +19,15 @@ export class RouterLocationsController {
     private readonly routerLocationsService: RouterLocationsService,
   ) {}
 
-  @Post('_internal/add-location')
+  @Post(':routerId')
   @UseGuards(JwtAuthGuard)
   async addInternalLocation(
+    @Param('routerId', new ParseIntPipe()) routerId: number,
     @Body() routerLocationDto: RouterLocationDto,
   ): Promise<RouterLocationDto> {
     try {
       return await this.routerLocationsService.saveRouterLocation(
+        routerId,
         routerLocationDto,
       );
     } catch (error) {
@@ -34,53 +36,50 @@ export class RouterLocationsController {
     }
   }
 
-  @Get('find-all')
-  async findAllLocations(
-    @Query('routerId') routerId: number,
-  ): Promise<RouterLocationDto[]> {
-    try {
-      return await this.routerLocationsService.findAllRouterLocations(routerId);
-    } catch (error) {
-      console.error('Error fetching all locations:', error);
-      throw new Error('Could not fetch all locations');
-    }
-  }
+  // TODO: find a better way to do this
+  // @Get('find-all')
+  // async findAllLocations(
+  //   @Param('userId', new ParseIntPipe()) userId: number,
+  // ): Promise<RouterLocationDto[]> {
+  //   try {
+  //     return await this.routerLocationsService.findAllRouterLocations(userId);
+  //   } catch (error) {
+  //     console.error('Error fetching all locations:', error);
+  //     throw new Error('Could not fetch all locations');
+  //   }
+  // }
 
-  @Get('find-one')
+  @Get(':routerId')
   async findOneLocation(
-    @Query('routerId') routerId: string,
+    @Param('routerId', new ParseIntPipe()) routerId: number,
   ): Promise<RouterLocationDto> {
     try {
-      const numericRouterId = parseInt(routerId, 10);
-      if (isNaN(numericRouterId)) {
-        throw new Error('Invalid routerId');
-      }
-      return await this.routerLocationsService.findOneRouterLocation(
-        numericRouterId,
-      );
+      return await this.routerLocationsService.findOneRouterLocation(routerId);
     } catch (error) {
       console.error('Error fetching router by ID:', error);
       throw new Error('Could not fetch router by ID');
     }
   }
 
-  @Patch('_internal/update-location/:locationId')
+  @Patch(':routerId')
   @UseGuards(JwtAuthGuard)
-  async updateInternalLocation(
-    @Param('locationId') locationId: string,
+  async updateInternalLocationByRouterId(
+    @Param('routerId', new ParseIntPipe()) routerId: number,
     @Body() updateRouterLocationDto: UpdateRouterLocationDto,
   ): Promise<RouterLocationDto> {
+    console.log(
+      'Attempting to update router location with routerId:',
+      routerId,
+      typeof routerId,
+    );
+
     try {
-      const numericLocationId = parseInt(locationId, 10);
-      if (isNaN(numericLocationId)) {
-        throw new Error('Invalid routerId');
-      }
-      return await this.routerLocationsService.updateRouterLocation(
-        numericLocationId,
+      return await this.routerLocationsService.updateRouterLocationByRouterId(
+        routerId,
         updateRouterLocationDto,
       );
     } catch (error) {
-      console.error('Error updating location:', error);
+      console.error('Error details:', error);
       throw new Error('Could not update location');
     }
   }

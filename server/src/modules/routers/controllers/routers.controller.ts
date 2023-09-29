@@ -17,7 +17,7 @@ import { SessionService } from '../../../session/session.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { CreateRouterDto } from '../dto/create-router.dto';
 import { UpdateRouterDto } from '../dto/update-router.dto';
-import { RouterStatus } from '../router-types';
+import { Router } from '../entities/router.entity';
 import { RoutersService } from '../services/routers.service';
 
 @Controller('routers')
@@ -54,15 +54,17 @@ export class RoutersController {
     }
   }
 
-  @Post('add-router')
+  @Post()
   @UseGuards(JwtAuthGuard)
   public async addRouter(
     @Req() req: Request,
     @Body() createRouterDto: CreateRouterDto,
-  ): Promise<RouterStatus | HttpException> {
+  ): Promise<Router | HttpException> {
     const userId = this.getUserId(req);
     createRouterDto.userId = userId;
-    return this.routersService.addRouterToAccount(createRouterDto);
+    const result = this.routersService.addRouterToAccount(createRouterDto);
+
+    return result;
   }
 
   @Get()
@@ -104,6 +106,37 @@ export class RoutersController {
       );
     }
     return this.routersService.findAllRoutersByUserId(userId);
+  }
+
+  @Get('location/:routerId')
+  @UseGuards(JwtAuthGuard)
+  public async findRouterWithLocation(
+    @Req() req: Request,
+    @Param('routerId') rawRouterId: string,
+  ): Promise<Routers | HttpException> {
+    const userId = this.getUserId(req);
+    const routerId = Number(rawRouterId);
+
+    await this.ensureRouterOwnership(routerId, userId);
+
+    try {
+      const router = await this.routersService.findOneRouterWithLocation(
+        routerId,
+      );
+      return router;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      } else {
+        throw new HttpException(
+          'An unknown error occurred',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
   }
 
   @Patch(':routerId')

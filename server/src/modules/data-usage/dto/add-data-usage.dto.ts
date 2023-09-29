@@ -1,6 +1,7 @@
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 
-export class DataUsageDto {
+export class AddDataUsageDto {
   @IsNotEmpty()
   @IsNumber()
   userId: number;
@@ -11,17 +12,13 @@ export class DataUsageDto {
 
   @IsNotEmpty()
   @IsNumber()
-  routerId: number;
-
-  @IsNotEmpty()
-  @IsNumber()
   simId: number;
 
   @IsNotEmpty()
-  @IsNumber()
+  @Transform(({ value }) => value.toString(), { toPlainOnly: true })
   dataUsage: bigint;
 
-  constructor(partial: Partial<DataUsageDto> = {}) {
+  constructor(partial: Partial<AddDataUsageDto> = {}) {
     Object.assign(this, partial);
   }
 }

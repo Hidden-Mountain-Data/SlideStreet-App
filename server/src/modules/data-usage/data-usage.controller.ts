@@ -6,23 +6,51 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { DataUsages } from '@prisma/client';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { DataUsageService } from './data-usage.service';
-import { DataUsageDto } from './dto/data-usage.dto';
+import { AddDataUsageDto } from './dto/add-data-usage.dto';
+import { UpdateDataUsageDto } from './dto/update-data-usage.dto';
+import { DataUsage } from './entities/data-usage.entity';
 
 @Controller('data-usage')
 export class DataUsageController {
   constructor(private readonly dataUsageService: DataUsageService) {}
 
+  // TODO: Figure out how to pass userId, simId, and dateId to this function as Params like this:
+  // @Post(':userId/:simId/:dateId')
+  // @UseGuards(JwtAuthGuard)
+  // async create(
+  //   @Param('userId', new ParseIntPipe()) userId: number,
+  //   @Param('simId', new ParseIntPipe()) simId: number,
+  //   @Param('dateId', new ParseIntPipe()) dateId: number,
+  //   @Body() createDataUsageDto: AddDataUsageDto,
+  // ): Promise<DataUsages> {
+  //   console.log(
+  //     `Controller: Received params - userId: ${userId}, simId: ${simId}, dateId: ${dateId}`,
+  //   );
   @Post()
-  async create(@Body() createDataUsageDto: DataUsageDto): Promise<DataUsages> {
+  @UseGuards(JwtAuthGuard)
+  async create(
+    @Body() createDataUsageDto: AddDataUsageDto,
+  ): Promise<DataUsage> {
     try {
-      return await this.dataUsageService.create(createDataUsageDto);
-    } catch (error) {
-      console.error('Error creating data usage:', error);
+      const createdData = await this.dataUsageService.createDateUsage(
+        createDataUsageDto,
+      );
+
+      return createdData as unknown as DataUsages;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error Stack:', error.stack);
+      } else {
+        console.error('An unknown error occurred:', error);
+      }
       throw new HttpException(
         'Failed to create data usage',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -31,9 +59,10 @@ export class DataUsageController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll(): Promise<DataUsages[]> {
     try {
-      return await this.dataUsageService.findAll();
+      return await this.dataUsageService.findAllDataUsage();
     } catch (error) {
       console.error('Error finding data usages:', error);
       throw new HttpException(
@@ -43,12 +72,27 @@ export class DataUsageController {
     }
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string): Promise<DataUsages | null> {
+  @Get(':simId')
+  @UseGuards(JwtAuthGuard)
+  async findOne(
+    @Param('simId', new ParseIntPipe()) simId: number,
+  ): Promise<DataUsages[] | null> {
+    console.log(`Trying to find data usage by simId: ${simId}`);
     try {
-      return await this.dataUsageService.findOne(+id);
-    } catch (error) {
-      console.error('Error finding data usage:', error);
+      const result = await this.dataUsageService.findDataUsageBySimId(simId);
+
+      if (result.length === 0) {
+        console.log(`Data usage for simId ${simId} not found.`);
+        return null;
+      }
+
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error('Error Stack in FindOne:', error.stack);
+      } else {
+        console.error('An unknown error occurred while finding:', error);
+      }
       throw new HttpException(
         'Failed to find data usage',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -56,13 +100,18 @@ export class DataUsageController {
     }
   }
 
-  @Patch(':id')
+  @Patch(':dataUsageId')
+  @UseGuards(JwtAuthGuard)
   async update(
-    @Param('id') id: string,
-    @Body() updateDataUsageDto: DataUsageDto,
-  ): Promise<DataUsages> {
+    @Param('dataUsageId', new ParseIntPipe()) dataUsageId: number,
+    @Body() updateDataUsageDto: UpdateDataUsageDto,
+  ): Promise<DataUsage> {
+    console.log(`Updating data usage for dataUsageId: ${dataUsageId}`);
     try {
-      return await this.dataUsageService.update(+id, updateDataUsageDto);
+      return await this.dataUsageService.updateDataUsage(
+        dataUsageId,
+        updateDataUsageDto,
+      );
     } catch (error) {
       console.error('Error updating data usage:', error);
       throw new HttpException(
@@ -72,10 +121,14 @@ export class DataUsageController {
     }
   }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
+  @Delete(':dataUsageId')
+  @UseGuards(JwtAuthGuard)
+  async remove(
+    @Param('dataUsageId', new ParseIntPipe()) dataUsageId: number,
+  ): Promise<void | HttpException> {
+    console.log(`Deleting data usage for dataUsageId: ${dataUsageId}`);
     try {
-      await this.dataUsageService.remove(+id);
+      await this.dataUsageService.removeOneDataUsage(dataUsageId);
     } catch (error) {
       console.error('Error removing data usage:', error);
       throw new HttpException(

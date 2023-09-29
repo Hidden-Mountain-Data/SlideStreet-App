@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import {
   IsAlphanumeric,
   IsNotEmpty,
@@ -21,6 +22,12 @@ export class CreateRouterDto {
   imei: string;
 
   sims: CreateSimDto;
+
+  @Optional()
+  name: string;
+
+  @Optional()
+  notes: string;
 
   constructor(partial: Partial<CreateRouterDto> = {}) {
     Object.assign(this, partial);

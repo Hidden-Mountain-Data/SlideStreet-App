@@ -13,6 +13,7 @@ import { UsersModule } from './modules/users/users.module';
 import { FileService } from './services/file.service';
 import { PrismaService } from './services/prisma.service';
 import { SessionService } from './session/session.service';
+import { SimsModule } from './modules/sims/sims.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SessionService } from './session/session.service';
     RoutersModule,
     DatesModule,
     DataUsageModule,
+    SimsModule,
   ],
   controllers: [AppController],
   providers: [

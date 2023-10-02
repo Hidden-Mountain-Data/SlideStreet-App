@@ -17,7 +17,10 @@ const prisma = new PrismaClient();
 export async function seedDates(): Promise<void> {
   const existingRecords = await prisma.dates.findFirst();
   if (existingRecords) {
-    console.log('Dates already exist, skipping seed function.');
+    console.error(
+      '\x1b[31m%s\x1b[0m',
+      'Dates already exist, skipping seed function.',
+    );
     return;
   }
 
@@ -29,10 +32,14 @@ export async function seedDates(): Promise<void> {
       skipDuplicates: true,
     })
     .then(() => {
-      console.log('Dates created successfully!', dateRecords);
+      console.log(
+        '\x1b[36m%s\x1b[0m',
+        'Dates created successfully, here is what the first looks like: ',
+        dateRecords[0],
+      );
     })
     .catch((err) => {
-      console.log('Error while creating dates:', err);
+      console.error('\x1b[31m%s\x1b[0m', 'Error while seeding dates: ', err);
     });
 }
 

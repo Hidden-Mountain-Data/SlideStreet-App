@@ -1,46 +1,31 @@
 import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { seedSims } from './sims';
 
 export async function seedRouters(userId: number): Promise<void> {
-  const existingRouter = await prisma.routers.findFirst();
-  const existingSim = await prisma.sims.findFirst();
+  const prisma = new PrismaClient();
 
-  if (existingRouter || existingSim) {
-    console.log('Routers or Sims already exist, skipping seed function.');
-    return;
-  }
-
-  const routers = [];
-  const routerData = {
-    userId,
-    imei: `IMEI_${Math.floor(Math.random() * 1000)}`,
-    simId: null,
-  };
-  const createdRouter = await prisma.routers.create({
-    data: routerData,
-  });
-  routers.push(createdRouter);
-
-  for (const router of routers) {
-    const simData = {
-      iccid: `ICCID_${Math.floor(Math.random() * 1000)}`,
-      userId: router.userId,
-      routerId: router.routerId,
-    };
-
-    await prisma.sims.create({
-      data: simData,
+  try {
+    const createdRouter = await prisma.routers.create({
+      data: {
+        userId,
+        name: 'CoolRouter',
+        imei: 'some-imei',
+      },
     });
+
+    if (createdRouter) {
+      console.log(
+        '\x1b[36m%s\x1b[0m',
+        'Router created successfully:',
+        createdRouter,
+      );
+
+      const routerId = createdRouter.routerId;
+      await seedSims(userId, routerId);
+    }
+  } catch (error) {
+    console.log('\x1b[31m%s\x1b[0m', 'Error seeding Routers:', error);
+  } finally {
+    await prisma.$disconnect();
   }
-
-  const simData = {
-    routerId: null,
-    iccid: `ICCID_${Math.floor(Math.random() * 1000)}`,
-    imei: '5678',
-  };
-
-  await prisma.sims.create({
-    data: simData,
-  });
 }

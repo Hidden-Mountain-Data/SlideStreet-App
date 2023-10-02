@@ -46,7 +46,7 @@ model Dates {
 
 model Sims {
   simId            Int          @id @default(autoincrement()) @map("sim_id")
-  userId           Int?         @map("user_id")
+  userId           Int          @map("user_id")
   routerId         Int?         @map("router_id")
   iccid            String       @db.VarChar(50)
   active           Boolean?
@@ -60,7 +60,7 @@ model Sims {
   deletedAt        DateTime?    @map("deleted_at")
   dataUsageEntries DataUsages[] @relation("DataUsageSim")
   router           Routers?     @relation("RouterSims", fields: [routerId], references: [routerId])
-  user             Users?       @relation("UserSim", fields: [userId], references: [userId])
+  user             Users        @relation("UserSim", fields: [userId], references: [userId])
 
   @@index([simId])
   @@index([userId])

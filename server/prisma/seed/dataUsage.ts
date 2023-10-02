@@ -5,7 +5,10 @@ const prisma = new PrismaClient();
 export async function seedDataUsages(userId: number): Promise<void> {
   const existingDataUsage = await prisma.dataUsages.findFirst();
   if (existingDataUsage) {
-    console.log('DataUsages already exist, skipping seed function.');
+    console.error(
+      '\x1b[31m%s\x1b[0m',
+      'DataUsages already exist, skipping seed function.',
+    );
     return;
   }
 
@@ -15,14 +18,17 @@ export async function seedDataUsages(userId: number): Promise<void> {
   });
 
   if (!routers || routers.length === 0) {
-    console.log("No routers found for the user, can't seed DataUsages.");
+    console.error(
+      '\x1b[31m%s\x1b[0m',
+      "No routers found for the user, can't seed DataUsages.",
+    );
     return;
   }
 
   const someDate = await prisma.dates.findFirst();
 
   if (!someDate) {
-    console.log("No date found, can't seed DataUsages.");
+    console.error('\x1b[31m%s\x1b[0m', "No date found, can't seed DataUsages.");
     return;
   }
 
@@ -31,7 +37,10 @@ export async function seedDataUsages(userId: number): Promise<void> {
   for (const router of routers) {
     const sim = router.sims[0];
     if (!sim) {
-      console.log(`No sim found for router ${router.routerId}, skipping.`);
+      console.error(
+        '\x1b[31m%s\x1b[0m',
+        `No sim found for router ${router.routerId}, skipping.`,
+      );
       continue;
     }
 
@@ -41,7 +50,6 @@ export async function seedDataUsages(userId: number): Promise<void> {
     const dataUsageRecord = {
       userId,
       dateId,
-      routerId: router.routerId,
       simId: sim.simId,
       dataUsage,
     };
@@ -53,5 +61,9 @@ export async function seedDataUsages(userId: number): Promise<void> {
     data: dataUsagesToCreate,
   });
 
-  console.log('DataUsages created successfully!', dataUsagesToCreate);
+  console.log(
+    '\x1b[36m%s\x1b[0m',
+    'DataUsages created successfully!',
+    dataUsagesToCreate,
+  );
 }

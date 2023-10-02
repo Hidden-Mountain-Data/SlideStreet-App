@@ -17,6 +17,7 @@ import { Request } from 'express';
 import { SessionUserGuard } from '../../../guards/session-user.guard';
 import { SessionService } from '../../../session/session.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { Sim } from '../../sims/entities/sim.entity';
 import { CreateRouterDto } from '../dto/create-router.dto';
 import { UpdateRouterDto } from '../dto/update-router.dto';
 import { Router } from '../entities/router.entity';
@@ -122,6 +123,13 @@ export class RoutersController {
       () => this.routersService.findOneRouterWithLocation(routerId),
       'Error fetching router with location',
     );
+  }
+
+  @Get('sim/:routerId')
+  public async findSimsByRouterId(
+    @Param('routerId', new ParseIntPipe()) routerId: number,
+  ): Promise<Sim> {
+    return this.routersService.findSimByRouterId(routerId);
   }
 
   @Patch(':routerId')

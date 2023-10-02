@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { SessionUserGuard } from '../../guards/session-user.guard';
 import { PrismaService } from '../../services/prisma.service';
 import { SessionService } from '../../session/session.service';
 import { UserProvider } from '../users/user.provider';
@@ -16,6 +17,7 @@ import { RoutersService } from './services/routers.service';
     RouterLocationsService,
     PrismaService,
     UserProvider,
+    SessionUserGuard,
     SessionService,
   ],
 })

@@ -1,10 +1,5 @@
 import { Optional } from '@nestjs/common';
-import {
-  IsAlphanumeric,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-} from 'class-validator';
+import { IsAlphanumeric, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateSimDto {
   @IsNotEmpty()
@@ -13,10 +8,6 @@ export class CreateSimDto {
 }
 
 export class CreateRouterDto {
-  @IsNotEmpty()
-  @IsNumber()
-  userId: number;
-
   @IsNotEmpty()
   @IsAlphanumeric()
   imei: string;

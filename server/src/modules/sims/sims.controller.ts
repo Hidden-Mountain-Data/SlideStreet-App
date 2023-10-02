@@ -24,7 +24,7 @@ export class SimsController {
     @Body() createSimDto: CreateSimDto,
   ): Promise<Sim | HttpException> {
     try {
-      const newSim = await this.simsService.create(createSimDto);
+      const newSim = await this.simsService.addSim(createSimDto);
       return newSim;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);

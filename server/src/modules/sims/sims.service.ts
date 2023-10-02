@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { SimStatus } from '@prisma/client';
 import { PrismaService } from '../../services/prisma.service';
 import { Router } from '../routers/entities/router.entity';
 import { CreateSimDto } from './dto/create-sim.dto';
@@ -9,11 +10,21 @@ import { Sim } from './entities/sim.entity';
 export class SimsService {
   constructor(private prisma: PrismaService) {}
 
-  async connectToRouter(simId: number, routerId: number) {
-    return this.prisma.sims.update({
-      where: { simId },
-      data: { routerId },
-    });
+  async connectToRouter(simId: number, routerId: number): Promise<Sim> {
+    try {
+      const updatedSim = await this.prisma.sims.update({
+        where: { simId },
+        data: { routerId },
+      });
+      console.log('Successfully connected Sim to Router', updatedSim);
+      return updatedSim;
+    } catch (error) {
+      console.error('Failed to connect Sim to Router', error);
+      throw new HttpException(
+        'Failed to connect Sim to Router',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   async findRouterBySimId(simId: number): Promise<Router> {
@@ -34,17 +45,21 @@ export class SimsService {
     return simRecord.router;
   }
 
-  async create(createSimData: CreateSimDto): Promise<Sim | HttpException> {
+  async addSim(createSimData: CreateSimDto): Promise<Sim | HttpException> {
     try {
       const createdSim = await this.prisma.sims.create({
         data: {
           iccid: createSimData.iccid,
+          userId: createSimData.userId,
+          status: SimStatus.ACTIVE,
         },
       });
 
+      console.log('simId:', createdSim);
+
       return createdSim;
     } catch (error) {
-      throw new Error(`Failed to create a new Sim: ${error.message}`);
+      throw new Error(`Failed to create a new Sim: ${error}`);
     }
   }
 

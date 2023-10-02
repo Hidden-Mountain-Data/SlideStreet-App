@@ -63,7 +63,6 @@ export class RoutersController {
       }
     }
   }
-
   private async ensureRouterOwnership(
     routerId: number,
     userId: number,
@@ -81,6 +80,8 @@ export class RoutersController {
     @Req() req: Request,
     @Body() createRouterDto: CreateRouterDto,
   ): Promise<Router | HttpException> {
+    console.log('Inside addRouter. If you see this, the endpoint is hit.');
+    console.log('Attempting to add router:', createRouterDto);
     const userId = this.getUserIdAndThrowIfUnauthorized(req);
     return this.executeSafely(
       () => this.routersService.addRouterToAccount(createRouterDto, userId),
@@ -101,6 +102,7 @@ export class RoutersController {
     @Req() req: Request,
     @Param('userId', new ParseIntPipe()) userId: number,
   ): Promise<Routers[] | HttpException> {
+    console.log('userId:', userId);
     const authUserId = this.getUserIdAndThrowIfUnauthorized(req);
     if (authUserId !== userId) {
       this.throwHttpException(

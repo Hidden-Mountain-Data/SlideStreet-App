@@ -5,10 +5,14 @@ import { Sim } from '../../sims/entities/sim.entity';
 import { CreateRouterDto } from '../dto/create-router.dto';
 import { UpdateRouterDto } from '../dto/update-router.dto';
 import { Router } from '../entities/router.entity';
+import { SimsService } from './../../sims/sims.service';
 
 @Injectable()
 export class RoutersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private simsService: SimsService,
+  ) {}
 
   async addRouterToAccount(
     createRouterData: CreateRouterDto,
@@ -23,11 +27,13 @@ export class RoutersService {
     }
 
     try {
-      const createdSim = await this.prisma.sims.create({
-        data: {
-          iccid: createRouterData.sims.iccid,
-        },
+      const createdSim = await this.simsService.addSim({
+        userId,
+        iccid: createRouterData.sims.iccid,
       });
+
+      // TODO: Figure out how to get simId off the created SIM
+      const simId = createdSim.simId;
 
       const newRouter = await this.prisma.routers.create({
         data: {
@@ -48,6 +54,58 @@ export class RoutersService {
       );
     }
   }
+  // async addRouterToAccount(
+  //   createRouterData: CreateRouterDto,
+  //   userId: number,
+  // ): Promise<Router | HttpException> {
+  //   console.log('Received data in service:', createRouterData);
+
+  //   if (!createRouterData.sims || !createRouterData.sims.iccid) {
+  //     throw new HttpException(
+  //       'Missing or invalid SIM data',
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+
+  //   try {
+  //     const createSimDto = {
+  //       iccid: createRouterData.sims.iccid,
+  //       userId,
+  //       status: SimStatus.ACTIVE,
+  //     };
+
+  //     const createdSim = await this.simsService.addSim(createSimDto);
+  //     console.log('createdSim:', createdSim);
+
+  //     // Type check to appease TypeScript and logically segregate errors.
+  //     if ('simId' in createdSim) {
+  //       const simWithId = createdSim as unknown as { simId: number }; // Type casting
+  //       const newRouter = await this.prisma.routers.create({
+  //         data: {
+  //           userId,
+  //           imei: createRouterData.imei || '123',
+  //           simId: simWithId.simId,
+  //           name: createRouterData.name,
+  //           notes: createRouterData.notes,
+  //         },
+  //       });
+
+  //       return newRouter;
+  //     } else {
+  //       // Handle HttpException case here if needed
+  //       throw new HttpException(
+  //         'Failed to create SIM',
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //       );
+  //     }
+  //   } catch (err: any) {
+  //     console.log('Error:', err);
+  //     throw new HttpException(
+  //       `Unexpected error: ${err.message}`,
+  //       HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
   async isRouterOwnedByUser(
     routerId: number,
@@ -102,10 +160,11 @@ export class RoutersService {
 
   async findAllRoutersByUserId(userId: number): Promise<Routers[]> {
     try {
+      console.log('Trying to find routers by userId:', userId);
       const routers = await this.prisma.routers.findMany({
         where: { userId: +userId },
       });
-
+      console.log('Found routers:', routers);
       return routers;
     } catch (error) {
       throw new HttpException(
@@ -119,6 +178,7 @@ export class RoutersService {
     const router = await this.prisma.routers.findUnique({
       where: { routerId },
     });
+    console.log('Found routers:', router);
     if (!router) {
       throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
     }

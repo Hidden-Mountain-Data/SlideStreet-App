@@ -29,12 +29,12 @@ export async function seedUsers(): Promise<{
 
   const createdUser = await prisma.users
     .upsert({
-      where: { email: 'john@email.com' },
+      where: { email: 'joe@email.com' },
       update: {},
       create: {
         firstName: 'Joe',
         lastName: 'Smith',
-        email: 'john@email.com',
+        email: 'joe@email.com',
         password: hashedPassword!,
       },
     })

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsEmail } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 import { Role } from '../../../rbac/role.enum';
 
 export class UserDto {
@@ -21,6 +21,10 @@ export class UserDto {
   email: string;
 
   roles: Role[];
+
+  notifications: boolean;
+
+  darkMode: boolean;
 
   picture?: string;
 

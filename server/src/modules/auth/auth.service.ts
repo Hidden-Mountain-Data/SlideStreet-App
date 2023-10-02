@@ -1,15 +1,17 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUserDto } from '../users/dto/login-user.dto';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { PrismaService } from 'src/services/prisma.service';
-import { RegistrationStatus } from './registration-status';
-export const roundsOfHashing = 10;
+import { Users } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { DimUser } from '@prisma/client';
-import { User } from '../users/entities/user';
+import { Request } from 'express';
 import * as humps from 'humps';
+import { PrismaService } from 'src/services/prisma.service';
+import { UserSession } from '../../interfaces/SessionWithUser';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LoginUserDto } from '../users/dto/login-user.dto';
+import { UsersService } from '../users/users.service';
+import { RegistrationStatus } from './registration-status';
+
+export const roundsOfHashing = 10;
 
 @Injectable()
 export class AuthService {
@@ -22,57 +24,70 @@ export class AuthService {
   async register(
     data: CreateUserDto,
   ): Promise<RegistrationStatus | HttpException> {
+    console.log('CAMELIZED', humps.camelizeKeys(data));
+    const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
+
+    data.password = hashedPassword;
+
+    const { email, password, firstName, lastName } = humps.camelizeKeys(
+      data,
+    ) as CreateUserDto;
+
+    const fullName = `${firstName} ${lastName}`;
+
     try {
-      console.log('CAMELIZED', humps.camelizeKeys(data));
-      const hashedPassword = await bcrypt.hash(data.password, roundsOfHashing);
-
-      data.password = hashedPassword;
-
-      const userInDb = await this.usersService.findOneByUsername(data.email);
-
-      if (userInDb) {
-        throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
-      }
-
-      const {
-        email,
-        password,
-        firstName,
-        lastName,
-        fullName,
-        stripeCustomerId,
-        phone,
-      } = humps.camelizeKeys(data) as CreateUserDto;
-
-      await this.prisma.dimUser.create({
+      await this.prisma.users.create({
         data: {
           email,
           password,
           firstName,
           lastName,
           fullName,
-          stripeCustomerId,
-          phone,
-          token: '',
         },
       });
+
       return {
         success: true,
         message: 'New user Created!',
       };
     } catch (err) {
-      console.log(err);
-      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      if (err instanceof Error) {
+        console.log(err);
+        throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+      throw new HttpException(
+        'An unexpected error occurred',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<User> {
-    const user = await this.usersService.findByLogin(loginUserDto);
-    user.token = this.jwtService.sign(loginUserDto);
-    return user;
+  async login(
+    @Req() request: Request,
+    loginUserDto: LoginUserDto,
+  ): Promise<Users> {
+    try {
+      const user = await this.usersService.findByLogin(loginUserDto);
+
+      if (!user) {
+        console.error('User not found');
+        throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
+      }
+
+      (request.session as UserSession).userId = user.userId;
+
+      const token = this.jwtService.sign(loginUserDto);
+
+      user.token = token;
+
+      return user;
+    } catch (err) {
+      console.log('Caught an error', err);
+      throw err;
+    }
   }
 
-  async getProfile(username: string): Promise<DimUser> {
+  async getProfile(username: string): Promise<Users> {
     return await this.usersService.findOneByUsername(username);
   }
 }

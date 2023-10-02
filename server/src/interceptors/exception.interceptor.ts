@@ -19,23 +19,39 @@ export interface Response<T> {
 
 @Injectable()
 export class ExceptionInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+  intercept<T>(_context: ExecutionContext, next: CallHandler): Observable<T> {
     return next.handle().pipe(
-      catchError((err) =>
-        throwError(
+      catchError((err: unknown) => {
+        let statusCode = 500;
+        let response = {};
+
+        if (typeof err === 'object' && err !== null) {
+          if ('getStatus' in err && typeof err['getStatus'] === 'function') {
+            statusCode = err['getStatus']();
+          }
+
+          if (
+            'getResponse' in err &&
+            typeof err['getResponse'] === 'function'
+          ) {
+            response = err['getResponse']();
+          }
+        }
+
+        return throwError(
           () =>
             new HttpException(
               {
                 version: '1.0',
                 id: uuidV4(),
-                code: err.status,
+                code: statusCode,
                 message: 'Error',
-                errors: err,
+                errors: response,
               },
-              err.status,
+              statusCode,
             ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

@@ -116,6 +116,14 @@ export class DataUsageService {
     dataUsageId: number,
     updateDataUsageDto: UpdateDataUsageDto,
   ): Promise<DataUsage> {
+    const existingData = await this.prisma.dataUsages.findUnique({
+      where: { dataUsageId },
+    });
+
+    if (!existingData) {
+      return null;
+    }
+
     try {
       updateDataUsageDto.dataUsage = BigInt(updateDataUsageDto.dataUsage);
       const updatedData = await this.prisma.dataUsages.update({
@@ -125,7 +133,7 @@ export class DataUsageService {
 
       (updatedData.dataUsage as unknown) = updatedData.dataUsage.toString();
       return updatedData;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error updating data usage:', error);
       throw new HttpException(
         'Failed to update data usage',
@@ -135,11 +143,19 @@ export class DataUsageService {
   }
 
   async removeOneDataUsage(dataUsageId: number): Promise<void | HttpException> {
+    const existingData = await this.prisma.dataUsages.findUnique({
+      where: { dataUsageId },
+    });
+
+    if (!existingData) {
+      return null;
+    }
+
     try {
       await this.prisma.dataUsages.delete({
         where: { dataUsageId },
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error removing data usage:', error);
       throw new HttpException(
         'Failed to remove data usage',

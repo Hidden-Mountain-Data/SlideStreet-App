@@ -106,34 +106,29 @@ export class DataUsageController {
     @Param('dataUsageId', new ParseIntPipe()) dataUsageId: number,
     @Body() updateDataUsageDto: UpdateDataUsageDto,
   ): Promise<DataUsage> {
-    console.log(`Updating data usage for dataUsageId: ${dataUsageId}`);
-    try {
-      return await this.dataUsageService.updateDataUsage(
-        dataUsageId,
-        updateDataUsageDto,
-      );
-    } catch (error) {
-      console.error('Error updating data usage:', error);
+    const updatedData = await this.dataUsageService.updateDataUsage(
+      dataUsageId,
+      updateDataUsageDto,
+    );
+    if (!updatedData) {
       throw new HttpException(
-        'Failed to update data usage',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        `Data usage with id ${dataUsageId} not found`,
+        HttpStatus.NOT_FOUND,
       );
     }
+    return updatedData;
   }
 
   @Delete(':dataUsageId')
   @UseGuards(JwtAuthGuard)
   async remove(
     @Param('dataUsageId', new ParseIntPipe()) dataUsageId: number,
-  ): Promise<void | HttpException> {
-    console.log(`Deleting data usage for dataUsageId: ${dataUsageId}`);
-    try {
-      await this.dataUsageService.removeOneDataUsage(dataUsageId);
-    } catch (error) {
-      console.error('Error removing data usage:', error);
+  ): Promise<void> {
+    const result = await this.dataUsageService.removeOneDataUsage(dataUsageId);
+    if (result === null) {
       throw new HttpException(
-        'Failed to remove data usage',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        `Data usage with id ${dataUsageId} not found`,
+        HttpStatus.NOT_FOUND,
       );
     }
   }

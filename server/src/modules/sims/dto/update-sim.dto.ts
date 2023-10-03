@@ -1,23 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
-import {
-  IsBoolean,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { CreateSimDto } from './create-sim.dto';
 import { SimStatus } from '@prisma/client';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { CreateSimDto } from './create-sim.dto';
 
 export class UpdateSimDto extends PartialType(CreateSimDto) {
-  @IsOptional()
-  @IsNumber()
-  userId: number;
-
-  @IsOptional()
-  @IsNumber()
-  routerId: number;
-
   @IsOptional()
   @IsBoolean()
   active: boolean;

@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { SessionService } from '../session/session.service';
 
-// TODO: ACTUALLY USE THIS
 @Injectable()
 export class HttpHelpers {
   constructor(private readonly sessionService: SessionService) {}
@@ -17,7 +16,9 @@ export class HttpHelpers {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    console.log(`User ID found: ${userId}`);
+    console.log(
+      `User ID found: ${userId}, here is the typeof: ${typeof userId}`,
+    );
     return userId;
   }
 

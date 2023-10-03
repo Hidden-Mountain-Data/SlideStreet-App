@@ -18,7 +18,7 @@ export class RoutersService {
       const newRouter = await this.prisma.routers.create({
         data: {
           imei: createRouterData.imei,
-          userId: userId,
+          userId,
           name: createRouterData.name || null,
           notes: createRouterData.notes || null,
         },
@@ -75,7 +75,7 @@ export class RoutersService {
         data: {
           userId,
           routerId,
-          iccid: 'some-iccid-1',
+          iccid: 'some-sim-iccid', // TODO: Will need a real value here
           active: true,
           status: 'ACTIVE',
           embedded: true,
@@ -83,31 +83,6 @@ export class RoutersService {
       });
 
       return newSim;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
-    }
-  }
-
-  async isRouterOwnedByUser(
-    routerId: number,
-    userId: number,
-  ): Promise<boolean> {
-    try {
-      const router = await this.prisma.routers.findUnique({
-        where: { routerId: +routerId },
-      });
-
-      return router?.userId === userId;
     } catch (error: unknown) {
       if (error instanceof Error) {
         throw new HttpException(
@@ -154,6 +129,7 @@ export class RoutersService {
       console.log('Trying to find routers by userId:', userId);
       const routers = await this.prisma.routers.findMany({
         where: { userId: +userId },
+        include: { routerLocation: true, sims: true },
       });
       console.log('Found routers:', routers);
       return routers;
@@ -165,22 +141,22 @@ export class RoutersService {
     }
   }
 
-  async findOneRouter(routerId: number): Promise<Routers> {
-    const router = await this.prisma.routers.findUnique({
-      where: { routerId },
-    });
-    console.log('Found routers:', router);
-    if (!router) {
-      throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
-    }
-    return router;
-  }
+  // async findOneRouter(routerId: number): Promise<Routers> {
+  //   const router = await this.prisma.routers.findUnique({
+  //     where: { routerId },
+  //   });
 
-  async findOneRouterWithLocation(routerId: number): Promise<Routers | null> {
+  //   if (!router) {
+  //     throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
+  //   }
+  //   return router;
+  // }
+
+  async findOneRouterDetails(routerId: number): Promise<Routers | null> {
     try {
       const router = await this.prisma.routers.findUnique({
         where: { routerId },
-        include: { routerLocation: true },
+        include: { routerLocation: true, sims: true },
       });
       if (!router) {
         throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
@@ -252,7 +228,32 @@ export class RoutersService {
     }
   }
 
-  async removeRouter(
+  async isRouterOwnedByUser(
+    routerId: number,
+    userId: number,
+  ): Promise<boolean> {
+    try {
+      const router = await this.prisma.routers.findUnique({
+        where: { routerId: +routerId },
+      });
+
+      return router?.userId === userId;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      } else {
+        throw new HttpException(
+          'An unknown error occurred',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
+
+  async removeRouterById(
     routerId: number,
     userId: number,
   ): Promise<void | HttpException> {
@@ -283,7 +284,11 @@ export class RoutersService {
     }
 
     try {
-      if (simDetails.embedded) {
+      await this.prisma.routerLocations.deleteMany({
+        where: { routerId },
+      });
+
+      if (simDetails && simDetails.embedded) {
         await this.prisma.sims.delete({
           where: { simId: routerDetails.simId },
         });

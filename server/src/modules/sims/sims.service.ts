@@ -55,7 +55,8 @@ export class SimsService {
         },
       });
 
-      console.log('simId:', createdSim);
+      console.log('createdSim:', createdSim);
+      console.log('simId:', createdSim.simId);
 
       return createdSim;
     } catch (error) {

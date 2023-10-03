@@ -1,111 +1,102 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Routers } from '@prisma/client';
+import { Prisma, Routers } from '@prisma/client';
 import { PrismaService } from '../../../services/prisma.service';
 import { Sim } from '../../sims/entities/sim.entity';
 import { CreateRouterDto } from '../dto/create-router.dto';
 import { UpdateRouterDto } from '../dto/update-router.dto';
 import { Router } from '../entities/router.entity';
-import { SimsService } from './../../sims/sims.service';
 
 @Injectable()
 export class RoutersService {
-  constructor(
-    private prisma: PrismaService,
-    private simsService: SimsService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async addRouterToAccount(
     createRouterData: CreateRouterDto,
     userId: number,
   ): Promise<Router | HttpException> {
-    console.log('Received data in service:', createRouterData);
-    if (!createRouterData.sims || !createRouterData.sims.iccid) {
-      throw new HttpException(
-        'Missing or invalid SIM data',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     try {
-      const createdSim = await this.simsService.addSim({
-        userId,
-        iccid: createRouterData.sims.iccid,
-      });
-
-      // TODO: Figure out how to get simId off the created SIM
-      const simId = createdSim.simId;
-
       const newRouter = await this.prisma.routers.create({
         data: {
+          imei: createRouterData.imei,
           userId: userId,
-          imei: createRouterData.imei || '123',
-          simId: createdSim.simId,
-          name: createRouterData.name,
-          notes: createRouterData.notes,
+          name: createRouterData.name || null,
+          notes: createRouterData.notes || null,
         },
       });
 
-      return newRouter;
-    } catch (err: any) {
-      console.log('Error:', err);
-      throw new HttpException(
-        `Unexpected error: ${err.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      const newSim = (await this.createRouterWithEmbeddedSim(
+        userId,
+        newRouter.routerId,
+      )) as unknown as Prisma.SimsWhereUniqueInput;
+
+      if (newSim instanceof HttpException) {
+        throw newSim;
+      }
+
+      const updatedRouter = await this.prisma.routers.update({
+        where: {
+          routerId: newRouter.routerId,
+        },
+        data: {
+          simId: newSim.simId,
+        },
+        include: {
+          sims: true,
+        },
+      });
+
+      return {
+        success: true,
+        message: 'Router with embedded SIM added successfully!',
+        router: updatedRouter,
+      };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      } else {
+        throw new HttpException(
+          'An unknown error occurred',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
   }
-  // async addRouterToAccount(
-  //   createRouterData: CreateRouterDto,
-  //   userId: number,
-  // ): Promise<Router | HttpException> {
-  //   console.log('Received data in service:', createRouterData);
 
-  //   if (!createRouterData.sims || !createRouterData.sims.iccid) {
-  //     throw new HttpException(
-  //       'Missing or invalid SIM data',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
+  async createRouterWithEmbeddedSim(
+    userId: number,
+    routerId: number,
+  ): Promise<Sim | HttpException> {
+    console.log('inside createRouterWithEmbeddedSim', userId, routerId);
+    try {
+      const newSim = await this.prisma.sims.create({
+        data: {
+          userId,
+          routerId,
+          iccid: 'some-iccid-1',
+          active: true,
+          status: 'ACTIVE',
+          embedded: true,
+        },
+      });
 
-  //   try {
-  //     const createSimDto = {
-  //       iccid: createRouterData.sims.iccid,
-  //       userId,
-  //       status: SimStatus.ACTIVE,
-  //     };
-
-  //     const createdSim = await this.simsService.addSim(createSimDto);
-  //     console.log('createdSim:', createdSim);
-
-  //     // Type check to appease TypeScript and logically segregate errors.
-  //     if ('simId' in createdSim) {
-  //       const simWithId = createdSim as unknown as { simId: number }; // Type casting
-  //       const newRouter = await this.prisma.routers.create({
-  //         data: {
-  //           userId,
-  //           imei: createRouterData.imei || '123',
-  //           simId: simWithId.simId,
-  //           name: createRouterData.name,
-  //           notes: createRouterData.notes,
-  //         },
-  //       });
-
-  //       return newRouter;
-  //     } else {
-  //       // Handle HttpException case here if needed
-  //       throw new HttpException(
-  //         'Failed to create SIM',
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-  //   } catch (err: any) {
-  //     console.log('Error:', err);
-  //     throw new HttpException(
-  //       `Unexpected error: ${err.message}`,
-  //       HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
+      return newSim;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      } else {
+        throw new HttpException(
+          'An unknown error occurred',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
+  }
 
   async isRouterOwnedByUser(
     routerId: number,

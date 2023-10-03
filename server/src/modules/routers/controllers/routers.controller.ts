@@ -76,18 +76,31 @@ export class RoutersController {
   }
 
   @Post(':userId')
+  // @UseGuards(JwtAuthGuard)
   public async addRouter(
     @Req() req: Request,
     @Body() createRouterDto: CreateRouterDto,
   ): Promise<Router | HttpException> {
     console.log('Inside addRouter. If you see this, the endpoint is hit.');
-    console.log('Attempting to add router:', createRouterDto);
     const userId = this.getUserIdAndThrowIfUnauthorized(req);
-    return this.executeSafely(
-      () => this.routersService.addRouterToAccount(createRouterDto, userId),
-      'Error adding router',
+    return await this.routersService.addRouterToAccount(
+      createRouterDto,
+      userId,
     );
   }
+  // @Post(':userId')
+  // public async addRouter(
+  //   @Req() req: Request,
+  //   @Body() createRouterDto: CreateRouterDto,
+  // ): Promise<Router | HttpException> {
+  //   console.log('Inside addRouter. If you see this, the endpoint is hit.');
+  //   console.log('Attempting to add router:', createRouterDto);
+  //   const userId = this.getUserIdAndThrowIfUnauthorized(req);
+  //   return this.executeSafely(
+  //     () => this.routersService.addRouterToAccount(createRouterDto, userId),
+  //     'Error adding router',
+  //   );
+  // }
 
   @Get()
   public async findAllRouters(): Promise<Routers[] | HttpException> {

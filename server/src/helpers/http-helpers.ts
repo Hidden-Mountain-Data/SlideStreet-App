@@ -1,50 +1,40 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { SessionService } from '../session/session.service';
 
 @Injectable()
 export class HttpHelpers {
+  private readonly logger = new Logger(HttpHelpers.name);
+
   constructor(private readonly sessionService: SessionService) {}
 
   getUserIdAndThrowIfUnauthorized(req: Request): number {
-    console.log('Inside getUserIdAndThrowIfUnauthorized');
     const userId = this.sessionService.getUserIdFromSession(req);
     if (!userId) {
-      console.log('User ID not found, throwing HttpException');
-      this.throwHttpException(
-        'User ID not found in session',
-        HttpStatus.UNAUTHORIZED,
-      );
+      this.logger.warn('User ID not found in session');
+      throw new NotFoundException('User ID not found in session');
     }
-    console.log(
-      `User ID found: ${userId}, here is the typeof: ${typeof userId}`,
-    );
     return userId;
-  }
-
-  throwHttpException(message: string, status: HttpStatus): void {
-    console.log(
-      `Throwing HttpException with message: ${message} and status: ${status}`,
-    );
-    throw new HttpException(message, status);
   }
 
   async executeSafely<T>(
     operation: () => Promise<T>,
     errorMessage: string,
   ): Promise<T> {
-    console.log('Inside executeSafely');
     try {
       return await operation();
     } catch (error: unknown) {
-      console.log('Caught error in executeSafely');
       if (error instanceof Error) {
-        this.throwHttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        this.logger.error(`Error during executeSafely: ${error.message}`);
+        throw new InternalServerErrorException(error.message);
       } else {
-        this.throwHttpException(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+        this.logger.error(`Error during executeSafely: ${errorMessage}`);
+        throw new InternalServerErrorException(errorMessage);
       }
     }
   }

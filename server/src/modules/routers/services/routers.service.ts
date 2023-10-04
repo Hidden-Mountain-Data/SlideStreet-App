@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Routers } from '@prisma/client';
 import { PrismaService } from '../../../services/prisma.service';
 import { Sim } from '../../sims/entities/sim.entity';
@@ -8,6 +14,8 @@ import { Router } from '../entities/router.entity';
 
 @Injectable()
 export class RoutersService {
+  private readonly logger = new Logger(RoutersService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async addRouterToAccount(
@@ -50,18 +58,14 @@ export class RoutersService {
         message: 'Router with embedded SIM added successfully!',
         router: updatedRouter,
       };
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+    } catch (error) {
+      this.logger.error(
+        `Error adding router to account for user: ${userId}. DTO: ${JSON.stringify(
+          createRouterData,
+        )}`,
+        error instanceof Error ? error.stack : 'unknown error',
+      );
+      throw new InternalServerErrorException('Could not update the sim');
     }
   }
 
@@ -69,13 +73,12 @@ export class RoutersService {
     userId: number,
     routerId: number,
   ): Promise<Sim | HttpException> {
-    console.log('inside createRouterWithEmbeddedSim', userId, routerId);
     try {
       const newSim = await this.prisma.sims.create({
         data: {
           userId,
           routerId,
-          iccid: 'some-sim-iccid', // TODO: Will need a real value here
+          iccid: 'some-sim-iccid', // TODO: Adjust accordingly
           active: true,
           status: 'ACTIVE',
           embedded: true,
@@ -83,18 +86,12 @@ export class RoutersService {
       });
 
       return newSim;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+    } catch (error) {
+      this.logger.error(
+        `Error creating embedded sim for routerId: ${routerId}`,
+        error,
+      );
+      throw new InternalServerErrorException('Could not embed sim');
     }
   }
 
@@ -109,71 +106,46 @@ export class RoutersService {
         skip,
         take,
       });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+    } catch (error) {
+      this.logger.error('Error finding All Routers:', error);
+      throw new InternalServerErrorException('Could not find All Routers');
     }
   }
 
   async findAllRoutersByUserId(userId: number): Promise<Routers[]> {
     try {
-      console.log('Trying to find routers by userId:', userId);
       const routers = await this.prisma.routers.findMany({
         where: { userId: +userId },
         include: { routerLocation: true, sims: true },
       });
-      console.log('Found routers:', routers);
+
       return routers;
     } catch (error) {
-      throw new HttpException(
-        'Internal Server Error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      this.logger.error(
+        `Error finding All Routers by userId: ${userId}`,
+        error,
       );
+      throw new InternalServerErrorException('Could not find All User Routers');
     }
   }
 
-  // async findOneRouter(routerId: number): Promise<Routers> {
-  //   const router = await this.prisma.routers.findUnique({
-  //     where: { routerId },
-  //   });
-
-  //   if (!router) {
-  //     throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
-  //   }
-  //   return router;
-  // }
-
-  async findOneRouterDetails(routerId: number): Promise<Routers | null> {
+  async findOneRouterDetails(routerId: number): Promise<Router | null> {
     try {
       const router = await this.prisma.routers.findUnique({
         where: { routerId },
         include: { routerLocation: true, sims: true },
       });
       if (!router) {
-        throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
+        throw new NotFoundException('Router not found');
       }
+
       return router;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+    } catch (error) {
+      this.logger.error(
+        `Error finding details for routerId: ${routerId}`,
+        error,
+      );
+      throw new InternalServerErrorException('Could not find router details');
     }
   }
 
@@ -182,22 +154,15 @@ export class RoutersService {
       const sim = this.prisma.sims.findMany({
         where: { routerId },
       });
+
       if (!sim) {
-        throw new HttpException('Sim not found', HttpStatus.NOT_FOUND);
+        throw new NotFoundException('Sim not found');
       }
+
       return sim;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+    } catch (error) {
+      this.logger.error(`Error finding sim by routerId: ${routerId}`, error);
+      throw new InternalServerErrorException('Could not find sim by routerId');
     }
   }
 
@@ -206,72 +171,44 @@ export class RoutersService {
     updateRouterDto: UpdateRouterDto,
   ): Promise<Routers | HttpException> {
     try {
-      const updatedData: Partial<Routers> = {};
-
-      if (updateRouterDto.name !== undefined) {
-        updatedData.name = updateRouterDto.name;
-      }
-
-      if (updateRouterDto.notes !== undefined) {
-        updatedData.notes = updateRouterDto.notes;
-      }
-
-      return await this.prisma.routers.update({
+      const existingRouter = await this.prisma.routers.findUnique({
         where: { routerId },
-        data: updatedData,
-      });
-    } catch (error) {
-      throw new HttpException(
-        'Error updating router',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async isRouterOwnedByUser(
-    routerId: number,
-    userId: number,
-  ): Promise<boolean> {
-    try {
-      const router = await this.prisma.routers.findUnique({
-        where: { routerId: +routerId },
       });
 
-      return router?.userId === userId;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+      if (!existingRouter) {
+        this.logger.warn(`Router with ID ${routerId} not found`);
+        throw new NotFoundException(`Router with ID ${routerId} not found`);
       }
+
+      const updatedRouter = await this.prisma.routers.update({
+        where: { routerId },
+        data: {
+          name: updateRouterDto.name,
+          notes: updateRouterDto.notes,
+        },
+      });
+
+      return updatedRouter;
+    } catch (error) {
+      this.logger.error(
+        `Error updating sim with routerId: ${routerId}. DTO: ${JSON.stringify(
+          updateRouterDto,
+        )}`,
+        error instanceof Error ? error.stack : 'unknown error',
+      );
+      throw new InternalServerErrorException('Could not update the sim');
     }
   }
 
-  async removeRouterById(
-    routerId: number,
-    userId: number,
-  ): Promise<void | HttpException> {
-    const isOwned = await this.isRouterOwnedByUser(routerId, userId);
-    if (!isOwned) {
-      throw new HttpException(
-        'Router not found or not owned by user',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
+  async removeRouterById(routerId: number): Promise<void | HttpException> {
     const routerDetails = await this.prisma.routers.findUnique({
       where: { routerId },
       select: { simId: true },
     });
 
     if (!routerDetails) {
-      throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
+      this.logger.error(`Router with ID ${routerId} does not exist.`);
+      throw new NotFoundException('Router not found');
     }
 
     const simDetails = await this.prisma.sims.findUnique({
@@ -280,7 +217,8 @@ export class RoutersService {
     });
 
     if (!simDetails) {
-      throw new HttpException('Sim not found', HttpStatus.NOT_FOUND);
+      this.logger.error(`Sim with ID ${routerDetails.simId} does not exist.`);
+      throw new NotFoundException('Sim not found');
     }
 
     try {
@@ -297,18 +235,9 @@ export class RoutersService {
       await this.prisma.routers.delete({
         where: { routerId },
       });
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+    } catch (error) {
+      this.logger.error('Error deleting router:', error);
+      throw new InternalServerErrorException('Could not delete router');
     }
   }
 }

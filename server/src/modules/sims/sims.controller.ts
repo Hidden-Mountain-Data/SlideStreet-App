@@ -4,7 +4,7 @@ import {
   Delete,
   Get,
   HttpException,
-  HttpStatus,
+  Logger,
   Param,
   ParseIntPipe,
   Patch,
@@ -28,6 +28,8 @@ import { SimsService } from './sims.service';
 @Controller('sims')
 @UseGuards(JwtAuthGuard, SessionUserGuard)
 export class SimsController {
+  private readonly logger = new Logger(SimsController.name);
+
   constructor(
     private readonly simsService: SimsService,
     private readonly httpHelper: HttpHelpers,
@@ -39,17 +41,12 @@ export class SimsController {
     @Req() req: Request,
     @Body() createSimDto: CreateSimDto,
   ): Promise<Sim | HttpException> {
-    console.log('Inside addSim. If you see this, the endpoint is hit.');
     const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
     try {
-      const newSim = await this.simsService.addSimToAccount(
-        createSimDto,
-        userId,
-      );
-
-      return newSim;
+      return await this.simsService.addSimToAccount(createSimDto, userId);
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error(`Error adding new sim to user: ${userId}`, error);
+      throw error;
     }
   }
 
@@ -66,8 +63,11 @@ export class SimsController {
 
       return this.simsService.connectSimToRouter(simId, routerId);
     } catch (error) {
-      console.log('Error in connectToRouter:', error);
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error(
+        `Error connectiong sim: ${simId} to router: ${routerId}`,
+        error,
+      );
+      throw error;
     }
   }
 
@@ -78,7 +78,8 @@ export class SimsController {
 
       return await this.simsService.findAllSimsByUserId(userId);
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error(`Error fetching sims for user: `, error);
+      throw error;
     }
   }
 
@@ -87,22 +88,14 @@ export class SimsController {
     @Req() req: Request,
     @Param('simId', new ParseIntPipe()) simId: number,
   ): Promise<Router | HttpException> {
-    console.log('simId:', simId, 'req:', req);
-    const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
-    await this.ownershipHelpers.ensureRouterOwnership(simId, userId);
-
     try {
-      const routerBySimId = await this.httpHelper.executeSafely(
-        () => this.simsService.findRouterInfoBySimId(simId),
-        'Error fetching router with location using that simId',
-      );
+      const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
+      await this.ownershipHelpers.ensureSimOwnership(simId, userId);
 
-      return routerBySimId;
+      return await this.simsService.findRouterInfoBySimId(simId);
     } catch (error) {
-      throw new HttpException(
-        `Failed to find router with location for simId ${simId}: ${error}`,
-        HttpStatus.NOT_FOUND,
-      );
+      this.logger.error(`Error fetching router for sim: ${simId}`, error);
+      throw error;
     }
   }
 
@@ -111,17 +104,14 @@ export class SimsController {
     @Req() req: Request,
     @Param('simId', new ParseIntPipe()) simId: number,
   ): Promise<Sim | HttpException> {
-    console.log('simId:', simId, 'req:', req);
     try {
       const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
       await this.ownershipHelpers.ensureSimOwnership(simId, userId);
 
       return this.simsService.findSimInfoBySimId(simId);
     } catch (error) {
-      throw new HttpException(
-        `Failed to find router with location for simId ${simId}: ${error}`,
-        HttpStatus.NOT_FOUND,
-      );
+      this.logger.error(`Error finding sim info for sim: ${simId}`, error);
+      throw error;
     }
   }
 
@@ -131,23 +121,10 @@ export class SimsController {
     @Body() updateSimDto: UpdateSimDto,
   ): Promise<Sim | HttpException> {
     try {
-      const updatedSim = await this.simsService.updateSimById(
-        simId,
-        updateSimDto,
-      );
-      return updatedSim;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      return await this.simsService.updateSimById(simId, updateSimDto);
+    } catch (error) {
+      this.logger.error(`Error updating sim for simId: ${simId}`, error);
+      throw error;
     }
   }
 
@@ -157,10 +134,13 @@ export class SimsController {
     @Param('simId', new ParseIntPipe()) simId: number,
   ): Promise<void | HttpException> {
     const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
+
     await this.ownershipHelpers.ensureSimOwnership(simId, userId);
-    await this.httpHelper.executeSafely(
-      () => this.simsService.removeSimById(simId, userId),
-      'Error removing router',
-    );
+    try {
+      await this.simsService.removeSimById(simId);
+    } catch (error) {
+      this.logger.error(`Error removing simId: ${simId}`, error);
+      throw error;
+    }
   }
 }

@@ -4,7 +4,7 @@ import {
   Delete,
   Get,
   HttpException,
-  HttpStatus,
+  Logger,
   Param,
   ParseIntPipe,
   Patch,
@@ -27,6 +27,8 @@ import { RoutersService } from '../services/routers.service';
 @Controller('routers')
 @UseGuards(JwtAuthGuard, SessionUserGuard)
 export class RoutersController {
+  private readonly logger = new Logger(RoutersController.name);
+
   constructor(
     private readonly routersService: RoutersService,
     private readonly httpHelper: HttpHelpers,
@@ -38,66 +40,73 @@ export class RoutersController {
     @Req() req: Request,
     @Body() createRouterDto: CreateRouterDto,
   ): Promise<Router | HttpException> {
-    console.log('Inside addRouter. If you see this, the endpoint is hit.');
     const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
     try {
-      const newRouter = await this.routersService.addRouterToAccount(
+      return await this.routersService.addRouterToAccount(
         createRouterDto,
         userId,
       );
-
-      return newRouter;
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error(`Error adding router for user: ${userId}`, error);
+      throw error;
     }
   }
 
   @Get()
   public async findAllRouters(): Promise<Routers[] | HttpException> {
-    return this.httpHelper.executeSafely(
-      () => this.routersService.findAllRouters({}),
-      'Error fetching all routers',
-    );
+    try {
+      return await this.routersService.findAllRouters({});
+    } catch (error) {
+      this.logger.error(`Error fetching all routers`, error);
+      throw error;
+    }
   }
 
   @Get(':userId')
   async findAllRoutersByUserId(
     @Req() req: Request,
   ): Promise<Routers[] | HttpException> {
+    const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
     try {
-      const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
-
-      return this.routersService.findAllRoutersByUserId(userId);
+      return await this.routersService.findAllRoutersByUserId(userId);
     } catch (error) {
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error(`Error fetching routers by user: ${userId}`, error);
+      throw error;
     }
   }
 
-  @Get('location/:routerId')
+  @Get('router-details/:routerId')
   public async findRouterDetails(
     @Req() req: Request,
     @Param('routerId', new ParseIntPipe()) routerId: number,
-  ): Promise<Routers | HttpException> {
+  ): Promise<Router | HttpException> {
     try {
       const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
       await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
+
       return await this.httpHelper.executeSafely(
         () => this.routersService.findOneRouterDetails(routerId),
         'Error fetching router with location',
       );
     } catch (error) {
-      throw new HttpException(
-        `Failed to find location on router with id: ${routerId}: ${error}`,
-        HttpStatus.NOT_FOUND,
-      );
+      this.logger.error(`Error finding details for router: ${routerId}`, error);
+      throw error;
     }
   }
 
   @Get('sim/:routerId')
   public async findSimsByRouterId(
+    @Req() req: Request,
     @Param('routerId', new ParseIntPipe()) routerId: number,
   ): Promise<Sim> {
-    return this.routersService.findSimByRouterId(routerId);
+    const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
+    try {
+      await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
+      return await this.routersService.findSimByRouterId(routerId);
+    } catch (error) {
+      this.logger.error(`Error fetching sim by router: ${routerId}`, error);
+      throw error;
+    }
   }
 
   @Patch(':routerId')
@@ -105,13 +114,15 @@ export class RoutersController {
     @Req() req: Request,
     @Param('routerId', new ParseIntPipe()) routerId: number,
     @Body() updateRouterDto: UpdateRouterDto,
-  ): Promise<Routers | HttpException> {
+  ): Promise<Router | HttpException> {
     const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
-    await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
-    return this.httpHelper.executeSafely(
-      () => this.routersService.updateRouter(routerId, updateRouterDto),
-      'Error updating router',
-    );
+    try {
+      await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
+      return await this.routersService.updateRouter(routerId, updateRouterDto);
+    } catch (error) {
+      this.logger.error(`Error updating router: ${routerId}`, error);
+      throw error;
+    }
   }
 
   @Delete(':routerId')
@@ -120,10 +131,12 @@ export class RoutersController {
     @Param('routerId', new ParseIntPipe()) routerId: number,
   ): Promise<void> {
     const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
-    await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
-    await this.httpHelper.executeSafely(
-      () => this.routersService.removeRouterById(routerId, userId),
-      'Error removing router',
-    );
+    try {
+      await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
+      await this.routersService.removeRouterById(routerId);
+    } catch (error) {
+      this.logger.error(`Error removing router: ${routerId}`, error);
+      throw error;
+    }
   }
 }

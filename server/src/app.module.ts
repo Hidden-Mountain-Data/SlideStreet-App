@@ -1,4 +1,5 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
@@ -11,6 +12,7 @@ import { DatesModule } from './modules/dates/dates.module';
 import { RoutersModule } from './modules/routers/routers.module';
 import { SimsModule } from './modules/sims/sims.module';
 import { UsersModule } from './modules/users/users.module';
+import { VerizonModule } from './modules/verizon/verizon.module';
 import { FileService } from './services/file.service';
 import { PrismaService } from './services/prisma.service';
 import { SessionService } from './session/session.service';
@@ -18,12 +20,14 @@ import { SessionService } from './session/session.service';
 @Module({
   imports: [
     AuthModule,
+    ConfigModule.forRoot(),
     UsersModule,
     ScheduleModule.forRoot(),
     RoutersModule,
     DatesModule,
     DataUsageModule,
     SimsModule,
+    VerizonModule,
   ],
   controllers: [AppController],
   providers: [

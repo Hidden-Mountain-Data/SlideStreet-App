@@ -1,11 +1,11 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { DeviceManagerProxyService } from './services/proxy-device-manager.service';
-import { InConnectProxyService } from './services/proxy-in-connect.service';
+import { ProxyDeviceManagerService } from './services/proxy-device-manager.service';
+import { ProxyInConnectService } from './services/proxy-in-connect.service';
 
 @Module({
   imports: [HttpModule],
-  providers: [InConnectProxyService, DeviceManagerProxyService],
-  exports: [InConnectProxyService, DeviceManagerProxyService],
+  providers: [ProxyInConnectService, ProxyDeviceManagerService],
+  exports: [ProxyInConnectService, ProxyDeviceManagerService],
 })
 export class ProxyModule {}

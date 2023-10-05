@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
-export class InConnectProxyService {
+export class ProxyInConnectService {
   private readonly inConnectUrl: string = 'https://ics.inhandnetworks.com/v1';
 
   constructor(private readonly httpService: HttpService) {}

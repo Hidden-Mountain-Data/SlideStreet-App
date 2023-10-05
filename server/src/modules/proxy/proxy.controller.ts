@@ -1,19 +1,19 @@
 import { All, Controller, Logger, Req } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { Request } from 'express';
-import { DeviceManagerProxyService } from './services/proxy-device-manager.service';
-import { InConnectProxyService } from './services/proxy-in-connect.service';
+import { ProxyDeviceManagerService } from './services/proxy-device-manager.service';
+import { ProxyInConnectService } from './services/proxy-in-connect.service';
 
 @Controller('proxy')
 export class ProxyController {
   private readonly logger = new Logger(ProxyController.name);
 
   constructor(
-    private readonly inConnectService: InConnectProxyService,
-    private readonly deviceManagerService: DeviceManagerProxyService,
+    private readonly inConnectService: ProxyInConnectService,
+    private readonly deviceManagerService: ProxyDeviceManagerService,
   ) {}
 
-  @All('inconnect/*')
+  @All('in-connect/*')
   async handleInConnect(@Req() req: Request): Promise<AxiosResponse> {
     try {
       const method = req.method.toLowerCase();
@@ -28,7 +28,7 @@ export class ProxyController {
     }
   }
 
-  @All('devicemanager/*')
+  @All('device-manager/*')
   async handleDeviceManager(@Req() req: Request): Promise<AxiosResponse> {
     try {
       const method = req.method.toLowerCase();

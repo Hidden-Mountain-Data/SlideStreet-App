@@ -1,11 +1,11 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common'; // Added Logger for logging
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'; // Added Logger for logging
 import { AxiosError } from 'axios';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
-export class DeviceManagerProxyService {
-  private readonly logger = new Logger(DeviceManagerProxyService.name);
+export class ProxyDeviceManagerService implements OnModuleInit {
+  private readonly logger = new Logger(ProxyDeviceManagerService.name);
 
   private readonly deviceManagerUrl: string = 'https://iot.inhandnetworks.com';
 
@@ -16,7 +16,12 @@ export class DeviceManagerProxyService {
     this.initializeTokens();
   }
 
+  async onModuleInit() {
+    await this.initializeTokens();
+  }
+
   private async initializeTokens() {
+    this.logger.debug('initializeTokens called.');
     try {
       const tokenEndpoint = `${this.deviceManagerUrl}/oauth2/access_token`;
 
@@ -24,7 +29,7 @@ export class DeviceManagerProxyService {
         .post(tokenEndpoint, null, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            // 'Authorization': `Bearer ${this.accessToken}`,
+            Authorization: `Bearer ${this.accessToken}`,
           },
           params: {
             grant_type: 'refresh_token',
@@ -47,24 +52,49 @@ export class DeviceManagerProxyService {
   }
 
   async proxyRequest(method: string, url: string, data?: any) {
+    this.logger.debug('proxyRequest called.');
     try {
-      const response$ = this.httpService.request({
+      const decodedData = {
+        ...data,
+        username: decodeURIComponent(data.username),
+      };
+      this.logger.debug('decodedData: ' + JSON.stringify(decodedData));
+      const queryString = new URLSearchParams(decodedData).toString();
+
+      this.logger.debug('queryString: ' + queryString); // ! THIS LOGS clarence@cannon.cloud
+
+      const requestConfig = {
         method,
         headers: {
-          Authorization: `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        url: `${this.deviceManagerUrl}${url}`,
-        data,
-      });
+        url: `${this.deviceManagerUrl}${url}?${queryString}`,
+      };
 
+      this.logger.debug('requestConfig: ' + JSON.stringify(requestConfig)); // ! THIS LOGS: clarence%40cannon.cloud
+
+      const response$ = this.httpService.request(requestConfig);
       return await firstValueFrom(response$);
     } catch (error) {
       const axiosError = error as AxiosError;
+
+      if (axiosError?.response) {
+        this.logger.error('Error Response from External Service:', {
+          status: axiosError.response.status,
+          statusText: axiosError.response.statusText,
+          data: axiosError.response.data,
+        });
+      } else {
+        const errorMessage = (error as Error).message;
+        this.logger.error('Error:', errorMessage);
+      }
+
       if (axiosError?.response?.status === 401) {
         await this.refreshAccessToken();
         return this.proxyRequest(method, url, data);
       }
-      this.logger.error('Failed to proxy request to Device Manager', error);
+
+      this.logger.error('Failed to proxy request to Device Manager');
       throw error;
     }
   }

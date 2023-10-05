@@ -4,8 +4,9 @@ import {
   Delete,
   Get,
   HttpException,
-  HttpStatus,
+  Logger,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Req,
@@ -13,188 +14,129 @@ import {
 } from '@nestjs/common';
 import { Routers } from '@prisma/client';
 import { Request } from 'express';
-import { SessionService } from '../../../session/session.service';
+import { SessionUserGuard } from '../../../guards/session-user.guard';
+import { HttpHelpers } from '../../../helpers/http-helpers';
+import { OwnershipHelpers } from '../../../helpers/ownership-helpers';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { Sim } from '../../sims/entities/sim.entity';
 import { CreateRouterDto } from '../dto/create-router.dto';
 import { UpdateRouterDto } from '../dto/update-router.dto';
 import { Router } from '../entities/router.entity';
 import { RoutersService } from '../services/routers.service';
 
 @Controller('routers')
+@UseGuards(JwtAuthGuard, SessionUserGuard)
 export class RoutersController {
+  private readonly logger = new Logger(RoutersController.name);
+
   constructor(
     private readonly routersService: RoutersService,
-    private readonly sessionService: SessionService,
+    private readonly httpHelper: HttpHelpers,
+    private readonly ownershipHelpers: OwnershipHelpers,
   ) {}
 
-  private throwIfUnauthorized(userId: number | undefined): void {
-    if (!userId) {
-      throw new HttpException(
-        'User ID not found in session',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-  }
-
-  private getUserId(req: Request): number | undefined {
-    const userId = this.sessionService.getUserIdFromSession(req);
-    this.throwIfUnauthorized(userId);
-    return userId;
-  }
-
-  private async ensureRouterOwnership(
-    routerId: number,
-    userId: number,
-  ): Promise<void> {
-    if (!(await this.routersService.isRouterOwnedByUser(routerId, userId))) {
-      throw new HttpException(
-        'This router is not accessible to current account',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-  }
-
-  @Post()
-  @UseGuards(JwtAuthGuard)
+  @Post(':userId')
   public async addRouter(
     @Req() req: Request,
     @Body() createRouterDto: CreateRouterDto,
   ): Promise<Router | HttpException> {
-    const userId = this.getUserId(req);
-    createRouterDto.userId = userId;
-    const result = this.routersService.addRouterToAccount(createRouterDto);
-
-    return result;
+    const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
+    try {
+      return await this.routersService.addRouterToAccount(
+        createRouterDto,
+        userId,
+      );
+    } catch (error) {
+      this.logger.error(`Error adding router for user: ${userId}`, error);
+      throw error;
+    }
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
-  public async findAllRouters(): Promise<Routers[]> {
+  public async findAllRouters(): Promise<Routers[] | HttpException> {
     try {
-      const routers = await this.routersService.findAllRouters({});
-      if (Array.isArray(routers)) {
-        return routers;
-      } else {
-        throw new Error('Unexpected response type');
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      return await this.routersService.findAllRouters({});
+    } catch (error) {
+      this.logger.error(`Error fetching all routers`, error);
+      throw error;
     }
   }
 
   @Get(':userId')
-  @UseGuards(JwtAuthGuard)
   async findAllRoutersByUserId(
     @Req() req: Request,
-    @Param('userId') paramUserId: number,
-  ): Promise<Routers[]> {
-    const userId = this.getUserId(req);
-    if (userId !== Number(paramUserId)) {
-      throw new HttpException(
-        'You can only see your own routers',
-        HttpStatus.FORBIDDEN,
-      );
+  ): Promise<Routers[] | HttpException> {
+    const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
+    try {
+      return await this.routersService.findAllRoutersByUserId(userId);
+    } catch (error) {
+      this.logger.error(`Error fetching routers by user: ${userId}`, error);
+      throw error;
     }
-    return this.routersService.findAllRoutersByUserId(userId);
   }
 
-  @Get('location/:routerId')
-  @UseGuards(JwtAuthGuard)
-  public async findRouterWithLocation(
+  @Get('router-details/:routerId')
+  public async findRouterDetails(
     @Req() req: Request,
-    @Param('routerId') rawRouterId: string,
-  ): Promise<Routers | HttpException> {
-    const userId = this.getUserId(req);
-    const routerId = Number(rawRouterId);
-
-    await this.ensureRouterOwnership(routerId, userId);
-
+    @Param('routerId', new ParseIntPipe()) routerId: number,
+  ): Promise<Router | HttpException> {
     try {
-      const router = await this.routersService.findOneRouterWithLocation(
-        routerId,
+      const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
+      await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
+
+      return await this.httpHelper.executeSafely(
+        () => this.routersService.findOneRouterDetails(routerId),
+        'Error fetching router with location',
       );
-      return router;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+    } catch (error) {
+      this.logger.error(`Error finding details for router: ${routerId}`, error);
+      throw error;
+    }
+  }
+
+  @Get('sim/:routerId')
+  public async findSimsByRouterId(
+    @Req() req: Request,
+    @Param('routerId', new ParseIntPipe()) routerId: number,
+  ): Promise<Sim> {
+    const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
+    try {
+      await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
+      return await this.routersService.findSimByRouterId(routerId);
+    } catch (error) {
+      this.logger.error(`Error fetching sim by router: ${routerId}`, error);
+      throw error;
     }
   }
 
   @Patch(':routerId')
-  @UseGuards(JwtAuthGuard)
   async updateRouter(
     @Req() req: Request,
-    @Param('routerId') rawRouterId: string,
+    @Param('routerId', new ParseIntPipe()) routerId: number,
     @Body() updateRouterDto: UpdateRouterDto,
-  ): Promise<Routers | HttpException> {
-    const userId = this.getUserId(req);
-    const routerId = Number(rawRouterId);
-
-    await this.ensureRouterOwnership(routerId, userId);
-
-    if (!(await this.routersService.isRouterOwnedByUser(routerId, userId))) {
-      throw new HttpException(
-        'You are not authorized to update this router',
-        HttpStatus.FORBIDDEN,
-      );
-    }
-
+  ): Promise<Router | HttpException> {
+    const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
     try {
-      const result = await this.routersService.updateRouter(
-        routerId,
-        updateRouterDto,
-      );
-      return result;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      } else {
-        throw new HttpException(
-          'An unknown error occurred',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+      await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
+      return await this.routersService.updateRouter(routerId, updateRouterDto);
+    } catch (error) {
+      this.logger.error(`Error updating router: ${routerId}`, error);
+      throw error;
     }
   }
 
   @Delete(':routerId')
-  @UseGuards(JwtAuthGuard)
   public async removeRouter(
     @Req() req: Request,
-    @Param('routerId') rawRouterId: string,
+    @Param('routerId', new ParseIntPipe()) routerId: number,
   ): Promise<void> {
-    const userId = this.getUserId(req);
-    const routerId = Number(rawRouterId);
-
-    await this.ensureRouterOwnership(routerId, userId);
-
-    const routerExists = await this.routersService.findOneRouter(routerId);
-    if (!routerExists) {
-      throw new HttpException('Router not found', HttpStatus.NOT_FOUND);
+    const userId = this.httpHelper.getUserIdAndThrowIfUnauthorized(req);
+    try {
+      await this.ownershipHelpers.ensureRouterOwnership(routerId, userId);
+      await this.routersService.removeRouterById(routerId);
+    } catch (error) {
+      this.logger.error(`Error removing router: ${routerId}`, error);
+      throw error;
     }
-
-    await this.routersService.removeRouter(routerId, userId);
   }
 }

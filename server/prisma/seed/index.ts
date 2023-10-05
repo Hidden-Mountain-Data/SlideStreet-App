@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import { seedDataUsages } from './dataUsage';
 import { seedDates } from './dates';
 import { seedRouters } from './routers';
+import { seedSims } from './sims';
 import { seedUsers } from './users';
-import { seedDataUsages } from './dataUsage';
 
 const prisma = new PrismaClient();
 
@@ -15,25 +16,34 @@ async function main(): Promise<void> {
     if (userSeedResult) {
       const { userId } = userSeedResult;
       await seedDates();
+
+      // * This will also seed a Sim linked to a router
       await seedRouters(userId);
+
       await seedDataUsages(userId);
+
+      // * Seed a Sim that's not linked to any router
+      await seedSims(userId);
     } else {
-      console.error('User seeding returned null, skipping further seeding.');
+      console.error(
+        '\x1b[31m%s\x1b[0m',
+        'User seeding returned null, skipping further seeding.',
+      );
       everythingSeeded = false;
     }
 
     if (everythingSeeded) {
-      console.log('Everything seeded successfully!');
+      console.log('\x1b[36m%s\x1b[0m', 'Everything seeded successfully!');
     }
   } catch (error) {
-    console.error('Something went wrong:', error);
+    console.error('\x1b[31m%s\x1b[0m', 'Something went wrong:', error);
   }
 }
 
 main()
   .then(() => prisma.$disconnect())
   .catch((e) => {
-    console.error('Seeding failed:', e);
+    console.error('\x1b[31m%s\x1b[0m', 'Seeding failed:', e);
     prisma.$disconnect();
     process.exit(1);
   });

@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DataUsageModule } from './modules/data-usage/data-usage.module';
 import { DatesModule } from './modules/dates/dates.module';
 import { RoutersModule } from './modules/routers/routers.module';
+import { SimsModule } from './modules/sims/sims.module';
 import { UsersModule } from './modules/users/users.module';
 import { FileService } from './services/file.service';
 import { PrismaService } from './services/prisma.service';
@@ -22,6 +23,7 @@ import { SessionService } from './session/session.service';
     RoutersModule,
     DatesModule,
     DataUsageModule,
+    SimsModule,
   ],
   controllers: [AppController],
   providers: [

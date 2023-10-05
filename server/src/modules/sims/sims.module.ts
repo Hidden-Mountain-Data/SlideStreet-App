@@ -5,27 +5,24 @@ import { OwnershipHelpers } from '../../helpers/ownership-helpers';
 import { PrismaService } from '../../services/prisma.service';
 import { SessionService } from '../../session/session.service';
 import { RoutersModule } from '../routers/routers.module';
-import { SimsModule } from '../sims/sims.module';
 import { UserProvider } from '../users/user.provider';
 import { UsersModule } from '../users/users.module';
-import { DataUsageController } from './data-usage.controller';
-import { DataUsageService } from './data-usage.service';
+import { SimsController } from './sims.controller';
+import { SimsService } from './sims.service';
 
 @Module({
-  imports: [
-    UsersModule,
-    forwardRef(() => RoutersModule),
-    forwardRef(() => SimsModule),
-  ],
-  controllers: [DataUsageController],
+  imports: [UsersModule, forwardRef(() => RoutersModule)],
+  controllers: [SimsController],
   providers: [
-    DataUsageService,
+    SimsService,
+    PrismaService,
+    UserProvider,
+    SessionUserGuard,
+    SessionService,
+    SessionService,
     HttpHelpers,
     OwnershipHelpers,
-    PrismaService,
-    SessionService,
-    SessionUserGuard,
-    UserProvider,
   ],
+  exports: [SimsService],
 })
-export class DataUsageModule {}
+export class SimsModule {}

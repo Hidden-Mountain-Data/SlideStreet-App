@@ -1,27 +1,14 @@
 import { Optional } from '@nestjs/common';
-import {
-  IsAlphanumeric,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-} from 'class-validator';
-
-export class CreateSimDto {
-  @IsNotEmpty()
-  @IsString()
-  iccid: string;
-}
+import { IsAlphanumeric, IsNotEmpty } from 'class-validator';
 
 export class CreateRouterDto {
-  @IsNotEmpty()
-  @IsNumber()
-  userId: number;
-
   @IsNotEmpty()
   @IsAlphanumeric()
   imei: string;
 
-  sims: CreateSimDto;
+  // @ValidateNested({ each: true })
+  // @Type(() => CreateSimDto)
+  // sims: CreateSimDto;
 
   @Optional()
   name: string;

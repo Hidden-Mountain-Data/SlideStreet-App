@@ -1,30 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { RouterLocations } from '@prisma/client';
 import { PrismaService } from '../../../services/prisma.service';
-import { RouterLocation } from '../../../types/router-types';
 import { RouterLocationDto } from '../dto/create-router-location.dto';
 import { UpdateRouterLocationDto } from '../dto/update-router-location.dto';
+import { RouterLocation } from './../../../types/router-types.d';
 
 @Injectable()
 export class RouterLocationsService {
+  private readonly logger = new Logger(RouterLocationsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
-  async saveRouterLocation(
+  async saveInitialRouterLocation(
     routerId: number,
-    dto: RouterLocationDto,
+    routerLocationDto: RouterLocationDto,
   ): Promise<RouterLocation> {
+    // TODO: Figure out if we need to soft delate locations and save for any time or how to properly implement this. Currently, this function will only work on initial location, if any updates are needed, hit updateRouterLocationByRouterId
     try {
-      console.log(typeof routerId);
-      if (typeof routerId !== 'number') {
-        throw new Error('routerId should be a number');
-      }
-      const { longitude, latitude, dateTime } = dto;
+      const { longitude, latitude, dateTime } = routerLocationDto;
       const routerExists = await this.prisma.routers.findUnique({
         where: { routerId },
       });
+
       if (!routerExists) {
-        throw new Error(`Router with ID ${routerId} does not exist.`);
+        this.logger.error(`Router with ID ${routerId} does not exist.`);
+        throw new HttpException(
+          `Router with ID ${routerId} does not exist.`,
+          HttpStatus.NOT_FOUND,
+        );
       }
-      return await this.prisma.routerLocations.create({
+
+      return this.prisma.routerLocations.create({
         data: {
           routerId,
           longitude,
@@ -33,24 +46,30 @@ export class RouterLocationsService {
         },
       });
     } catch (error) {
-      console.error('Error saving new location:', error);
-      throw new Error('Could not save location');
+      this.logger.error('Error saving new location:', error);
+      throw new InternalServerErrorException('Could not save location');
     }
   }
 
-  // TODO: find a better way to do this
-  // async findAllRouterLocations(userId: number): Promise<RouterLocation[]> {
-  //   try {
-  //     const locations = await this.prisma.routerLocations.findMany({
-  //       where: { userId },
-  //     });
+  async getAllLocationsByUserId(userId: number): Promise<RouterLocations[]> {
+    try {
+      const locations = await this.prisma.routerLocations.findMany({
+        where: { router: { userId } },
+        include: { router: true },
+      });
 
-  //     return locations.map((loc) => loc as unknown as RouterLocation);
-  //   } catch (error) {
-  //     console.error('Error finding all locations:', error);
-  //     throw new Error('Could not find locations');
-  //   }
-  // }
+      if (!locations || locations.length === 0) {
+        throw new NotFoundException(`No locations found for userId ${userId}`);
+      }
+
+      return locations;
+    } catch (error) {
+      this.logger.error('Error deleting all locations for routerId:', error);
+      throw new InternalServerErrorException(
+        'Error deleting all locations for routerId',
+      );
+    }
+  }
 
   async findOneRouterLocation(
     routerId: number,
@@ -59,16 +78,29 @@ export class RouterLocationsService {
       const location = await this.prisma.routerLocations.findFirst({
         where: { routerId },
       });
+
+      if (!location) {
+        this.logger.error(`Router with ID ${routerId} does not exist.`);
+        throw new NotFoundException(
+          `Router with ID ${routerId} does not exist.`,
+        );
+      }
+
       return location;
     } catch (error) {
-      console.error('Error finding one location:', error);
-      throw new Error('Could not find location');
+      this.logger.error(
+        `Error deleting all locations for routerId: ${routerId}`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        'Error deleting all locations for routerId',
+      );
     }
   }
 
   async updateRouterLocationByRouterId(
     routerId: number,
-    dto: UpdateRouterLocationDto,
+    updateRouterLocationDto: UpdateRouterLocationDto,
   ): Promise<RouterLocation> {
     try {
       const location = await this.prisma.routerLocations.findFirst({
@@ -76,16 +108,71 @@ export class RouterLocationsService {
       });
 
       if (!location) {
-        throw new Error(`No location found for routerId ${routerId}`);
+        this.logger.error(
+          `Router Location with routerId ${routerId} does not exist.`,
+        );
+        throw new NotFoundException(
+          `Router Location with routerId ${routerId} does not exist.`,
+        );
       }
 
       return await this.prisma.routerLocations.update({
         where: { locationId: location.locationId },
-        data: dto,
+        data: updateRouterLocationDto,
       });
     } catch (error) {
-      console.error('Error updating location by routerId:', error);
-      throw new Error('Could not update location by routerId');
+      this.logger.error(
+        `Error deleting all locations for routerId: ${routerId}`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        'Error deleting all locations for routerId',
+      );
+    }
+  }
+
+  async deleteRouterLocationByLocationId(locationId: number): Promise<void> {
+    try {
+      const location = await this.prisma.routerLocations.findUnique({
+        where: { locationId },
+      });
+
+      if (!location) {
+        this.logger.error(
+          `Router Location with locationId ${locationId} does not exist.`,
+        );
+        throw new NotFoundException(
+          `Router Location with locationId ${locationId} does not exist.`,
+        );
+      }
+
+      await this.prisma.routerLocations.delete({
+        where: { locationId: location.locationId },
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error deleting all locations for locationId: ${locationId}`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        'Error deleting all locations for routerId',
+      );
+    }
+  }
+
+  async deleteAllLocationsByRouterId(routerId: number): Promise<void> {
+    try {
+      await this.prisma.routerLocations.deleteMany({
+        where: { routerId },
+      });
+    } catch (error) {
+      this.logger.error(
+        `Error deleting all locations for routerId: ${routerId}`,
+        error,
+      );
+      throw new InternalServerErrorException(
+        `Error deleting all locations for routerId`,
+      );
     }
   }
 }

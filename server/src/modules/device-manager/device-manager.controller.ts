@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Post } from '@nestjs/common';
 import { ProxyDeviceManagerService } from '../proxy/services/proxy-device-manager.service';
 
 @Controller('device-manager')
@@ -36,21 +28,13 @@ export class DeviceManagerController {
   }
 
   @Post('access-token')
-  async getAccessToken(@Body() body: any) {
-    this.logger.log('getAccessToken called with body:', body);
+  async getAccessToken(
+    @Body() body: AccessTokenRequest,
+  ): Promise<AccessTokenResponse> {
     const data = {
+      ...body,
       grant_type: 'password',
-      username: body.email,
-      password: body.password,
-      password_type: '1',
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
     };
-
-    this.logger.debug(`username: ${data.username}`);
-    this.logger.debug(`password: ${data.password}`);
-    this.logger.debug(`Client ID: ${data.client_id}`);
-    this.logger.debug(`Client Secret: ${data.client_secret}`);
 
     try {
       return await this.deviceManagerProxyService.proxyRequest(
@@ -86,19 +70,24 @@ export class DeviceManagerController {
   }
 
   @Post('refresh-token')
-  async refreshAccessToken(@Query() query: any) {
-    this.logger.log('getDeviceClients called.');
+  async handleRefreshToken(
+    @Body('refreshToken') refreshToken: string,
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    this.logger.log(
+      'handleRefreshToken called. Refresh token: ' + refreshToken,
+    );
 
     try {
-      const endpoint = `/oauth2/access_token?grant_type=${query.grant_type}&client_id=${query.client_id}&client_secret=${query.client_secret}&refresh_token=${query.refresh_token}`;
-      return await this.deviceManagerProxyService.proxyRequest(
-        'POST',
-        endpoint,
+      return await this.deviceManagerProxyService.requestNewTokenWithRefreshToken(
+        refreshToken,
       );
     } catch (error) {
       const errorMessage = (error as Error).message;
       this.logger.error(
-        `Error refreshAccessToken() in DeviceManagerController: ${errorMessage}`,
+        `Error handleRefreshToken() in DeviceManagerController: ${errorMessage}`,
       );
       throw error;
     }

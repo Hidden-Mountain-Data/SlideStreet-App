@@ -1,47 +1,89 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common'; // Added Logger for logging
-import { AxiosError } from 'axios';
-import { firstValueFrom } from 'rxjs';
+import { Injectable, Logger } from '@nestjs/common';
+import { AxiosError, AxiosRequestConfig } from 'axios';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
-export class ProxyDeviceManagerService implements OnModuleInit {
+export class ProxyDeviceManagerService {
   private readonly logger = new Logger(ProxyDeviceManagerService.name);
 
-  private readonly deviceManagerUrl: string = 'https://iot.inhandnetworks.com';
-
   private accessToken: string;
+  private accessTokenExpiry: number;
   private refreshToken: string;
+  private refreshTokenTimeout: NodeJS.Timeout;
 
-  constructor(private readonly httpService: HttpService) {
-    this.initializeTokens();
+  private clientId: string = process.env.CLIENT_ID;
+  private clientSecret: string = process.env.CLIENT_SECRET;
+
+  private pingInterval: NodeJS.Timeout;
+  private pingDuration: number = 1.5 * 60 * 1000;
+
+  private currentTime = new Date(Date.now()).toLocaleString();
+
+  constructor(private readonly httpService: HttpService) {}
+
+  private startPingInterval(): void {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+    }
+
+    this.pingInterval = setInterval(() => {
+      const tokenRefreshTime = new Date(
+        this.accessTokenExpiry,
+      ).toLocaleString();
+      this.logger.debug(
+        `Ping! Current time is ${new Date(
+          this.currentTime,
+        ).toLocaleString()} and token will be refreshed at: ${tokenRefreshTime}`,
+      );
+    }, this.pingDuration);
   }
 
-  async onModuleInit() {
-    await this.initializeTokens();
-  }
-
-  private async initializeTokens() {
+  private async initializeTokens(): Promise<void> {
     this.logger.debug('initializeTokens called.');
+
+    const tokenEndpoint = `${process.env.IOT_ENDPOINT}/oauth2/access_token`;
+
+    const requestConfig: AxiosRequestConfig = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Bearer ${this.accessToken}`,
+      },
+      url: tokenEndpoint,
+      params: {
+        grant_type: 'refresh_token',
+        client_id: process.env.CLIENT_ID || '',
+        client_secret: process.env.CLIENT_SECRET || '',
+        refresh_token: '836f359621706ba3d914e438d73ed66b',
+      },
+    };
+
     try {
-      const tokenEndpoint = `${this.deviceManagerUrl}/oauth2/access_token`;
-
-      const response = await this.httpService
-        .post(tokenEndpoint, null, {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: `Bearer ${this.accessToken}`,
-          },
-          params: {
-            grant_type: 'refresh_token',
-            client_id: '000017953450251798098136',
-            client_secret: '08E9EC6793345759456CB8BAE52615F3',
-            refresh_token: '836f359621706ba3d914e438d73ed66b',
-          },
-        })
-        .toPromise();
-
+      const response = await lastValueFrom(
+        this.httpService.request(requestConfig),
+      );
       this.accessToken = response.data.access_token;
       this.refreshToken = response.data.refresh_token;
+      const expiresInMilliseconds = response.data.expires_in
+        ? response.data.expires_in * 1000
+        : 15 * 60 * 1000;
+
+      this.accessTokenExpiry = Date.now() + expiresInMilliseconds;
+
+      this.scheduleTokenRefresh();
+      this.startPingInterval();
+
+      this.logger.debug('accessToken in initializeTokens:', this.accessToken);
+      this.logger.debug('refreshToken in initializeTokens:', this.refreshToken);
+      this.logger.debug(
+        'expiresInMilliseconds in initializeTokens:',
+        expiresInMilliseconds,
+      );
+      this.logger.debug(
+        'accessTokenExpiry in initializeTokens:',
+        this.accessTokenExpiry,
+      );
     } catch (error) {
       this.logger.error(
         'Failed to initialize tokens for Device Manager',
@@ -51,30 +93,77 @@ export class ProxyDeviceManagerService implements OnModuleInit {
     }
   }
 
+  private scheduleTokenRefresh(): void {
+    this.logger.debug(
+      'scheduleTokenRefresh called at:',
+      new Date().toLocaleString(),
+    );
+
+    const expiresInMilliseconds = this.accessTokenExpiry - Date.now();
+    const tokenRefreshTime = new Date(this.accessTokenExpiry).toLocaleString();
+
+    this.logger.debug(
+      `Token will be refreshed exactly at: ${tokenRefreshTime}`,
+    );
+
+    if (this.refreshTokenTimeout) {
+      clearTimeout(this.refreshTokenTimeout);
+    }
+
+    const bufferTime = 1 * 60 * 1000;
+
+    this.refreshTokenTimeout = setTimeout(() => {
+      this.refreshAccessToken(this.refreshToken);
+    }, expiresInMilliseconds - bufferTime);
+  }
+
+  private async ensureTokenIsValid(): Promise<void> {
+    if (
+      !this.accessToken ||
+      this.accessTokenExpiry - Date.now() < 1 * 60 * 1000
+    ) {
+      await this.initializeTokens();
+    }
+  }
+
   async proxyRequest(method: string, url: string, data?: any) {
-    this.logger.debug('proxyRequest called.');
+    this.logger.debug('proxyRequest for accessToken called at: ', Date.now());
+    await this.ensureTokenIsValid();
+
+    const headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      ...(this.accessToken
+        ? { Authorization: `Bearer ${this.accessToken}` }
+        : {}),
+    };
+    const requestConfig: AxiosRequestConfig = {
+      method,
+      headers,
+    };
+    let params = {};
+
+    if (data) {
+      const { username, password, grant_type: grantType } = data;
+      params = {
+        username,
+        password,
+        grant_type: grantType,
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
+      };
+    }
+
+    const requestUrl = `${process.env.IOT_ENDPOINT}${url}`;
+
+    this.logger.debug('requestUrl: ' + requestUrl);
+    this.logger.debug('params: ' + JSON.stringify(params));
+
     try {
-      const decodedData = {
-        ...data,
-        username: decodeURIComponent(data.username),
-      };
-      this.logger.debug('decodedData: ' + JSON.stringify(decodedData));
-      const queryString = new URLSearchParams(decodedData).toString();
+      const response = await lastValueFrom(
+        this.httpService.request({ ...requestConfig, url: requestUrl, params }),
+      );
 
-      this.logger.debug('queryString: ' + queryString); // ! THIS LOGS clarence@cannon.cloud
-
-      const requestConfig = {
-        method,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        url: `${this.deviceManagerUrl}${url}?${queryString}`,
-      };
-
-      this.logger.debug('requestConfig: ' + JSON.stringify(requestConfig)); // ! THIS LOGS: clarence%40cannon.cloud
-
-      const response$ = this.httpService.request(requestConfig);
-      return await firstValueFrom(response$);
+      return response.data;
     } catch (error) {
       const axiosError = error as AxiosError;
 
@@ -90,7 +179,8 @@ export class ProxyDeviceManagerService implements OnModuleInit {
       }
 
       if (axiosError?.response?.status === 401) {
-        await this.refreshAccessToken();
+        this.logger.debug('in the 401 response');
+        await this.refreshAccessToken(this.refreshToken);
         return this.proxyRequest(method, url, data);
       }
 
@@ -99,29 +189,85 @@ export class ProxyDeviceManagerService implements OnModuleInit {
     }
   }
 
-  async refreshAccessToken() {
+  async refreshAccessToken(refreshToken: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     try {
-      const tokenEndpoint = `${this.deviceManagerUrl}/oauth2/access_token`;
+      this.logger.debug('refreshAccessToken called at:', Date.now());
+      const tokenEndpoint = `${process.env.IOT_ENDPOINT}/oauth2/access_token`;
 
-      const response = await this.httpService
-        .post(tokenEndpoint, null, {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: `Bearer ${this.accessToken}`,
-          },
+      const response = await lastValueFrom(
+        this.httpService.post(tokenEndpoint, null, {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           params: {
             grant_type: 'refresh_token',
-            client_id: '000017953450251798098136',
-            client_secret: '08E9EC6793345759456CB8BAE52615F3',
-            refresh_token: this.refreshToken,
+            client_id: this.clientId,
+            client_secret: this.clientSecret,
+            refresh_token: refreshToken,
           },
-        })
-        .toPromise();
+        }),
+      );
 
       this.accessToken = response.data.access_token;
       this.refreshToken = response.data.refresh_token;
+
+      this.scheduleTokenRefresh();
+
+      clearInterval(this.pingInterval);
+      this.logger.debug('Token has been refreshed, stopping the ping!');
+
+      return {
+        accessToken: this.accessToken,
+        refreshToken: this.refreshToken,
+      };
     } catch (error) {
       this.logger.error('Failed to refresh token for Device Manager', error);
+      throw error;
+    }
+  }
+
+  async requestNewTokenWithRefreshToken(refreshToken: string): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    const tokenEndpoint = `${process.env.IOT_ENDPOINT}/oauth2/access_token`;
+
+    const data = {
+      grant_type: 'refresh_token',
+      client_id: this.clientId,
+      client_secret: this.clientSecret,
+      refresh_token: refreshToken,
+    };
+
+    this.logger.debug(
+      '${process.env.IOT_ENDPOINT} in requestNewTokenWithRefreshToken in service:',
+      process.env.IOT_ENDPOINT,
+    );
+    this.logger.debug(
+      'data in requestNewTokenWithRefreshToken in service:',
+      data,
+    );
+
+    try {
+      const response = await lastValueFrom(
+        this.httpService.post(tokenEndpoint, null, {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          params: data,
+        }),
+      );
+
+      this.accessToken = response.data.access_token;
+      this.refreshToken = response.data.refresh_token;
+
+      this.scheduleTokenRefresh();
+
+      return {
+        accessToken: this.accessToken,
+        refreshToken: this.refreshToken,
+      };
+    } catch (error) {
+      this.logger.error('Failed to get a new token with refresh token', error);
       throw error;
     }
   }

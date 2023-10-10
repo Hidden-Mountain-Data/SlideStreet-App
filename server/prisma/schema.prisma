@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model DataUsages {
+  dataUsageId Int       @id @default(autoincrement()) @map("data_usage_id")
+  dateId      Int       @map("date_id")
+  routerId    Int?      @map("router_id")
+  simId       Int       @map("sim_id")
+  userId      Int       @map("user_id")
+  dataUsage   BigInt    @map("data_usage")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  date        Dates     @relation("DataUsageDate", fields: [dateId], references: [dateId])
+  router      Routers?  @relation("DataUsageRouter", fields: [routerId], references: [routerId])
+  sim         Sims      @relation("DataUsageSim", fields: [simId], references: [simId])
+  user        Users     @relation("DataUsageUser", fields: [userId], references: [userId])
+
+  @@index([dateId])
+  @@index([simId])
+  @@index([userId])
+  @@map("data_usages")
+}
+
+model Dates {
+  dateId           Int          @id @default(autoincrement()) @map("date_id")
+  date             DateTime     @unique
+  day              Int
+  dayOfWeek        Int          @map("day_of_week")
+  dayOfYear        Int          @map("day_of_year")
+  weekOfYear       Int          @map("week_of_year")
+  month            Int
+  quarter          Int
+  year             Int
+  dataUsageEntries DataUsages[] @relation("DataUsageDate")
+
+  @@index([date])
+  @@map("dates")
+}
+
+model Sims {
+  simId            Int          @id @default(autoincrement()) @map("sim_id")
+  userId           Int          @map("user_id")
+  routerId         Int?         @map("router_id")
+  iccid            String       @db.VarChar(50)
+  active           Boolean?
+  ipAddress        String?      @map("ip_address") @db.VarChar(50)
+  status           SimStatus    @default(ACTIVE)
+  embedded         Boolean?     @default(true)
+  notes            String?      @db.VarChar(500)
+  imei             String?      @db.VarChar(50)
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+  deletedAt        DateTime?    @map("deleted_at")
+  dataUsageEntries DataUsages[] @relation("DataUsageSim")
+  router           Routers?     @relation("RouterSims", fields: [routerId], references: [routerId])
+  user             Users        @relation("UserSim", fields: [userId], references: [userId])
+
+  @@index([simId])
+  @@index([userId])
+  @@index([routerId])
+  @@map("sims")
+}
+
+model Routers {
+  routerId         Int              @id @default(autoincrement()) @map("router_id")
+  simId            Int?             @map("sim_id")
+  userId           Int              @map("user_id")
+  name             String?          @db.VarChar(200)
+  notes            String?          @db.VarChar(500)
+  imei             String           @db.VarChar(50)
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  deletedAt        DateTime?        @map("deleted_at")
+  dataUsageEntries DataUsages[]     @relation("DataUsageRouter")
+  routerLocation   RouterLocations?
+  sims             Sims[]           @relation("RouterSims")
+  user             Users            @relation("UserRouter", fields: [userId], references: [userId])
+
+  @@index([userId])
+  @@map("routers")
+}
+
+model Users {
+  userId           Int          @id @default(autoincrement())
+  addressId        String?      @unique @map("address_id") @db.VarChar(50)
+  imageUuid        String?      @map("image_uuid") @db.VarChar(36)
+  stripeCustomerId String?      @map("stripe_customer_id") @db.VarChar(200)
+  email            String       @unique @db.VarChar(100)
+  password         String       @db.VarChar(200)
+  token            String?      @db.VarChar(200)
+  firstName        String?      @map("first_name") @db.VarChar(50)
+  lastName         String?      @map("last_name") @db.VarChar(50)
+  fullName         String?      @map("full_name") @db.VarChar(100)
+  phone            String?      @db.VarChar(20)
+  refreshToken     String?      @map("refresh_token") @db.VarChar(200)
+  apiKey           String?      @map("api_key") @db.VarChar(200)
+  createdAt        DateTime     @default(now()) @map("created_at")
+  deletedAt        DateTime?    @map("deleted_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+  isActive         Boolean      @default(false) @map("is_active")
+  imageUrl         String?      @map("image_url") @db.VarChar(250)
+  role             Roles?       @default(USER)
+  address          Addresses?   @relation("UserAddress")
+  dataUsages       DataUsages[] @relation("DataUsageUser")
+  routers          Routers[]    @relation("UserRouter")
+  sims             Sims[]       @relation("UserSim")
+
+  @@index([email], map: "user_email_key")
+  @@index([addressId], map: "user_address_key")
+  @@map("users")
+}
+
+model RouterLocations {
+  locationId Int       @id @default(autoincrement()) @map("location_id")
+  routerId   Int       @unique @map("router_id")
+  longitude  Float     @map("router_logitude")
+  latitude   Float     @map("router_latitude")
+  dateTime   DateTime
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+  router     Routers   @relation(fields: [routerId], references: [routerId])
+
+  @@index([routerId])
+  @@map("router_locations")
+}
+
+model Addresses {
+  userId       Int       @unique @map("user_id")
+  city         String    @db.VarChar(50)
+  state        String    @db.VarChar(50)
+  zip          Int
+  country      String    @db.VarChar(100)
+  addressId    Int       @id @default(autoincrement()) @map("address_id")
+  addressLine1 String    @map("address_line_1") @db.VarChar(50)
+  addressLine2 String    @map("address_line_2") @db.VarChar(50)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  deletedAt    DateTime? @map("deleted_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  user         Users     @relation("UserAddress", fields: [userId], references: [userId])
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+enum Roles {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum SimStatus {
+  ACTIVE
+  DEACTIVATED
+  SUSPENDED
+  PREACTIVE
+  PENDING
+  UNKNOWN
+}

@@ -12,16 +12,16 @@ void main() {
         useMaterial3: true,
         colorScheme: kColorScheme,
         appBarTheme: const AppBarTheme().copyWith(
-          backgroundColor: Color(0xBBBBBB),
+          backgroundColor: const Color(0x00bbbbbb),
           foregroundColor: kColorScheme.onPrimaryContainer,
         ),
         cardTheme: const CardTheme().copyWith(
-            color: const Color.fromARGB(255, 15, 15, 15),
+            color: const Color.fromARGB(255, 195, 195, 195),
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            shadowColor: const Color.fromARGB(255, 0, 0, 0),
+            shadowColor: const Color.fromARGB(0, 0, 0, 0),
             shape: const RoundedRectangleBorder(
               side: BorderSide(
-                color: Color.fromARGB(255, 70, 70, 70),
+                color: Color.fromARGB(255, 205, 205, 205),
                 width: 2,
               ),
               borderRadius: BorderRadius.all(Radius.circular(15)),
@@ -29,16 +29,15 @@ void main() {
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             side: const BorderSide(
-              color: Color.fromARGB(
-                  255, 70, 70, 70), // Set the desired border color here
+              color: Color.fromARGB(255, 205, 205, 205),
               width: 2,
             ),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(0),
             ),
             minimumSize: const Size(double.infinity, 70),
-            backgroundColor: const Color.fromARGB(255, 21, 21, 24),
-            foregroundColor: Colors.white,
+            backgroundColor: const Color.fromARGB(255, 192, 192, 192),
+            foregroundColor: const Color.fromARGB(255, 0, 0, 0),
           ),
         ),
         textTheme: ThemeData().textTheme.copyWith(

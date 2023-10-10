@@ -1,4 +1,5 @@
 import 'package:client/pages/sign_up.dart';
+import 'package:client/pages/usage_page.dart';
 import 'package:flutter/material.dart';
 
 final emailController = TextEditingController();
@@ -13,7 +14,6 @@ class LoginPage extends StatefulWidget {
 class LoginPageState extends State<LoginPage> {
   @override
   void dispose() {
-    // Clean up the controller when the widget is disposed.
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -23,32 +23,30 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Material(
       child: Scaffold(
-        backgroundColor: Color.fromARGB(255, 187, 187, 187),
+        backgroundColor: const Color.fromARGB(255, 187, 187, 187),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           leading: null,
           toolbarHeight: 75,
           centerTitle: true,
-          title: Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/Original.png',
-                  height: 60,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/Original.png',
+                height: 60,
+              ),
+              const Text(
+                "Sign In",
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w900,
+                  color: Color.fromARGB(255, 0, 0, 0),
                 ),
-                const Text(
-                  "Sign In",
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w900,
-                    color: Color.fromARGB(255, 0, 0, 0),
-                  ),
-                ),
-                const SizedBox(width: 65),
-              ],
-            ),
+              ),
+              const SizedBox(width: 65),
+            ],
           ),
         ),
         body: Container(
@@ -68,11 +66,11 @@ class LoginPageState extends State<LoginPage> {
               children: <Widget>[
                 const SizedBox(height: 40),
                 Align(
-                  alignment: Alignment.centerLeft, // Align to the left
+                  alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {},
                     child: const Text(
-                      "Welcome!",
+                      "Welcome back!",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
@@ -83,7 +81,7 @@ class LoginPageState extends State<LoginPage> {
                 ),
                 const SizedBox(height: 20),
                 Align(
-                  alignment: Alignment.centerLeft, // Align to the left
+                  alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {},
                     child: const Text(
@@ -102,7 +100,7 @@ class LoginPageState extends State<LoginPage> {
                 const PasswordField(),
                 const SizedBox(height: 20),
                 Align(
-                  alignment: Alignment.centerLeft, // Align to the left
+                  alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {
                       Navigator.push(
@@ -112,7 +110,7 @@ class LoginPageState extends State<LoginPage> {
                       );
                     },
                     child: const Text(
-                      "Already have an account? Sign in!",
+                      "Don't have an account? Sign up!",
                       style: TextStyle(
                         fontSize: 20,
                         color: Color.fromARGB(255, 127, 126, 128),
@@ -124,7 +122,13 @@ class LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 45),
                 ElevatedButton(
                   style: raisedButtonStyle,
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const UsagePage()),
+                    );
+                  },
                   child: const Text('Login',
                       style: TextStyle(
                           fontSize: 20,
@@ -161,7 +165,7 @@ class UsernameField extends StatelessWidget {
           decoration: const InputDecoration(
             border: InputBorder.none,
             filled: true,
-            fillColor: const Color.fromARGB(255, 225, 225, 225),
+            fillColor: Color.fromARGB(255, 225, 225, 225),
             labelText: 'Email',
             hintStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
             hintText: 'Enter your email address',
@@ -205,12 +209,10 @@ class _PasswordFieldState extends State<PasswordField> {
             hintStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
             suffixIcon: IconButton(
               icon: Icon(
-                // Based on passwordVisible state choose the icon
                 _passwordVisible ? Icons.visibility : Icons.visibility_off,
                 color: Colors.black,
               ),
               onPressed: () {
-                // Update the state i.e. toogle the state of passwordVisible variable
                 setState(() {
                   _passwordVisible = !_passwordVisible;
                 });

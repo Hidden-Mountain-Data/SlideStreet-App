@@ -1,12 +1,18 @@
+import 'package:client/notifiers/user_notifier.dart';
 import 'package:client/pages/sign_in.dart';
 import 'package:client/pages/usage_page.dart';
+import 'package:client/providers/user_service.dart';
+import 'package:client/widgets/text_fields/email_text_field.dart';
+import 'package:client/widgets/text_fields/password_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 final emailController = TextEditingController();
 final passwordController = TextEditingController();
 final firstNameController = TextEditingController();
 final lastNameController = TextEditingController();
 final confirmPasswordController = TextEditingController();
+final phoneNumberController = TextEditingController();
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -15,16 +21,6 @@ class SignUpPage extends StatefulWidget {
 }
 
 class SignUpPageState extends State<SignUpPage> {
-  @override
-  void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
-    firstNameController.dispose();
-    lastNameController.dispose();
-    confirmPasswordController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -146,9 +142,11 @@ class SignUpPageState extends State<SignUpPage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const UsernameField(),
+                  EmailField(emailController: emailController),
                   const SizedBox(height: 20),
-                  const PasswordField(),
+                  const PhoneNumberField(),
+                  const SizedBox(height: 20),
+                  PasswordField(passwordController: passwordController),
                   const SizedBox(height: 20),
                   const ConfirmPasswordField(),
                   const SizedBox(height: 20),
@@ -176,11 +174,48 @@ class SignUpPageState extends State<SignUpPage> {
                   ElevatedButton(
                     style: raisedButtonStyle,
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const UsagePage()),
-                      );
+                      UserService().register({
+                        "email": emailController.text,
+                        "password": passwordController.text,
+                        "first_name": firstNameController.text,
+                        "last_name": lastNameController.text,
+                        "phone": phoneNumberController.text,
+                      });
+
+                      UserService().login({
+                        "email": emailController.text,
+                        "password": passwordController.text
+                      }).then((user) {
+                        if (user?.id != null) {
+                          Provider.of<UserProvider>(context, listen: false)
+                              .setUser(user!);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const UsagePage()),
+                          );
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('Invalid credentials'),
+                                content: const Text(
+                                  'Email or password is incorrect.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('OK'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      });
                     },
                     child: const Text('Sign Up',
                         style: TextStyle(
@@ -194,87 +229,6 @@ class SignUpPageState extends State<SignUpPage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
-  minimumSize: const Size(double.maxFinite, 50),
-  backgroundColor: Colors.black,
-  shape: const RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(20)),
-  ),
-);
-
-class UsernameField extends StatelessWidget {
-  const UsernameField({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        TextFormField(
-          controller: emailController,
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-            filled: true,
-            fillColor: Color.fromARGB(255, 225, 225, 225),
-            labelText: 'Email',
-            hintStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-            hintText: 'Enter your email address',
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class PasswordField extends StatefulWidget {
-  const PasswordField({super.key});
-
-  @override
-  State<PasswordField> createState() => _PasswordFieldState();
-}
-
-class _PasswordFieldState extends State<PasswordField> {
-  late bool _passwordVisible;
-
-  @override
-  void initState() {
-    super.initState();
-    _passwordVisible = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        TextFormField(
-          controller: passwordController,
-          keyboardType: TextInputType.text,
-          obscureText: !_passwordVisible,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            filled: true,
-            fillColor: const Color.fromARGB(255, 225, 225, 225),
-            labelText: 'Password',
-            hintText: 'Enter your password',
-            hintStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                color: Colors.black,
-              ),
-              onPressed: () {
-                setState(() {
-                  _passwordVisible = !_passwordVisible;
-                });
-              },
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -321,6 +275,35 @@ class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
                 });
               },
             ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class PhoneNumberField extends StatefulWidget {
+  const PhoneNumberField({super.key});
+
+  @override
+  State<PhoneNumberField> createState() => _PhoneNumberFieldState();
+}
+
+class _PhoneNumberFieldState extends State<PhoneNumberField> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        TextFormField(
+          controller: phoneNumberController,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            filled: true,
+            fillColor: Color.fromARGB(255, 225, 225, 225),
+            labelText: 'Phone Number',
+            hintText: 'Enter your phone number',
+            hintStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
           ),
         ),
       ],

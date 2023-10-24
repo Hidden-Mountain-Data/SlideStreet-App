@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:client/notifiers/theme_notifier.dart';
 
 String selectedTimeFrame = '1 Week';
 
@@ -25,107 +27,130 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: const Color.fromARGB(255, 195, 195, 195),
-      elevation: 4.0,
-      margin: const EdgeInsets.all(16.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer<ThemeNotifier>(
+      builder: (context, themeNotifier, child) {
+        return Card(
+          color: themeNotifier.isDarkMode
+              ? const Color.fromARGB(255, 37, 37, 38)
+              : const Color.fromARGB(255, 195, 195, 195),
+          elevation: 4.0,
+          margin: const EdgeInsets.all(16.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Usage',
-                  style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Usage',
+                      style: TextStyle(
+                          fontSize: 28.0, fontWeight: FontWeight.bold),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 0),
+                      decoration: BoxDecoration(
+                          color: themeNotifier.isDarkMode
+                              ? const Color.fromARGB(255, 91, 91, 91)
+                              : const Color.fromARGB(255, 195, 195, 195),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: DropdownButton<String>(
+                        value: selectedTimeFrame,
+                        dropdownColor: themeNotifier.isDarkMode
+                            ? const Color.fromARGB(255, 91, 91, 91)
+                            : const Color.fromARGB(255, 195, 195, 195),
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedTimeFrame = newValue!;
+                            updateXAxisTitlesCount();
+                          });
+                        },
+                        items: ['1 Week', '1 Month', '6 Months', '1 Year']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value,
+                                style: TextStyle(
+                                    color: themeNotifier.isDarkMode
+                                        ? Colors.white
+                                        : Colors.black)),
+                          );
+                        }).toList(),
+                        icon: Icon(Icons.arrow_drop_down,
+                            color: themeNotifier.isDarkMode
+                                ? Colors.white
+                                : Colors.black),
+                        iconSize: 32,
+                        underline: const SizedBox(),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 8.0),
+                Text(
+                  'Total Usage: ${widget.totalUsage}',
+                  style: const TextStyle(
+                      fontSize: 16.0, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8.0),
+                const SizedBox(height: 16.0),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: DropdownButton<String>(
-                    value: selectedTimeFrame,
-                    dropdownColor: Colors.white,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedTimeFrame = newValue!;
-                        updateXAxisTitlesCount();
-                      });
-                    },
-                    items: ['1 Week', '1 Month', '6 Months', '1 Year']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    icon: const Icon(Icons.arrow_drop_down),
-                    iconSize: 32,
-                    underline: const SizedBox(),
+                  height: 200.0,
+                  margin: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceEvenly,
+                      maxY: getMaxUsageValue(),
+                      gridData: const FlGridData(
+                          drawHorizontalLine: false, drawVerticalLine: false),
+                      titlesData: FlTitlesData(
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                              showTitles: true,
+                              interval: getMaxUsageValue() / 5.0),
+                        ),
+                        bottomTitles: AxisTitles(
+                          axisNameSize: 16.0,
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: getTitles,
+                          ),
+                          drawBelowEverything: true,
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                      ),
+                      borderData: FlBorderData(
+                        show: true,
+                        border: Border(
+                            bottom: BorderSide(
+                              color: themeNotifier.isDarkMode
+                                  ? Colors.white
+                                  : const Color(0xff37434d),
+                              width: 1,
+                            ),
+                            left: BorderSide(
+                              color: themeNotifier.isDarkMode
+                                  ? Colors.white
+                                  : const Color(0xff37434d),
+                              width: 1,
+                            )),
+                      ),
+                      barGroups: getBarGroups(),
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8.0),
-            Text(
-              'Total Usage: ${widget.totalUsage}',
-              style:
-                  const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8.0),
-            const SizedBox(height: 16.0),
-            Container(
-              height: 200.0,
-              margin: const EdgeInsets.symmetric(vertical: 16.0),
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceEvenly,
-                  maxY: getMaxUsageValue(),
-                  gridData: const FlGridData(
-                      drawHorizontalLine: false, drawVerticalLine: false),
-                  titlesData: FlTitlesData(
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                          showTitles: true, interval: getMaxUsageValue() / 5.0),
-                    ),
-                    bottomTitles: AxisTitles(
-                      axisNameSize: 16.0,
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: getTitles,
-                      ),
-                      drawBelowEverything: true,
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                  ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: const Border(
-                        bottom: BorderSide(
-                          color: Color(0xff37434d),
-                          width: 1,
-                        ),
-                        left: BorderSide(
-                          color: Color(0xff37434d),
-                          width: 1,
-                        )),
-                  ),
-                  barGroups: getBarGroups(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -211,7 +236,6 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
   Widget getTitles(double value, TitleMeta meta) {
     const style = TextStyle(
-      color: Colors.blue,
       fontWeight: FontWeight.bold,
       fontSize: 14,
     );

@@ -1,6 +1,11 @@
+import 'package:client/notifiers/user_notifier.dart';
 import 'package:client/pages/sign_up.dart';
 import 'package:client/pages/usage_page.dart';
+import 'package:client/providers/user_service.dart';
+import 'package:client/widgets/text_fields/email_text_field.dart';
+import 'package:client/widgets/text_fields/password_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 final emailController = TextEditingController();
 final passwordController = TextEditingController();
@@ -95,9 +100,9 @@ class LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 40),
-                const UsernameField(),
+                EmailField(emailController: emailController),
                 const SizedBox(height: 40),
-                const PasswordField(),
+                PasswordField(passwordController: passwordController),
                 const SizedBox(height: 20),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -123,11 +128,40 @@ class LoginPageState extends State<LoginPage> {
                 ElevatedButton(
                   style: raisedButtonStyle,
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const UsagePage()),
-                    );
+                    UserService().login({
+                      "email": emailController.text,
+                      "password": passwordController.text
+                    }).then((user) {
+                      if (user?.id != null) {
+                        Provider.of<UserProvider>(context, listen: false)
+                            .setUser(user!);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const UsagePage()),
+                        );
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Invalid credentials'),
+                              content: const Text(
+                                'Email or password is incorrect.',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    });
                   },
                   child: const Text('Login',
                       style: TextStyle(
@@ -151,76 +185,3 @@ final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
     borderRadius: BorderRadius.all(Radius.circular(20)),
   ),
 );
-
-class UsernameField extends StatelessWidget {
-  const UsernameField({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        TextFormField(
-          controller: emailController,
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-            filled: true,
-            fillColor: Color.fromARGB(255, 225, 225, 225),
-            labelText: 'Email',
-            hintStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-            hintText: 'Enter your email address',
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class PasswordField extends StatefulWidget {
-  const PasswordField({super.key});
-
-  @override
-  State<PasswordField> createState() => _PasswordFieldState();
-}
-
-class _PasswordFieldState extends State<PasswordField> {
-  late bool _passwordVisible;
-
-  @override
-  void initState() {
-    super.initState();
-    _passwordVisible = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        TextFormField(
-          controller: passwordController,
-          keyboardType: TextInputType.text,
-          obscureText: !_passwordVisible,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            filled: true,
-            fillColor: const Color.fromARGB(255, 225, 225, 225),
-            labelText: 'Password',
-            hintText: 'Enter your password',
-            hintStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-            suffixIcon: IconButton(
-              icon: Icon(
-                _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                color: Colors.black,
-              ),
-              onPressed: () {
-                setState(() {
-                  _passwordVisible = !_passwordVisible;
-                });
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

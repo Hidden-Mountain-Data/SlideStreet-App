@@ -1,5 +1,5 @@
 import 'package:client/notifiers/user_notifier.dart';
-import 'package:client/pages/sign_in.dart';
+import 'package:client/pages/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
@@ -135,7 +135,7 @@ class SlideStreet extends StatelessWidget {
             ),
             themeMode:
                 themeNotifier.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: const LoginPage(),
+            home: const SplashScreen(),
           );
         },
       ),

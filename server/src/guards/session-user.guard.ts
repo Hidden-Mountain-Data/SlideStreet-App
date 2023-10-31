@@ -17,6 +17,7 @@ export class SessionUserGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const userId = this.sessionService.getUserIdFromSession(request);
+    console.log('userId', userId);
 
     if (!userId) {
       throw new UnauthorizedException('User ID not found in session');

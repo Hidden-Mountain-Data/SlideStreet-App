@@ -27,6 +27,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 187, 187, 187),
       appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 187, 187, 187),
         automaticallyImplyLeading: false,
         leading: null,
         toolbarHeight: 75,
@@ -124,7 +125,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   },
                   child: const Padding(
                     padding: EdgeInsets.all(20.0),
-                    child: Text('Sign Up',
+                    child: Text('Change Password',
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,

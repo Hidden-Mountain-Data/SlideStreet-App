@@ -25,7 +25,7 @@ import { Router } from '../entities/router.entity';
 import { RoutersService } from '../services/routers.service';
 
 @Controller('routers')
-@UseGuards(JwtAuthGuard, SessionUserGuard)
+@UseGuards(JwtAuthGuard)
 export class RoutersController {
   private readonly logger = new Logger(RoutersController.name);
 

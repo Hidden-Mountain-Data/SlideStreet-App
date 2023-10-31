@@ -15,7 +15,6 @@ import {
 } from '@nestjs/common';
 import { DataUsages } from '@prisma/client';
 import { Request } from 'express';
-import { SessionUserGuard } from '../../guards/session-user.guard';
 import { HttpHelpers } from '../../helpers/http-helpers';
 import { OwnershipHelpers } from '../../helpers/ownership-helpers';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -25,7 +24,7 @@ import { UpdateDataUsageDto } from './dto/update-data-usage.dto';
 import { DataUsage } from './entities/data-usage.entity';
 
 @Controller('data-usage')
-@UseGuards(JwtAuthGuard, SessionUserGuard)
+@UseGuards(JwtAuthGuard)
 export class DataUsageController {
   private readonly logger = new Logger(DataUsageController.name);
 

@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { Sims } from '@prisma/client';
 import { Request } from 'express';
-import { SessionUserGuard } from '../../guards/session-user.guard';
 import { HttpHelpers } from '../../helpers/http-helpers';
 import { OwnershipHelpers } from '../../helpers/ownership-helpers';
 import { SimAndRouterInfo } from '../../types/sim-types';
@@ -26,7 +25,7 @@ import { Sim } from './entities/sim.entity';
 import { SimsService } from './sims.service';
 
 @Controller('sims')
-@UseGuards(JwtAuthGuard, SessionUserGuard)
+@UseGuards(JwtAuthGuard)
 export class SimsController {
   private readonly logger = new Logger(SimsController.name);
 

@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { Routers } from '@prisma/client';
 import { Request } from 'express';
-import { SessionUserGuard } from '../../../guards/session-user.guard';
 import { HttpHelpers } from '../../../helpers/http-helpers';
 import { OwnershipHelpers } from '../../../helpers/ownership-helpers';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -25,7 +24,7 @@ import { Router } from '../entities/router.entity';
 import { RoutersService } from '../services/routers.service';
 
 @Controller('routers')
-@UseGuards(JwtAuthGuard, SessionUserGuard)
+@UseGuards(JwtAuthGuard)
 export class RoutersController {
   private readonly logger = new Logger(RoutersController.name);
 

@@ -1,5 +1,4 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { SessionUserGuard } from '../../guards/session-user.guard';
 import { HttpHelpers } from '../../helpers/http-helpers';
 import { OwnershipHelpers } from '../../helpers/ownership-helpers';
 import { PrismaService } from '../../services/prisma.service';
@@ -17,8 +16,6 @@ import { SimsService } from './sims.service';
     SimsService,
     PrismaService,
     UserProvider,
-    SessionUserGuard,
-    SessionService,
     SessionService,
     HttpHelpers,
     OwnershipHelpers,

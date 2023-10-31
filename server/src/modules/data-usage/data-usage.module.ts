@@ -1,4 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { HttpHelpers } from '../../helpers/http-helpers';
 import { OwnershipHelpers } from '../../helpers/ownership-helpers';
 import { PrismaService } from '../../services/prisma.service';
@@ -18,6 +19,7 @@ import { DataUsageService } from './data-usage.service';
   ],
   controllers: [DataUsageController],
   providers: [
+    JwtService,
     DataUsageService,
     HttpHelpers,
     OwnershipHelpers,

@@ -6,8 +6,9 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { DataUsages } from '@prisma/client';
+import { DataUsages, Users } from '@prisma/client';
 import { PrismaService } from '../../services/prisma.service';
+import { UserProvider } from '../users/user.provider';
 import { AddDataUsageDto } from './dto/add-data-usage.dto';
 import { UpdateDataUsageDto } from './dto/update-data-usage.dto';
 import { DataUsage } from './entities/data-usage.entity';
@@ -16,13 +17,23 @@ import { DataUsage } from './entities/data-usage.entity';
 export class DataUsageService {
   private readonly logger = new Logger(DataUsageService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly userProvider: UserProvider,
+  ) {}
+
+  private currentUser(): Users {
+    return this.userProvider.user;
+  }
 
   async addDateUsageToSim(
     dataUsagePayload: AddDataUsageDto,
     simId: number,
-    userId: number,
   ): Promise<DataUsage> {
+    const user = await this.prisma.users.findUnique({
+      where: { userId: this.currentUser().userId },
+    });
+
     try {
       const simExists = await this.prisma.sims.findUnique({
         where: { simId },
@@ -41,7 +52,7 @@ export class DataUsageService {
         data: {
           ...dataUsagePayload,
           simId,
-          userId,
+          userId: user.userId,
         },
       });
 
@@ -49,17 +60,21 @@ export class DataUsageService {
       return createdData;
     } catch (error: unknown) {
       this.logger.error(
-        `Error creating data usage for userId: ${userId} and simId: ${simId}`,
+        `Error creating data usage for userId: ${user.userId} and simId: ${simId}`,
         error,
       );
       throw new InternalServerErrorException('Could not create data usage');
     }
   }
 
-  async findAllDataUsagesByUserId(userId: number): Promise<DataUsages[]> {
+  async findAllDataUsagesByUserId(): Promise<DataUsages[]> {
+    const user = await this.prisma.users.findUnique({
+      where: { userId: this.currentUser().userId },
+    });
+
     try {
       const foundData = await this.prisma.dataUsages.findMany({
-        where: { userId: +userId },
+        where: { userId: +user.userId },
       });
 
       return foundData.map((data) => ({
@@ -68,7 +83,7 @@ export class DataUsageService {
       })) as unknown as DataUsages[];
     } catch (error) {
       this.logger.error(
-        `Error finding data usages for userId: ${userId}`,
+        `Error finding data usages for userId: ${user.userId}`,
         error,
       );
       throw new InternalServerErrorException(`Could not find data usages`);

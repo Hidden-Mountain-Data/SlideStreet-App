@@ -1,7 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { InConnectService } from './in-connect.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { CreateInConnectDto } from './dto/create-in-connect.dto';
 import { UpdateInConnectDto } from './dto/update-in-connect.dto';
+import { InConnectService } from './in-connect.service';
 
 @Controller('in-connect')
 export class InConnectController {
@@ -23,7 +31,10 @@ export class InConnectController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInConnectDto: UpdateInConnectDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateInConnectDto: UpdateInConnectDto,
+  ) {
     return this.inConnectService.update(+id, updateInConnectDto);
   }
 

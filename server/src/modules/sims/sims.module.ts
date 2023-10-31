@@ -1,4 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { HttpHelpers } from '../../helpers/http-helpers';
 import { OwnershipHelpers } from '../../helpers/ownership-helpers';
 import { PrismaService } from '../../services/prisma.service';
@@ -13,6 +14,7 @@ import { SimsService } from './sims.service';
   imports: [UsersModule, forwardRef(() => RoutersModule)],
   controllers: [SimsController],
   providers: [
+    JwtService,
     SimsService,
     PrismaService,
     UserProvider,

@@ -1,5 +1,9 @@
 import { Body, Controller, Get, Logger, Param, Post } from '@nestjs/common';
 import { ProxyDeviceManagerService } from '../proxy/services/proxy-device-manager.service';
+import {
+  DeviceGatewayClientsResponse,
+  DevicesResponse,
+} from './types/device-manager';
 
 @Controller('device-manager')
 export class DeviceManagerController {
@@ -10,7 +14,7 @@ export class DeviceManagerController {
   ) {}
 
   @Get('devices')
-  async getDevices() {
+  async getDevices(): Promise<DevicesResponse> {
     return await this.deviceManagerProxyService.proxyRequest(
       'GET',
       '/api/devices/',
@@ -34,7 +38,9 @@ export class DeviceManagerController {
   }
 
   @Get('devices/:deviceId/gateway/clients')
-  async getDeviceClients(@Param('deviceId') deviceId: string) {
+  async getDeviceClients(
+    @Param('deviceId') deviceId: string,
+  ): Promise<DeviceGatewayClientsResponse> {
     return await this.deviceManagerProxyService.proxyRequest(
       'GET',
       `/api/devices/${deviceId}/gateway/clients`,

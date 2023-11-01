@@ -17,6 +17,7 @@ import { PrismaService } from './services/prisma.service';
 import { SessionService } from './session/session.service';
 import { DeviceManagerModule } from './modules/device-manager/device-manager.module';
 import { InConnectModule } from './modules/in-connect/in-connect.module';
+import { TealModule } from './modules/teal/teal.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { InConnectModule } from './modules/in-connect/in-connect.module';
     ProxyModule,
     DeviceManagerModule,
     InConnectModule,
+    TealModule,
   ],
   controllers: [AppController],
   providers: [

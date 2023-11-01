@@ -48,7 +48,7 @@ model Sims {
   simId            Int          @id @default(autoincrement()) @map("sim_id")
   userId           Int          @map("user_id")
   routerId         Int?         @map("router_id")
-  iccid            String       @db.VarChar(50)
+  iccid            String       @unique @db.VarChar(50)
   active           Boolean?
   ipAddress        String?      @map("ip_address") @db.VarChar(50)
   status           SimStatus    @default(ACTIVE)
@@ -61,12 +61,31 @@ model Sims {
   dataUsageEntries DataUsages[] @relation("DataUsageSim")
   router           Routers?     @relation("RouterSims", fields: [routerId], references: [routerId])
   user             Users        @relation("UserSim", fields: [userId], references: [userId])
+  // tealSIM          TealSIM?     @relation("TealSIMSim", fields: [iccid], references: [iccid])
 
   @@index([simId])
   @@index([userId])
   @@index([routerId])
   @@map("sims")
 }
+
+// model TealSIM {
+//   id                   Int
+//   iccid                String     @unique
+//   imsi                 String?
+//   imei                 String?
+//   msisdn               String?
+//   clientId             Int
+//   clientName           String?
+//   lastConnectedNetwork Json?
+//   meerkatIpEntries     Json?
+//   profileOnly          Boolean
+//   requestId            String     @map("teal_request_id")
+//   simLink              Sims?      @relation("TealSIMSim")
+//   status               TealStatus @default(PENDING)
+
+//   @@map("teal_sim")
+// }
 
 model Routers {
   routerId         Int              @id @default(autoincrement()) @map("router_id")
@@ -148,6 +167,19 @@ model Addresses {
 
   @@index([userId])
   @@map("addresses")
+}
+
+model TealRequest {
+  requestId String     @id @default(nanoid())
+  status    TealStatus @default(PENDING)
+  type      String
+
+  @@map("teal_request")
+}
+
+enum TealStatus {
+  SUCCEEDED
+  PENDING
 }
 
 enum Roles {

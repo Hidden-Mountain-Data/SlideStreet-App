@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { RouterLocations, Users } from '@prisma/client';
+import { RouterLocations, User } from '@prisma/client';
 import { PrismaService } from '../../../services/prisma.service';
 import { UserProvider } from '../../users/user.provider';
 import { RouterLocationDto } from '../dto/create-router-location.dto';
@@ -22,7 +22,7 @@ export class RouterLocationsService {
     private readonly userProvider: UserProvider,
   ) {}
 
-  private currentUser(): Users {
+  private currentUser(): User {
     return this.userProvider.user;
   }
 
@@ -60,7 +60,7 @@ export class RouterLocationsService {
   }
 
   async getAllLocationsByUserId(): Promise<RouterLocations[]> {
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 

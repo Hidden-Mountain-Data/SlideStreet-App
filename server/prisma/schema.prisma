@@ -20,7 +20,7 @@ model DataUsages {
   date        Dates     @relation("DataUsageDate", fields: [dateId], references: [dateId])
   router      Routers?  @relation("DataUsageRouter", fields: [routerId], references: [routerId])
   sim         Sims      @relation("DataUsageSim", fields: [simId], references: [simId])
-  user        Users     @relation("DataUsageUser", fields: [userId], references: [userId])
+  user        User      @relation("DataUsageUser", fields: [userId], references: [userId])
 
   @@index([dateId])
   @@index([simId])
@@ -48,6 +48,7 @@ model Sims {
   simId            Int          @id @default(autoincrement()) @map("sim_id")
   userId           Int          @map("user_id")
   routerId         Int?         @map("router_id")
+  eid              String?
   iccid            String       @unique @db.VarChar(50)
   active           Boolean?
   ipAddress        String?      @map("ip_address") @db.VarChar(50)
@@ -55,37 +56,106 @@ model Sims {
   embedded         Boolean?     @default(true)
   notes            String?      @db.VarChar(500)
   imei             String?      @db.VarChar(50)
+  dataUsageEntries DataUsages[] @relation("DataUsageSim")
+  router           Routers?     @relation("RouterSims", fields: [routerId], references: [routerId])
+  user             User?        @relation("UserSim", fields: [userId], references: [userId])
+  plan             Plan?        @relation("PlanSim", fields: [planId], references: [planId])
+  planId           String?      @map("plan_id")
+  carrier          Carrier?     @relation("CarrierSim", fields: [carrierId], references: [carrierId])
+  carrierId        String?      @map("carrier_id")
+  clientPlan       ClientPlan?  @relation("ClientPlanSim", fields: [clientPlanId], references: [clientPlanId])
+  clientPlanId     String?      @map("client_plan_id")
+  account          Account?     @relation("AccountSim", fields: [accountId], references: [accountId])
+  accountId        String?      @map("account_id")
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
   deletedAt        DateTime?    @map("deleted_at")
-  dataUsageEntries DataUsages[] @relation("DataUsageSim")
-  router           Routers?     @relation("RouterSims", fields: [routerId], references: [routerId])
-  user             Users        @relation("UserSim", fields: [userId], references: [userId])
-  // tealSIM          TealSIM?     @relation("TealSIMSim", fields: [iccid], references: [iccid])
 
   @@index([simId])
   @@index([userId])
   @@index([routerId])
+  @@index([planId])
   @@map("sims")
 }
 
-// model TealSIM {
-//   id                   Int
-//   iccid                String     @unique
-//   imsi                 String?
-//   imei                 String?
-//   msisdn               String?
-//   clientId             Int
-//   clientName           String?
-//   lastConnectedNetwork Json?
-//   meerkatIpEntries     Json?
-//   profileOnly          Boolean
-//   requestId            String     @map("teal_request_id")
-//   simLink              Sims?      @relation("TealSIMSim")
-//   status               TealStatus @default(PENDING)
+model Account {
+  accountId   String       @id @default(nanoid())
+  name        String
+  address     Address?     @relation(fields: [addressId], references: [addressId])
+  addressId   Int?         @unique
+  clientPlans ClientPlan[] @relation("AccountClientPlan")
+  sims        Sims[]       @relation("AccountSim")
+}
 
-//   @@map("teal_sim")
-// }
+model Carrier {
+  carrierId   String    @id @default(nanoid()) @map("carrier_id")
+  name        String    @map("name")
+  tagLine     String?   @map("tag_line")
+  description String?   @map("description")
+  logo        String?   @map("logo")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+  plans       Plan[]    @relation("CarrierPlan")
+  sims        Sims[]    @relation("CarrierSim")
+  tags        Tag[]
+}
+
+model ClientPlan {
+  clientPlanId          String   @id @default(nanoid()) @map("client_plan_id")
+  clientCost            Decimal? @map("client_cost")
+  clientCostUnit        String?  @map("client_cost_unit")
+  clientOverageCost     Decimal? @map("client_overage_cost")
+  clientOverageUnit     String?  @map("client_overage_unit")
+  clientDataUnit        String?  @map("client_data_unit")
+  clientDataAmount      Decimal? @map("client_data_amount")
+  clientSMSCost         Decimal? @map("client_sms_cost")
+  clientPlanName        String?  @map("client_plan_name")
+  clientPlanType        String?  @map("client_plan_type")
+  clientPlanDescription String?  @map("client_plan_description")
+  sim                   Sims[]   @relation("ClientPlanSim")
+  user                  User?    @relation("UserClientPlan", fields: [userId], references: [userId])
+  userId                Int?     @map("user_id")
+  slidePlan             Plan?    @relation("ClientPlan", fields: [slidePlanId], references: [planId])
+  slidePlanId           String?  @map("slide_plan_id")
+  account               Account? @relation("AccountClientPlan", fields: [accountId], references: [accountId])
+  accountId             String?  @map("account_id")
+}
+
+model Plan {
+  planId           String       @id @default(nanoid()) @map("plan_id")
+  carrierUuid      String       @unique @map("carrier_uuid")
+  carrierName      String       @map("carrier_name")
+  slideCost        Decimal      @map("slide_cost")
+  slideCostUnit    String       @map("slide_cost_unit")
+  slideOverageCost Decimal      @map("slide_overage_cost")
+  slideOverageUnit String       @map("slide_overage_unit")
+  slideDataCost    Decimal      @map("slide_data_cost")
+  slideDataUnit    String       @map("slide_data_unit")
+  slideDataAmount  Decimal      @map("slide_data_amount")
+  slideSmsPrice    Decimal?     @map("slide_sms_price")
+  network          String?      @map("network")
+  planName         String       @map("plan_name")
+  planDescription  String?      @map("plan_description")
+  networkType      String       @map("network_type")
+  technology       String       @map("technology")
+  user             User?        @relation("UserPlan", fields: [userId], references: [userId])
+  userId           Int?         @map("user_id")
+  sim              Sims[]       @relation("PlanSim")
+  carrier          Carrier      @relation("CarrierPlan", fields: [carrierId], references: [carrierId])
+  carrierId        String       @map("carrier_id")
+  clientPlans      ClientPlan[] @relation("ClientPlan")
+
+  @@index([userId])
+}
+
+model Tag {
+  tagId    String    @id @default(nanoid()) @map("tag_id")
+  name     String    @map("name")
+  icon     String    @map("icon")
+  color    String    @map("color")
+  carriers Carrier[]
+}
 
 model Routers {
   routerId         Int              @id @default(autoincrement()) @map("router_id")
@@ -100,13 +170,13 @@ model Routers {
   dataUsageEntries DataUsages[]     @relation("DataUsageRouter")
   routerLocation   RouterLocations?
   sims             Sims[]           @relation("RouterSims")
-  user             Users            @relation("UserRouter", fields: [userId], references: [userId])
+  user             User             @relation("UserRouter", fields: [userId], references: [userId])
 
   @@index([userId])
   @@map("routers")
 }
 
-model Users {
+model User {
   userId           Int          @id @default(autoincrement())
   addressId        String?      @unique @map("address_id") @db.VarChar(50)
   imageUuid        String?      @map("image_uuid") @db.VarChar(36)
@@ -126,10 +196,12 @@ model Users {
   isActive         Boolean      @default(false) @map("is_active")
   imageUrl         String?      @map("image_url") @db.VarChar(250)
   role             Roles?       @default(USER)
-  address          Addresses?   @relation("UserAddress")
+  address          Address?     @relation("UserAddress")
   dataUsages       DataUsages[] @relation("DataUsageUser")
   routers          Routers[]    @relation("UserRouter")
   sims             Sims[]       @relation("UserSim")
+  clientPlans      ClientPlan[] @relation("UserClientPlan")
+  plans            Plan[]       @relation("UserPlan")
 
   @@index([email], map: "user_email_key")
   @@index([addressId], map: "user_address_key")
@@ -151,7 +223,7 @@ model RouterLocations {
   @@map("router_locations")
 }
 
-model Addresses {
+model Address {
   userId       Int       @unique @map("user_id")
   city         String    @db.VarChar(50)
   state        String    @db.VarChar(50)
@@ -163,7 +235,8 @@ model Addresses {
   createdAt    DateTime  @default(now()) @map("created_at")
   deletedAt    DateTime? @map("deleted_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
-  user         Users     @relation("UserAddress", fields: [userId], references: [userId])
+  user         User      @relation("UserAddress", fields: [userId], references: [userId])
+  Account      Account?
 
   @@index([userId])
   @@map("addresses")
@@ -195,4 +268,6 @@ enum SimStatus {
   PREACTIVE
   PENDING
   UNKNOWN
+  UNACTIVATED
+  WAITING
 }

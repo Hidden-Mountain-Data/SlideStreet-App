@@ -8,7 +8,7 @@ export async function seedUsers(): Promise<{
   userId: number;
   token: string;
 } | null> {
-  const existingUser = await prisma.users.findFirst();
+  const existingUser = await prisma.user.findFirst();
   if (existingUser) {
     console.error(
       '\x1b[31m%s\x1b[0m',
@@ -27,7 +27,7 @@ export async function seedUsers(): Promise<{
       return null;
     });
 
-  const createdUser = await prisma.users
+  const createdUser = await prisma.user
     .upsert({
       where: { email: 'joe@email.com' },
       update: {},

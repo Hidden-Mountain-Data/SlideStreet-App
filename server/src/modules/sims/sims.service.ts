@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Sims, Users } from '@prisma/client';
+import { Sims, User } from '@prisma/client';
 import { PrismaService } from '../../services/prisma.service';
 import { SimAndRouterInfo } from '../../types/sim-types';
 import { Router } from '../routers/entities/router.entity';
@@ -24,12 +24,12 @@ export class SimsService {
     private readonly userProvider: UserProvider,
   ) {}
 
-  private currentUser(): Users {
+  private currentUser(): User {
     return this.userProvider.user;
   }
 
   async addSimToAccount(createSimData: CreateSimDto): Promise<Sim> {
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 
@@ -111,7 +111,7 @@ export class SimsService {
   }
 
   async findAllSimsByUserId(): Promise<Sims[]> {
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 

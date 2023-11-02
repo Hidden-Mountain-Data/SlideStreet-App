@@ -6,7 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { DataUsages, Users } from '@prisma/client';
+import { DataUsages, User } from '@prisma/client';
 import { PrismaService } from '../../services/prisma.service';
 import { UserProvider } from '../users/user.provider';
 import { AddDataUsageDto } from './dto/add-data-usage.dto';
@@ -22,7 +22,7 @@ export class DataUsageService {
     private readonly userProvider: UserProvider,
   ) {}
 
-  private currentUser(): Users {
+  private currentUser(): User {
     return this.userProvider.user;
   }
 
@@ -30,7 +30,7 @@ export class DataUsageService {
     dataUsagePayload: AddDataUsageDto,
     simId: number,
   ): Promise<DataUsage> {
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 
@@ -68,7 +68,7 @@ export class DataUsageService {
   }
 
   async findAllDataUsagesByUserId(): Promise<DataUsages[]> {
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 

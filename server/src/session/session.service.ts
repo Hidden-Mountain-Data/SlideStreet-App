@@ -1,13 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { User } from '../modules/users/entities/user';
+import { UserEntity } from '../modules/users/entities/user';
 import { PrismaService } from '../services/prisma.service';
 
 @Injectable()
 export class SessionService {
   constructor(private prisma: PrismaService) {}
 
-  async getUserById(userId: number): Promise<User> {
-    const user = await this.prisma.users.findUnique({
+  async getUserById(userId: number): Promise<UserEntity> {
+    const user = await this.prisma.user.findUnique({
       where: { userId },
     });
     if (!user) {
@@ -16,7 +16,7 @@ export class SessionService {
     return user;
   }
 
-  async getUserInfo(userId: number): Promise<User> {
+  async getUserInfo(userId: number): Promise<UserEntity> {
     return this.getUserById(userId);
   }
 

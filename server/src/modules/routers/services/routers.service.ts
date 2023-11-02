@@ -5,7 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Routers, Users } from '@prisma/client';
+import { Prisma, Routers, User } from '@prisma/client';
 import { PrismaService } from '../../../services/prisma.service';
 import { Sim } from '../../sims/entities/sim.entity';
 import { UserProvider } from '../../users/user.provider';
@@ -22,14 +22,14 @@ export class RoutersService {
     private readonly userProvider: UserProvider,
   ) {}
 
-  private currentUser(): Users {
+  private currentUser(): User {
     return this.userProvider.user;
   }
 
   async addRouterToAccount(
     createRouterData: CreateRouterDto,
   ): Promise<Router | HttpException> {
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 
@@ -82,7 +82,7 @@ export class RoutersService {
   async createRouterWithEmbeddedSim(
     routerId: number,
   ): Promise<Sim | HttpException> {
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 
@@ -126,7 +126,7 @@ export class RoutersService {
   }
 
   async findAllRoutersByUserId(): Promise<Routers[]> {
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 

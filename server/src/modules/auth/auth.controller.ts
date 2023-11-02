@@ -15,7 +15,7 @@ import {
 import { Request as ExpressRequest } from 'express';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
-import { User } from '../users/entities/user';
+import { UserEntity } from '../users/entities/user';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { RegistrationStatus } from './registration-status';
@@ -45,7 +45,7 @@ export class AuthController {
   async login(
     @Req() request: ExpressRequest,
     @Body() loginUserDto: LoginUserDto,
-  ): Promise<User> {
+  ): Promise<UserEntity> {
     const result = await this.authService.login(request, loginUserDto);
 
     return result;
@@ -53,7 +53,9 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('profile')
-  async getProfile(@Request() req: CustomExpressUserRequest): Promise<User> {
+  async getProfile(
+    @Request() req: CustomExpressUserRequest,
+  ): Promise<UserEntity> {
     return await this.authService.getProfile(req.user.email);
   }
 }

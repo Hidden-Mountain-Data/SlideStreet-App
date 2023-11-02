@@ -11,10 +11,10 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { Users } from '@prisma/client';
+import { User } from '@prisma/client';
 import { AuthGuard } from '../auth/auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user';
+import { UserEntity } from './entities/user';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -28,14 +28,14 @@ export class UsersController {
   async index(
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip = 0,
     @Query('take', new DefaultValuePipe(10), ParseIntPipe) take = 10,
-  ): Promise<User[]> {
+  ): Promise<UserEntity[]> {
     return this.usersService.users({ skip, take });
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('me')
   @UseGuards(AuthGuard)
-  async me(): Promise<Users | HttpException> {
+  async me(): Promise<User | HttpException> {
     return await this.usersService.me();
   }
 
@@ -44,7 +44,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   async updateMe(
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<Users | HttpException> {
+  ): Promise<User | HttpException> {
     return await this.usersService.update(updateUserDto);
   }
 }

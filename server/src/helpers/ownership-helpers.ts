@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { Users } from '@prisma/client';
+import { User } from '@prisma/client';
 import { UserProvider } from '../modules/users/user.provider';
 import { PrismaService } from '../services/prisma.service';
 
@@ -18,7 +18,7 @@ export class OwnershipHelpers {
     private readonly userProvider: UserProvider,
   ) {}
 
-  private currentUser(): Users {
+  private currentUser(): User {
     return this.userProvider.user;
   }
 
@@ -27,7 +27,7 @@ export class OwnershipHelpers {
       where: { routerId: +routerId },
     });
 
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 
@@ -50,7 +50,7 @@ export class OwnershipHelpers {
     const sim = await this.prisma.sims.findUnique({
       where: { simId: +simId },
     });
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { userId: this.currentUser().userId },
     });
 

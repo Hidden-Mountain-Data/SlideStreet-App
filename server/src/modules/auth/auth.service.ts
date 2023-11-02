@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Req } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Users } from '@prisma/client';
+import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { Request } from 'express';
 import * as humps from 'humps';
@@ -36,7 +36,7 @@ export class AuthService {
     const fullName = `${firstName} ${lastName}`;
 
     try {
-      await this.prisma.users.create({
+      await this.prisma.user.create({
         data: {
           email,
           password,
@@ -65,7 +65,7 @@ export class AuthService {
   async login(
     @Req() request: Request,
     loginUserDto: LoginUserDto,
-  ): Promise<Users> {
+  ): Promise<User> {
     try {
       const user = await this.usersService.findByLogin(loginUserDto);
 
@@ -87,7 +87,7 @@ export class AuthService {
     }
   }
 
-  async getProfile(username: string): Promise<Users> {
+  async getProfile(username: string): Promise<User> {
     return await this.usersService.findOneByUsername(username);
   }
 }

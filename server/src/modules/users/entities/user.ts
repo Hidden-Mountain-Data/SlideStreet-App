@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 
-export class User {
+export class UserEntity {
   @Expose({ name: 'user_id' })
   userId: number;
 

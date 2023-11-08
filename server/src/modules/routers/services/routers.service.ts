@@ -5,9 +5,10 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Routers } from '@prisma/client';
+import { Prisma, Routers, Users } from '@prisma/client';
 import { PrismaService } from '../../../services/prisma.service';
 import { Sim } from '../../sims/entities/sim.entity';
+import { UserProvider } from '../../users/user.provider';
 import { CreateRouterDto } from '../dto/create-router.dto';
 import { UpdateRouterDto } from '../dto/update-router.dto';
 import { Router } from '../entities/router.entity';
@@ -16,24 +17,33 @@ import { Router } from '../entities/router.entity';
 export class RoutersService {
   private readonly logger = new Logger(RoutersService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly userProvider: UserProvider,
+  ) {}
+
+  private currentUser(): Users {
+    return this.userProvider.user;
+  }
 
   async addRouterToAccount(
     createRouterData: CreateRouterDto,
-    userId: number,
   ): Promise<Router | HttpException> {
+    const user = await this.prisma.users.findUnique({
+      where: { userId: this.currentUser().userId },
+    });
+
     try {
       const newRouter = await this.prisma.routers.create({
         data: {
           imei: createRouterData.imei,
-          userId,
+          userId: user.userId,
           name: createRouterData.name || null,
           notes: createRouterData.notes || null,
         },
       });
 
       const newSim = (await this.createRouterWithEmbeddedSim(
-        userId,
         newRouter.routerId,
       )) as unknown as Prisma.SimsWhereUniqueInput;
 
@@ -60,9 +70,9 @@ export class RoutersService {
       };
     } catch (error) {
       this.logger.error(
-        `Error adding router to account for user: ${userId}. DTO: ${JSON.stringify(
-          createRouterData,
-        )}`,
+        `Error adding router to account for user: ${
+          user.userId
+        }. DTO: ${JSON.stringify(createRouterData)}`,
         error instanceof Error ? error.stack : 'unknown error',
       );
       throw new InternalServerErrorException('Could not update the sim');
@@ -70,13 +80,16 @@ export class RoutersService {
   }
 
   async createRouterWithEmbeddedSim(
-    userId: number,
     routerId: number,
   ): Promise<Sim | HttpException> {
+    const user = await this.prisma.users.findUnique({
+      where: { userId: this.currentUser().userId },
+    });
+
     try {
       const newSim = await this.prisma.sims.create({
         data: {
-          userId,
+          userId: user.userId,
           routerId,
           iccid: 'some-sim-iccid', // TODO: Adjust accordingly
           active: true,
@@ -112,17 +125,21 @@ export class RoutersService {
     }
   }
 
-  async findAllRoutersByUserId(userId: number): Promise<Routers[]> {
+  async findAllRoutersByUserId(): Promise<Routers[]> {
+    const user = await this.prisma.users.findUnique({
+      where: { userId: this.currentUser().userId },
+    });
+
     try {
       const routers = await this.prisma.routers.findMany({
-        where: { userId: +userId },
+        where: { userId: +user.userId },
         include: { routerLocation: true, sims: true },
       });
 
       return routers;
     } catch (error) {
       this.logger.error(
-        `Error finding All Routers by userId: ${userId}`,
+        `Error finding All Routers by userId: ${user.userId}`,
         error,
       );
       throw new InternalServerErrorException('Could not find All User Routers');

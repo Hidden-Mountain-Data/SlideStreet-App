@@ -6,8 +6,9 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { RouterLocations } from '@prisma/client';
+import { RouterLocations, Users } from '@prisma/client';
 import { PrismaService } from '../../../services/prisma.service';
+import { UserProvider } from '../../users/user.provider';
 import { RouterLocationDto } from '../dto/create-router-location.dto';
 import { UpdateRouterLocationDto } from '../dto/update-router-location.dto';
 import { RouterLocation } from './../../../types/router-types.d';
@@ -16,7 +17,14 @@ import { RouterLocation } from './../../../types/router-types.d';
 export class RouterLocationsService {
   private readonly logger = new Logger(RouterLocationsService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userProvider: UserProvider,
+  ) {}
+
+  private currentUser(): Users {
+    return this.userProvider.user;
+  }
 
   async saveInitialRouterLocation(
     routerId: number,
@@ -51,15 +59,25 @@ export class RouterLocationsService {
     }
   }
 
-  async getAllLocationsByUserId(userId: number): Promise<RouterLocations[]> {
+  async getAllLocationsByUserId(): Promise<RouterLocations[]> {
+    const user = await this.prisma.users.findUnique({
+      where: { userId: this.currentUser().userId },
+    });
+
     try {
       const locations = await this.prisma.routerLocations.findMany({
-        where: { router: { userId } },
+        where: {
+          router: {
+            userId: user.userId,
+          },
+        },
         include: { router: true },
       });
 
       if (!locations || locations.length === 0) {
-        throw new NotFoundException(`No locations found for userId ${userId}`);
+        throw new NotFoundException(
+          `No locations found for userId ${user.userId}`,
+        );
       }
 
       return locations;

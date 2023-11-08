@@ -10,6 +10,8 @@ import * as humps from 'humps';
 
 import { AppModule } from './app.module';
 
+declare const module: any;
+
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'debug', 'verbose', 'log'],
@@ -41,5 +43,10 @@ async function bootstrap(): Promise<void> {
   );
   const port = parseInt(process.env.PORT ?? '3000', 10);
   await app.listen(port);
+
+  if (module.hot) {
+    module.hot.accept();
+    module.hot.dispose(() => app.close());
+  }
 }
 bootstrap();

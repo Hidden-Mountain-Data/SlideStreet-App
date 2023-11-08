@@ -22,7 +22,6 @@ class UserService {
       await storage.deleteAll();
       await storage.write(key: 'token', value: user['data']['token']);
       await storage.write(key: 'user', value: jsonEncode(user['data']));
-      print(user);
       return User.fromJson(user);
     } else {
       return null;

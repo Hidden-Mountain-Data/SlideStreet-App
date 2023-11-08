@@ -52,7 +52,7 @@ class TopRoundedBorderShape extends ShapeBorder {
 class RouterCard extends StatelessWidget {
   final String name;
   final String status;
-  final double usage;
+  final String usage;
   final String signalStrength;
   final String imei;
   final String simNumber;
@@ -74,7 +74,7 @@ class RouterCard extends StatelessWidget {
     switch (status) {
       case 'Suspended':
         return Colors.yellow;
-      case 'Active':
+      case 'ACTIVE':
         return Colors.green;
       case 'Deactivated':
         return Colors.red;

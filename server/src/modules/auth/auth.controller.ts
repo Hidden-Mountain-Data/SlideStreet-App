@@ -26,8 +26,8 @@ interface CustomExpressUserRequest extends ExpressRequest {
   };
 }
 
-@UseInterceptors(ClassSerializerInterceptor)
 @Controller('auth')
+@UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(private authService: AuthService) {}
 

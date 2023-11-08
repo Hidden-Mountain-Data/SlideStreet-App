@@ -10,8 +10,6 @@ class RouterService {
     final userString = await getUser();
     final user = jsonDecode(userString!);
     final userId = user['user_id'];
-    print(userId);
-    print(header);
     final url =
         Platform.isAndroid ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
     final response = await http.get(
@@ -23,17 +21,14 @@ class RouterService {
       var routersList = jsonData['data'] as List;
       return routersList.map((router) => Routers.fromJson(router)).toList();
     } else {
-      print(response.headers);
-      print(response.body);
       throw Exception(response.body);
     }
   }
 
   Future<Routers> fetchRouter(int routerId) async {
     final header = await getAuth();
-    final url = Platform.isAndroid
-        ? 'http://192.168.1.250:3000'
-        : 'http://localhost:3000';
+    final url =
+        Platform.isAndroid ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
     final response = await http.get(
         Uri.parse('$url/api/routers/router-details/$routerId'),
         headers: header);

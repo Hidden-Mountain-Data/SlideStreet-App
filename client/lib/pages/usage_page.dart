@@ -1,5 +1,6 @@
 import 'package:client/notifiers/user_notifier.dart';
 import 'package:client/providers/router_service.dart';
+import 'package:client/providers/usage_service.dart';
 import 'package:client/widgets/bottom_nav_bar.dart';
 import 'package:client/widgets/router_card.dart';
 import 'package:client/widgets/top_app_bar.dart';
@@ -19,11 +20,22 @@ class UsagePage extends StatefulWidget {
 
 class UsagePageState extends State<UsagePage> {
   late RouterService _routerService;
+  late DataUsageService _usageService;
 
   @override
   void initState() {
     super.initState();
-    _routerService = RouterService(); // Initialize the RouterService
+    _routerService = RouterService();
+    _usageService = DataUsageService();
+  }
+
+  String convertUsage(double usage) {
+    if (usage > 1000) {
+      double usageInGb = usage / 1000;
+      return '$usageInGb Gb';
+    } else {
+      return '$usage Mb';
+    }
   }
 
   @override
@@ -49,7 +61,7 @@ class UsagePageState extends State<UsagePage> {
                 future: _routerService.fetchRouters(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (snapshot.hasData) {
@@ -82,16 +94,34 @@ class UsagePageState extends State<UsagePage> {
                             itemCount: routers.length,
                             itemBuilder: (context, index) {
                               final routerData = routers[index];
-                              return RouterCard(
-                                name: routerData.name,
-                                status: routerData.sims[0].status,
-                                usage: 1,
-                                signalStrength: "temp",
-                                imei: routerData.imei,
-                                simNumber: routerData.sims[0].iccid,
-                                ipAddress: routerData.sims[0].iccid,
-                                notes: routerData.notes ?? "No notes",
-                              );
+                              return FutureBuilder(
+                                  future: _usageService
+                                      .fetchDataUsage(routerData.simId),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    } else if (snapshot.hasError) {
+                                      return Center(
+                                          child:
+                                              Text('Error: ${snapshot.error}'));
+                                    } else {
+                                      return RouterCard(
+                                        name: routerData.name,
+                                        status: routerData.sims[0].status,
+                                        usage: convertUsage(double.parse(
+                                            snapshot.data!.dataUsage)),
+                                        signalStrength: "temp",
+                                        imei: routerData.imei,
+                                        simNumber: routerData.sims[0].iccid,
+                                        ipAddress:
+                                            routerData.sims[0].ipAddress ??
+                                                "No IP Address",
+                                        notes: routerData.notes ?? "No notes",
+                                      );
+                                    }
+                                  });
                             },
                           ),
                         ),

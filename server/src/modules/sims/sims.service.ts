@@ -6,10 +6,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { Sims } from '@prisma/client';
+import { Sims, Users } from '@prisma/client';
 import { PrismaService } from '../../services/prisma.service';
 import { SimAndRouterInfo } from '../../types/sim-types';
 import { Router } from '../routers/entities/router.entity';
+import { UserProvider } from '../users/user.provider';
 import { CreateSimDto } from './dto/create-sim.dto';
 import { UpdateSimDto } from './dto/update-sim.dto';
 import { Sim } from './entities/sim.entity';
@@ -18,25 +19,33 @@ import { Sim } from './entities/sim.entity';
 export class SimsService {
   private readonly logger = new Logger(SimsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly userProvider: UserProvider,
+  ) {}
 
-  async addSimToAccount(
-    createSimData: CreateSimDto,
-    userId: number,
-  ): Promise<Sim> {
+  private currentUser(): Users {
+    return this.userProvider.user;
+  }
+
+  async addSimToAccount(createSimData: CreateSimDto): Promise<Sim> {
+    const user = await this.prisma.users.findUnique({
+      where: { userId: this.currentUser().userId },
+    });
+
     try {
       return await this.prisma.sims.create({
         data: {
-          userId,
+          userId: user.userId,
           iccid: createSimData.iccid,
           embedded: false,
         },
       });
     } catch (error) {
       this.logger.error(
-        `Error adding sim to account for user: ${userId}. DTO: ${JSON.stringify(
-          createSimData,
-        )}`,
+        `Error adding sim to account for user: ${
+          user.userId
+        }. DTO: ${JSON.stringify(createSimData)}`,
         error instanceof Error ? error.stack : 'unknown error',
       );
       throw new InternalServerErrorException('Could not update the sim');
@@ -101,15 +110,22 @@ export class SimsService {
     }
   }
 
-  async findAllSimsByUserId(userId: number): Promise<Sims[]> {
+  async findAllSimsByUserId(): Promise<Sims[]> {
+    const user = await this.prisma.users.findUnique({
+      where: { userId: this.currentUser().userId },
+    });
+
     try {
       const sims = await this.prisma.sims.findMany({
-        where: { userId: +userId },
+        where: { userId: +user.userId },
       });
 
       return sims;
     } catch (error) {
-      this.logger.error(`Error fetching all sims for userId: ${userId}`, error);
+      this.logger.error(
+        `Error fetching all sims for userId: ${user.userId}`,
+        error,
+      );
       throw new InternalServerErrorException('Could not find All User Routers');
     }
   }

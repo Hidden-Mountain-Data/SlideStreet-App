@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:client/models/user.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/user_notifier.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 const storage = FlutterSecureStorage();
 
 class UserService {
   Future<User?> login(Map<String, dynamic> userData) async {
-    final url =
-        Platform.isAndroid ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
+    //final url = dotenv.env['NEST_API_URL'];
+    final url = dotenv.env['NEST_API_URL_ANDROID'];
 
     final response =
         await http.post(Uri.parse('$url/api/auth/login'), body: userData);
@@ -29,8 +29,8 @@ class UserService {
   }
 
   Future<void> register(Map<String, dynamic> userData) async {
-    final url =
-        Platform.isAndroid ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
+    //final url = dotenv.env['NEST_API_URL'];
+    final url = dotenv.env['NEST_API_URL'];
     final response =
         await http.post(Uri.parse('$url/api/auth/register'), body: userData);
 

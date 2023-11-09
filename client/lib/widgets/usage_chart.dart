@@ -1,3 +1,4 @@
+import 'package:client/models/data_usage.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -9,7 +10,7 @@ String selectedTimeFrame = '1 Week';
 class RouterUsageCard extends StatefulWidget {
   final String title;
   final String totalUsage;
-  final List<Map<String, dynamic>> usageData;
+  final List<DataUsage> usageData;
 
   const RouterUsageCard({
     super.key,
@@ -108,6 +109,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
                       titlesData: FlTitlesData(
                         leftTitles: AxisTitles(
                           sideTitles: SideTitles(
+                              reservedSize: 36.0,
                               showTitles: true,
                               interval: getMaxUsageValue() / 5.0),
                         ),
@@ -157,12 +159,12 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
   double getMaxUsageValue() {
     double maxUsage = 0.0;
     for (final routerData in widget.usageData) {
-      final double usageValue = routerData['usage'].toDouble();
+      final double usageValue = double.parse(routerData.dataUsage) / 1000;
       if (usageValue > maxUsage) {
         maxUsage = usageValue;
       }
     }
-    return maxUsage;
+    return maxUsage.truncate() + 1.0;
   }
 
   void updateXAxisTitlesCount() {
@@ -189,17 +191,16 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     final routerColors = <String, Color>{};
 
     for (int index = 0; index < widget.usageData.length; index++) {
-      final Map<String, dynamic> routerData = widget.usageData[index];
-      final String routerName = routerData['router'];
-      final double usageValue = routerData['usage'].toDouble();
-      final DateTime date = routerData['date'];
+      final DataUsage routerData = widget.usageData[index];
+      final String routerName = 'temp';
+      final double usageValue = double.parse(routerData.dataUsage) / 1000;
+      final DateTime date = DateTime.parse(routerData.createdAt!);
 
       if (isWithinTimeFrame(date)) {
         final color = routerColors.putIfAbsent(
           routerName,
           () => Color(
-            (1.0 - (routerName.hashCode / 10000000).abs() * 0xFFFFFF).toInt() <<
-                0,
+            (1.0 - (routerName.hashCode / 1000).abs() * 0xFFFFFF).toInt() << 0,
           ),
         );
 
@@ -225,7 +226,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     final List<DateTime> uniqueDates = [];
 
     for (final routerData in widget.usageData) {
-      final DateTime date = routerData['date'];
+      final DateTime date = DateTime.parse(routerData.createdAt!);
       if (!uniqueDates.contains(date)) {
         uniqueDates.add(date);
       }

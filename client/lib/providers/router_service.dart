@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'dart:io';
 import 'package:client/models/router.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'helpers.dart';
 
 class RouterService {
@@ -10,8 +10,8 @@ class RouterService {
     final userString = await getUser();
     final user = jsonDecode(userString!);
     final userId = user['user_id'];
-    final url =
-        Platform.isAndroid ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
+    //final url = dotenv.env['NEST_API_URL'];
+    final url = dotenv.env['NEST_API_URL_ANDROID'];
     final response = await http.get(
       Uri.parse('$url/api/routers/$userId'),
       headers: header,
@@ -27,8 +27,8 @@ class RouterService {
 
   Future<Routers> fetchRouter(int routerId) async {
     final header = await getAuth();
-    final url =
-        Platform.isAndroid ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
+    //final url = dotenv.env['NEST_API_URL'];
+    final url = dotenv.env['NEST_API_URL_ANDROID'];
     final response = await http.get(
         Uri.parse('$url/api/routers/router-details/$routerId'),
         headers: header);

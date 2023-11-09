@@ -1,3 +1,4 @@
+import 'package:client/models/data_usage.dart';
 import 'package:client/notifiers/user_notifier.dart';
 import 'package:client/providers/router_service.dart';
 import 'package:client/providers/usage_service.dart';
@@ -8,7 +9,6 @@ import 'package:client/widgets/usage_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
-import 'package:client/test_data/usage_data.dart';
 import 'package:client/models/router.dart';
 
 class UsagePage extends StatefulWidget {
@@ -69,12 +69,26 @@ class UsagePageState extends State<UsagePage> {
 
                     return Column(
                       children: [
-                        SizedBox(
-                          height: 400,
-                          child: RouterUsageCard(
-                              title: "name",
-                              totalUsage: "total",
-                              usageData: exampleUsageData),
+                        FutureBuilder<List<DataUsage>>(
+                          future: _usageService.fetchDataUsage(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                  child: Text('Error: ${snapshot.error}'));
+                            } else {
+                              return SizedBox(
+                                height: 400,
+                                child: RouterUsageCard(
+                                    title: "name",
+                                    totalUsage: "total",
+                                    usageData: snapshot.data!),
+                              );
+                            }
+                          },
                         ),
                         const Padding(
                           padding: EdgeInsets.all(16.0),
@@ -96,7 +110,7 @@ class UsagePageState extends State<UsagePage> {
                               final routerData = routers[index];
                               return FutureBuilder(
                                   future: _usageService
-                                      .fetchDataUsage(routerData.simId),
+                                      .fetchDataUsageBySim(routerData.simId),
                                   builder: (context, snapshot) {
                                     if (snapshot.connectionState ==
                                         ConnectionState.waiting) {

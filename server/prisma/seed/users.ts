@@ -17,7 +17,7 @@ export async function seedUsers(): Promise<{
     return null;
   }
 
-  const password = 'test1234';
+  const password = process.env.USER_PASSWORD;
   const roundsOfHashing = 10;
 
   const hashedPassword = await bcrypt

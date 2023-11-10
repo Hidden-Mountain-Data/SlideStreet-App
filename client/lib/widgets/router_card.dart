@@ -211,7 +211,7 @@ class ColoredTopRoundedBorderShape extends ShapeBorder {
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     final paint = Paint()..color = color;
     canvas.drawRect(
-        Rect.fromLTRB(rect.left, rect.bottom, rect.right, rect.bottom + 6),
+        Rect.fromLTRB(rect.left, rect.bottom - 6, rect.right, rect.bottom + 6),
         paint);
   }
 

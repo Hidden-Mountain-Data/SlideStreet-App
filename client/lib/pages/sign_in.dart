@@ -30,6 +30,7 @@ class LoginPageState extends State<LoginPage> {
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 187, 187, 187),
         appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 187, 187, 187),
           automaticallyImplyLeading: false,
           leading: null,
           toolbarHeight: 75,

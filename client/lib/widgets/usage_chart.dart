@@ -192,7 +192,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
     for (int index = 0; index < widget.usageData.length; index++) {
       final DataUsage routerData = widget.usageData[index];
-      final String routerName = 'temp';
+      const String routerName = 'temp';
       final double usageValue = double.parse(routerData.dataUsage) / 1000;
       final DateTime date = DateTime.parse(routerData.createdAt!);
 

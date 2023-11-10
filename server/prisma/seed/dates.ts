@@ -44,8 +44,8 @@ export async function seedDates(): Promise<void> {
 }
 
 function getDates(): Dates[] {
-  const startDate = new global.Date(2010, 0, 1);
-  const endDate = addYears(Number(startDate), 2);
+  const startDate = new global.Date(2023, 0, 1);
+  const endDate =  new global.Date(2050, 12, 31);
 
   const dates = eachDayOfInterval({
     start: startDate,

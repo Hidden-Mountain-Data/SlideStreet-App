@@ -78,7 +78,7 @@ class SettingsPageState extends State<SettingsPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 24.0),
-                    child: _buildButton("Log Out", Icons.logout, () {
+                    child: _buildLogoutButton("Log Out", Icons.logout, () {
                       UserService().logoutUser(context);
                       Navigator.push(
                         context,
@@ -130,6 +130,29 @@ class SettingsPageState extends State<SettingsPage> {
   Widget _buildButton(String label, IconData icon, VoidCallback onPressed) {
     bool isDarkMode = Provider.of<ThemeNotifier>(context).isDarkMode;
     return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(
+        icon,
+        color: isDarkMode ? Colors.white : Colors.black,
+      ),
+      label: Text(
+        label,
+        style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Colors.black),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(
+      String label, IconData icon, VoidCallback onPressed) {
+    bool isDarkMode = Provider.of<ThemeNotifier>(context).isDarkMode;
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+            isDarkMode ? const Color.fromARGB(255, 182, 15, 15) : Colors.red,
+      ),
       onPressed: onPressed,
       icon: Icon(
         icon,

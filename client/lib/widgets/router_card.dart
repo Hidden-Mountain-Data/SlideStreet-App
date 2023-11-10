@@ -72,11 +72,11 @@ class RouterCard extends StatelessWidget {
 
   Color _getStatusColor() {
     switch (status) {
-      case 'Suspended':
+      case 'SUSPENDED':
         return Colors.yellow;
       case 'ACTIVE':
         return Colors.green;
-      case 'Deactivated':
+      case 'DEACTIVATED':
         return Colors.red;
       default:
         return Colors.grey;
@@ -246,11 +246,15 @@ class RouterCard2 extends StatelessWidget {
     switch (status) {
       case 'Suspended':
         return Colors.yellow;
+      case 'SUSPENDED':
+        return Colors.yellow;
       case 'Active':
         return Colors.green;
       case 'ACTIVE':
         return Colors.green;
       case 'Deactivated':
+        return Colors.red;
+      case 'DEACTIVATED':
         return Colors.red;
       default:
         return Colors.grey;

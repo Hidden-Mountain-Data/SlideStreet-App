@@ -1,31 +1,89 @@
-import { PrismaClient } from '@prisma/client';
-import { seedSims } from './sims';
+import { Routers, PrismaClient } from '@prisma/client';
 
-export async function seedRouters(userId: number): Promise<void> {
-  const prisma = new PrismaClient();
+const testRouters: Routers[] = [
+{
+  routerId: 1,
+  userId: 1,
+  name: 'CoolRouter1',
+  notes: 'Very Cool Router',
+  imei: '869257030328633',
+  iccid: 'sim-1',
+  serialNumber: 'CR2022313SCIWHO',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  deletedAt: null,
+  simId: 1,
+},
+{
+  routerId: 2,
+  userId: 1,
+  name: 'HMD-Router1',
+  notes: 'HMD-Router',
+  imei: '869257030328633',
+  iccid: '89148000008305885109',
+  serialNumber: 'CR2022313SCIWHO',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  deletedAt: null,
+  simId: 2,
+},
+{
+  routerId: 3,
+  userId: 1,
+  name: 'SlideStreet-Router-1',
+  notes: 'This router belongs to Slide Street',
+  imei: '869257030328633',
+  iccid: '89148000008305885109',
+  serialNumber: 'CR2022313SCIWHO',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  deletedAt: null,
+  simId: 3,
+},
+{
+  routerId: 4,
+  userId: 1,
+  name: 'SlideStreet-Router-2',
+  notes: 'This router belongs to Slide Street',
+  imei: '869257030328633',
+  iccid: '89148000008305885109',
+  serialNumber: 'CR2022313SCIWHO',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  deletedAt: null,
+  simId: 4,
+},
+{
+  routerId: 5,
+  userId: 1,
+  name: 'SlideStreet-Router-3',
+  notes: 'This router belongs to Slide Street',
+  imei: '869257030328633',
+  iccid: '89148000008305885109',
+  serialNumber: 'CR2022313SCIWHO',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  deletedAt: null,
+  simId: 5,
+},
+{
+  routerId: 6,
+  userId: 1,
+  name: 'SlideStreet-Router-4',
+  notes: 'This router belongs to Slide Street',
+  imei: '869257030328633',
+  iccid: '89148000008305885109',
+  serialNumber: 'CR2022313SCIWHO',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  deletedAt: null,
+  simId: 6,
+}
+]
 
-  try {
-    const createdRouter = await prisma.routers.create({
-      data: {
-        userId,
-        name: 'CoolRouter',
-        imei: 'some-imei',
-      },
-    });
-
-    if (createdRouter) {
-      console.log(
-        '\x1b[36m%s\x1b[0m',
-        'Router created successfully:',
-        createdRouter,
-      );
-
-      const routerId = createdRouter.routerId;
-      await seedSims(userId, routerId);
-    }
-  } catch (error) {
-    console.log('\x1b[31m%s\x1b[0m', 'Error seeding Routers:', error);
-  } finally {
-    await prisma.$disconnect();
-  }
+export async function seedRouters(prisma: PrismaClient){
+  const routers = await prisma.routers.createMany({
+    data: testRouters,
+    skipDuplicates: true,
+  });
 }

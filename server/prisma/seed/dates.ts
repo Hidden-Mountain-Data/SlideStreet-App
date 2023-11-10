@@ -1,6 +1,5 @@
 import { Dates, PrismaClient } from '@prisma/client';
 import {
-  addYears,
   eachDayOfInterval,
   format,
   getDate,
@@ -45,18 +44,14 @@ export async function seedDates(): Promise<void> {
 
 function getDates(): Dates[] {
   const startDate = new global.Date(2023, 0, 1);
-  const endDate =  new global.Date(2050, 12, 31);
+  const endDate = new global.Date(2050, 12, 31);
 
   const dates = eachDayOfInterval({
     start: startDate,
     end: endDate,
   });
 
-  const slicedDates = dates.slice(0, 730);
-  const step = 7;
-  const steppedDates = slicedDates.filter((_, index) => index % step === 0);
-
-  const records: Dates[] = steppedDates.map((date: any) => ({
+  const records: Dates[] = dates.map((date: any) => ({
     dateId: parseInt(format(date, 'yyyyMMdd'), 10),
     date: date.toISOString(),
     day: getDate(date),

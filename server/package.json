@@ -28,7 +28,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
-    "@nestjs/schedule": "^3.0.3",
+    "@nestjs/schedule": "^4.0.0",
     "@prisma/client": "5.0.0",
     "@types/humps": "^2.0.4",
     "@types/passport-jwt": "^3.0.9",

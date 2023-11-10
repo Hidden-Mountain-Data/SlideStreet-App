@@ -51,7 +51,7 @@ import { InConnectModule } from './modules/in-connect/in-connect.module';
     SessionService,
   ],
 })
-export class AppModule {}
+export class AppModule { }
 // export class AppModule implements NestModule {
 //   configure(consumer: MiddlewareConsumer): void {
 //     consumer.apply(DebugMiddleware).forRoutes('*');

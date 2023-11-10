@@ -52,7 +52,7 @@ class TopRoundedBorderShape extends ShapeBorder {
 class RouterCard extends StatelessWidget {
   final String name;
   final String status;
-  final double usage;
+  final String usage;
   final String signalStrength;
   final String imei;
   final String simNumber;
@@ -74,7 +74,7 @@ class RouterCard extends StatelessWidget {
     switch (status) {
       case 'Suspended':
         return Colors.yellow;
-      case 'Active':
+      case 'ACTIVE':
         return Colors.green;
       case 'Deactivated':
         return Colors.red;
@@ -203,15 +203,15 @@ class ColoredTopRoundedBorderShape extends ShapeBorder {
       ..addRRect(RRect.fromRectAndCorners(rect,
           topLeft: const Radius.circular(10.0),
           topRight: const Radius.circular(10.0)))
-      ..addRect(
-          Rect.fromLTRB(rect.left, rect.bottom - 6, rect.right, rect.bottom));
+      ..addRect(Rect.fromLTRB(
+          rect.left, rect.bottom - 6, rect.right, rect.bottom + 6));
   }
 
   @override
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     final paint = Paint()..color = color;
     canvas.drawRect(
-        Rect.fromLTRB(rect.left, rect.bottom - 6, rect.right, rect.bottom),
+        Rect.fromLTRB(rect.left, rect.bottom, rect.right, rect.bottom + 6),
         paint);
   }
 
@@ -224,7 +224,7 @@ class ColoredTopRoundedBorderShape extends ShapeBorder {
 class RouterCard2 extends StatelessWidget {
   final String name;
   final String status;
-  final double usage;
+  final String usage;
   final String speed;
   final String imei;
   final String simNumber;
@@ -247,6 +247,8 @@ class RouterCard2 extends StatelessWidget {
       case 'Suspended':
         return Colors.yellow;
       case 'Active':
+        return Colors.green;
+      case 'ACTIVE':
         return Colors.green;
       case 'Deactivated':
         return Colors.red;

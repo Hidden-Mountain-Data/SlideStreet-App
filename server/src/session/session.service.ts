@@ -21,6 +21,7 @@ export class SessionService {
   }
 
   getUserIdFromSession(req: any): number {
+    console.log('req.session.userId', req.session.userId);
     return req.session.userId;
   }
 }

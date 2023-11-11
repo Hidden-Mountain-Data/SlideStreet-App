@@ -1,6 +1,7 @@
 import 'package:client/notifiers/user_notifier.dart';
 import 'package:client/pages/splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -14,16 +15,18 @@ var kDarkColorScheme = ColorScheme.fromSeed(
     seedColor: const Color.fromARGB(255, 187, 187, 187));
 
 Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => UserProvider(),
-      child: ChangeNotifierProvider(
-        create: (context) => ThemeNotifier(),
-        child: const SlideStreet(),
-      ),
-    ),
-  );
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((value) => runApp(
+            ChangeNotifierProvider(
+              create: (context) => UserProvider(),
+              child: ChangeNotifierProvider(
+                create: (context) => ThemeNotifier(),
+                child: const SlideStreet(),
+              ),
+            ),
+          ));
 }
 
 class SlideStreet extends StatelessWidget {

@@ -22,7 +22,7 @@ export class SimsService {
   constructor(
     private prisma: PrismaService,
     private readonly userProvider: UserProvider,
-  ) {}
+  ) { }
 
   private currentUser(): Users {
     return this.userProvider.user;
@@ -41,10 +41,9 @@ export class SimsService {
           embedded: false,
         },
       });
-    } catch (error) {
+    } catch(error) {
       this.logger.error(
-        `Error adding sim to account for user: ${
-          user.userId
+        `Error adding sim to account for user: ${user.userId
         }. DTO: ${JSON.stringify(createSimData)}`,
         error instanceof Error ? error.stack : 'unknown error',
       );
@@ -64,7 +63,7 @@ export class SimsService {
       },
     });
 
-    if (!existingSim || !existingRouter) {
+    if(!existingSim || !existingRouter) {
       this.logger.warn(
         `Either Sim with simId: ${simId} or Router with routerId: ${routerId} does not exist`,
       );
@@ -75,7 +74,7 @@ export class SimsService {
     }
 
     const hasEmbeddedSim = existingRouter.sims.some((sim) => sim.embedded);
-    if (hasEmbeddedSim && existingSim.embedded) {
+    if(hasEmbeddedSim && existingSim.embedded) {
       this.logger.warn(
         `Cannot add an embedded Sim with simId: ${simId} to a router with routerId: ${routerId} that already has one`,
       );
@@ -98,7 +97,7 @@ export class SimsService {
       ]);
 
       return { sim: updatedSim, router: updatedRouter };
-    } catch (error: unknown) {
+    } catch(error: unknown) {
       this.logger.error(
         `Failed to connect Sim with simId: ${simId} to Router with routerId: ${routerId}`,
         error instanceof Error ? error.stack : 'unknown error',
@@ -121,7 +120,7 @@ export class SimsService {
       });
 
       return sims;
-    } catch (error) {
+    } catch(error) {
       this.logger.error(
         `Error fetching all sims for userId: ${user.userId}`,
         error,
@@ -140,7 +139,7 @@ export class SimsService {
       },
     });
 
-    if (!simRecord || !simRecord.router) {
+    if(!simRecord || !simRecord.router) {
       throw new HttpException(
         'Router not found for the given SIM ID',
         HttpStatus.NOT_FOUND,
@@ -163,7 +162,7 @@ export class SimsService {
         },
       });
 
-      if (!simRecord || !simRecord.router) {
+      if(!simRecord || !simRecord.router) {
         throw new HttpException(
           'Router not found for the given SIM ID',
           HttpStatus.NOT_FOUND,
@@ -171,7 +170,7 @@ export class SimsService {
       }
 
       return simRecord;
-    } catch (error) {
+    } catch(error) {
       this.logger.error(`Error finding details for simId: ${simId}`, error);
       throw new InternalServerErrorException('Could not find sim details');
     }
@@ -189,13 +188,13 @@ export class SimsService {
         },
       });
 
-      if (!simRecord || !simRecord.dataUsageEntries) {
+      if(!simRecord || !simRecord.dataUsageEntries) {
         throw new NotFoundException(`Router not found for simId: ${simId}`);
       }
 
       const sanitizedSimRecord = JSON.parse(
         JSON.stringify(simRecord, (key, value) => {
-          if (typeof value === 'bigint') {
+          if(typeof value === 'bigint') {
             return value.toString();
           }
           return value;
@@ -203,7 +202,7 @@ export class SimsService {
       );
 
       return sanitizedSimRecord;
-    } catch (error) {
+    } catch(error) {
       this.logger.error(`Error finding sim info for simId: ${simId}`, error);
       throw new InternalServerErrorException('Could not find sim by simId');
     }
@@ -219,13 +218,13 @@ export class SimsService {
         data: updateSimDto,
       });
 
-      if (!existingSim) {
+      if(!existingSim) {
         this.logger.warn(`Sim with ID ${simId} not found`);
         throw new NotFoundException(`Sim with ID ${simId} not found`);
       }
 
       return existingSim;
-    } catch (error) {
+    } catch(error) {
       this.logger.error(
         `Error updating sim with simId: ${simId}. DTO: ${JSON.stringify(
           updateSimDto,
@@ -239,24 +238,42 @@ export class SimsService {
   async removeSimById(simId: number): Promise<void> {
     const simRecord = await this.prisma.sims.findUnique({ where: { simId } });
 
-    if (simRecord?.embedded) {
+    if(simRecord?.embedded) {
       throw new HttpException(
         'Cannot remove an embedded SIM',
         HttpStatus.BAD_REQUEST,
       );
     }
 
-    if (simRecord && !simRecord.embedded) {
+    if(simRecord && !simRecord.embedded) {
       try {
         await this.prisma.dataUsages.deleteMany({ where: { simId } });
         await this.prisma.sims.delete({ where: { simId } });
-      } catch (error: unknown) {
+      } catch(error: unknown) {
         this.logger.error(`Failed to remove Sim with simId: ${simId}`, error);
         throw new HttpException(
           'Failed to remove Sim',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+    }
+  }
+
+  async getAllSims(): Promise<Sims[]> {
+    try {
+      return await this.prisma.sims.findMany();
+    } catch(error) {
+      this.logger.error(`Error fetching all sims`, error);
+      throw new InternalServerErrorException('Could not find All Sims');
+    }
+  }
+
+  async getSimByEid(eid: string): Promise<Sims> {
+    try {
+      return await this.prisma.sims.findUnique({ where: { eid } });
+    } catch(error) {
+      this.logger.error(`Error fetching sim by eid: ${eid}`, error);
+      throw new InternalServerErrorException('Could not find Sim by eid');
     }
   }
 }

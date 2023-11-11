@@ -11,7 +11,7 @@ export class DeviceManagerController {
 
   constructor(
     private readonly deviceManagerProxyService: ProxyDeviceManagerService,
-  ) {}
+  ) { }
 
   @Get('devices')
   async getDevices(): Promise<DevicesResponse> {

@@ -18,7 +18,7 @@ import { TealPollingService } from './services/teal-polling.service';
 import { SessionService } from './session/session.service';
 import { DeviceManagerModule } from './modules/device-manager/device-manager.module';
 import { InConnectModule } from './modules/in-connect/in-connect.module';
-import { TealWebhooksController } from './modules/teal-webhooks/teal-webhooks.controller';
+import { TealWebhooksModule } from './modules/teal-webhooks/teal-webhooks.module';
 
 @Module({
   imports: [
@@ -32,8 +32,9 @@ import { TealWebhooksController } from './modules/teal-webhooks/teal-webhooks.co
     ProxyModule,
     DeviceManagerModule,
     InConnectModule,
+    TealWebhooksModule
   ],
-  controllers: [AppController, TealWebhooksController],
+  controllers: [AppController],
   providers: [
     AppService,
     FileService,

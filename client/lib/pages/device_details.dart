@@ -4,13 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 
 class DeviceDetailsPage extends StatefulWidget {
-  const DeviceDetailsPage(
-      {super.key,
-      required this.routerName,
-      required this.imei,
-      required this.simNumber,
-      required this.ipAddress,
-      required this.notes});
+  const DeviceDetailsPage({
+    Key? key,
+    required this.routerName,
+    required this.imei,
+    required this.simNumber,
+    required this.ipAddress,
+    required this.notes,
+  }) : super(key: key);
 
   final String routerName;
   final String imei;
@@ -41,13 +42,14 @@ class DeviceDetailsPageState extends State<DeviceDetailsPage> {
         width: containerWidth,
         height: height,
         decoration: BoxDecoration(
-            color: color,
-            border: Border.all(
-              color: borderColor,
-              width: 2,
-            ),
-            borderRadius: BorderRadius.circular(5),
-            shape: BoxShape.rectangle),
+          color: color,
+          border: Border.all(
+            color: borderColor,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(5),
+          shape: BoxShape.rectangle,
+        ),
         padding: const EdgeInsets.all(8),
         margin: const EdgeInsets.only(bottom: 20),
         child: Column(
@@ -75,6 +77,7 @@ class DeviceDetailsPageState extends State<DeviceDetailsPage> {
         Color borderColor = themeNotifier.isDarkMode
             ? const Color.fromARGB(255, 74, 74, 74)
             : const Color.fromARGB(255, 205, 205, 205);
+
         return Material(
           child: Scaffold(
             backgroundColor: themeNotifier.isDarkMode
@@ -119,7 +122,9 @@ class DeviceDetailsPageState extends State<DeviceDetailsPage> {
                 ],
               ),
             ),
-            body: Column(
+            body: ListView(
+              physics: const ClampingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 const SizedBox(height: 20),
                 buildTextField('Router Name', widget.routerName, 70, cardColor,
@@ -130,26 +135,24 @@ class DeviceDetailsPageState extends State<DeviceDetailsPage> {
                 buildTextField(
                     'IP Address', widget.ipAddress, 70, cardColor, borderColor),
                 buildTextField(
-                    'Notes', widget.notes, 200, cardColor, borderColor),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Center(
-                    child: ElevatedButton(
-                      onPressed: toggleStatus,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            isSuspended ? Colors.red : Colors.green,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 16),
-                      ),
-                      child: Text(
-                        isSuspended ? 'Suspended' : 'Reactivate',
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
+                    'Notes', widget.notes, 120, cardColor, borderColor),
+                const SizedBox(height: 20),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: toggleStatus,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isSuspended ? Colors.red : Colors.green,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
+                    ),
+                    child: Text(
+                      isSuspended ? 'Suspended' : 'Reactivate',
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),

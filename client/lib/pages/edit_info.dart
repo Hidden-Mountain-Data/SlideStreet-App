@@ -10,8 +10,6 @@ class EditInformationPage extends StatefulWidget {
   _EditInformationPageState createState() => _EditInformationPageState();
 }
 
-late bool _passwordVisible;
-
 class _EditInformationPageState extends State<EditInformationPage> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -21,7 +19,6 @@ class _EditInformationPageState extends State<EditInformationPage> {
   @override
   void initState() {
     super.initState();
-    _passwordVisible = false;
   }
 
   @override
@@ -64,7 +61,7 @@ class _EditInformationPageState extends State<EditInformationPage> {
         ),
       ),
       body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         child: Container(
           height: MediaQuery.of(context).size.height - 70,
           decoration: const BoxDecoration(
@@ -98,35 +95,31 @@ class _EditInformationPageState extends State<EditInformationPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: InkWell(
-                    onTap: () {},
-                    child: const Text(
-                      "To modify personal information, please enter your password to confirm your identity",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color.fromARGB(255, 0, 0, 0),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
                 OtherField(
                     textController: _firstNameController,
                     hintText: 'First Name',
                     labelText: 'Edit your first name'),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
                 OtherField(
                     textController: _lastNameController,
                     hintText: 'Last Name',
                     labelText: 'Edit your last name'),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
                 EmailField(emailController: _emailController),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
+                const Align(
+                  child: Text(
+                    "To modify personal information, please enter your password to confirm your identity",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Color.fromARGB(255, 0, 0, 0),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
                 PasswordField(passwordController: _passwordController),
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
                 ElevatedButton(
                   style: raisedButtonStyle,
                   onPressed: () {
@@ -134,7 +127,7 @@ class _EditInformationPageState extends State<EditInformationPage> {
                   },
                   child: const Padding(
                     padding: EdgeInsets.all(20.0),
-                    child: Text('Sign Up',
+                    child: Text('Save',
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,

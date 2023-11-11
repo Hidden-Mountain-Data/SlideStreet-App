@@ -22,11 +22,51 @@ class ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     int currentIndex = 2;
+    double containerWidth = MediaQuery.of(context).size.width - 32;
+
+    Widget buildTextField(String label, String value, double height,
+        Color color, Color borderColor) {
+      return Container(
+        width: containerWidth,
+        height: height,
+        decoration: BoxDecoration(
+          color: color,
+          border: Border.all(
+            color: borderColor,
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(5),
+          shape: BoxShape.rectangle,
+        ),
+        padding: const EdgeInsets.all(8),
+        margin: const EdgeInsets.only(bottom: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              value,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         return Consumer<ThemeNotifier>(
           builder: (context, themeNotifier, child) {
+            Color cardColor = themeNotifier.isDarkMode
+                ? const Color.fromARGB(255, 62, 62, 66)
+                : const Color.fromARGB(255, 192, 191, 192);
+            Color borderColor = themeNotifier.isDarkMode
+                ? const Color.fromARGB(255, 74, 74, 74)
+                : const Color.fromARGB(255, 205, 205, 205);
             return Material(
               child: Scaffold(
                 backgroundColor: themeNotifier.isDarkMode
@@ -77,25 +117,16 @@ class ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       children: [
                         const SizedBox(height: 30),
-                        const CircleAvatar(
-                          radius: 60,
-                          backgroundImage: AssetImage('assets/profile.png'),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          '${userProvider.user!.firstName} ${userProvider.user!.lastName}',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        ProfileButton(
-                          text: userProvider.user!.email,
-                          onPressed: () {
-                            return;
-                          },
-                        ),
+                        buildTextField(
+                            'First Name',
+                            userProvider.user!.firstName,
+                            70,
+                            cardColor,
+                            borderColor),
+                        buildTextField('Last Name', userProvider.user!.lastName,
+                            70, cardColor, borderColor),
+                        buildTextField('Email', userProvider.user!.email, 70,
+                            cardColor, borderColor),
                         ProfileButton(
                           text: 'Change Password',
                           onPressed: () {
@@ -118,7 +149,7 @@ class ProfilePageState extends State<ProfilePage> {
                             );
                           },
                         ),
-                        ProfileButton(
+                        LogoutButton(
                           text: 'Log Out',
                           onPressed: () {
                             UserService().logoutUser(context);
@@ -153,6 +184,31 @@ class ProfileButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
       child: ElevatedButton(
+        onPressed: onPressed,
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
+}
+
+class LogoutButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+
+  const LogoutButton({super.key, required this.text, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      child: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.all<Color>(
+              const Color.fromARGB(255, 182, 15, 15)),
+        ),
         onPressed: onPressed,
         child: Text(
           text,

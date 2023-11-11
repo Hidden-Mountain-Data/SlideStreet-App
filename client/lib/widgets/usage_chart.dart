@@ -192,7 +192,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
     for (int index = 0; index < widget.usageData.length; index++) {
       final DataUsage routerData = widget.usageData[index];
-      final String routerName = 'temp';
+      const String routerName = 'temp';
       final double usageValue = double.parse(routerData.dataUsage) / 1000;
       final DateTime date = DateTime.parse(routerData.createdAt!);
 
@@ -240,13 +240,20 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
       fontWeight: FontWeight.bold,
       fontSize: 14,
     );
+
     String text;
 
     switch (selectedTimeFrame) {
       case '1 Week':
         final int index = value.toInt();
-        final DateTime date = getUniqueDates()[index];
-        return Text(DateFormat('EEE').format(date));
+        final List<DateTime> uniqueDates = getUniqueDates();
+        if (index >= 0 && index < uniqueDates.length) {
+          final DateTime date = uniqueDates[index];
+          text = DateFormat('EEE').format(date);
+        } else {
+          text = '';
+        }
+        break;
       case '1 Month':
         text = getWeekOfMonthTitle(value.toInt());
         break;

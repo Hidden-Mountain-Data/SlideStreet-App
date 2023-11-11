@@ -1,85 +1,114 @@
-import { PrismaClient } from '@prisma/client';
+import { SimStatus, Provider, Sims, PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const testSims: Sims[] = [
+  {
+    simId: 1,
+    userId: 1,
+    routerId: 1,
+    iccid: 'sim-1',
+    eid: 'eid-1',
+    provider: Provider.TEAL,
+    active: true,
+    ipAddress: 'ip-1',
+    imei: 'imei-1',
+    status: SimStatus.ACTIVE,
+    embedded: true,
+    notes: 'This is a cool sim',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  },
+  {
+    simId: 2,
+    userId: 1,
+    routerId: 2,
+    iccid: '8901990000004842491',
+    eid: '89033024108002601600000000853240',
+    provider: Provider.TEAL,
+    active: true,
+    ipAddress: '192.198.2.1',
+    imei: null,
+    status: SimStatus.ACTIVE,
+    embedded: true,
+    notes: 'Slide Street LLC',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  },
+  {
+    simId: 3,
+    userId: 1,
+    routerId: 3,
+    iccid: '8901990000004842509',
+    eid: '89033024108002601600000000853337',
+    provider: Provider.TEAL,
+    active: true,
+    ipAddress: '192.198.2.1',
+    imei: null,
+    status: SimStatus.DEACTIVATED,
+    embedded: true,
+    notes: 'Slide Street LLC',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  },
+  {
+    simId: 4,
+    userId: 1,
+    routerId: 4,
+    iccid: '8901990000004842517',
+    eid: '89033024108002601600000000853434',
+    provider: Provider.TEAL,
+    active: true,
+    ipAddress: '192.198.2.1',
+    imei: null,
+    status: SimStatus.ACTIVE,
+    embedded: true,
+    notes: 'Slide Street LLC',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  },
+  {
+    simId: 5,
+    userId: 1,
+    routerId: 5,
+    iccid: '8901990000004842533',
+    eid: '89033024108002601600000000853628',
+    provider: Provider.TEAL,
+    active: true,
+    ipAddress: '192.198.2.1',
+    imei: null,
+    status: SimStatus.SUSPENDED,
+    embedded: true,
+    notes: 'Slide Street LLC',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  },
+  {
+    simId: 6,
+    userId: 1,
+    routerId: 6,
+    iccid: '8901990000004842541',
+    eid: '89033024108002601600000000853725',
+    provider: Provider.TEAL,
+    active: true,
+    ipAddress: '192.198.2.1',
+    imei: null,
+    status: SimStatus.DEACTIVATED,
+    embedded: true,
+    notes: 'Slide Street LLC',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+  },
+]
 
-export async function seedSims(
-  userId: number,
-  routerId?: number,
-): Promise<void> {
-  try {
-    const existingSimWithRouter =
-      routerId !== undefined
-        ? await prisma.sims.findFirst({
-            where: { routerId },
-          })
-        : null;
-
-    const existingStandaloneSim = await prisma.sims.findFirst({
-      where: { routerId: null },
-    });
-
-    if (existingSimWithRouter && existingStandaloneSim) {
-      console.error(
-        '\x1b[31m%s\x1b[0m',
-        'Both types of Sims already exist, skipping seed function.',
-      );
-      return;
-    }
-
-    let createdRouterSimId: number | null = null;
-
-    if (!existingSimWithRouter && routerId !== undefined) {
-      const simWithRouter = await prisma.sims.create({
-        data: {
-          userId,
-          routerId,
-          iccid: 'some-iccid-1',
-          active: true,
-          status: 'ACTIVE',
-          embedded: true,
-        },
-      });
-
-      createdRouterSimId = simWithRouter.simId;
-
-      console.log(
-        '\x1b[36m%s\x1b[0m',
-        'Sim with router created! Here it is: ',
-        simWithRouter,
-      );
-    }
-
-    if (!existingStandaloneSim) {
-      const standaloneSim = await prisma.sims.create({
-        data: {
-          userId,
-          iccid: 'some-iccid-2',
-          active: true,
-          status: 'ACTIVE',
-          embedded: true,
-        },
-      });
-      console.log(
-        '\x1b[36m%s\x1b[0m',
-        'Standalone Sim created! Here it is: ',
-        standaloneSim,
-      );
-    }
-
-    if (createdRouterSimId !== null && routerId !== undefined) {
-      await prisma.routers.update({
-        where: { routerId },
-        data: { simId: createdRouterSimId },
-      });
-
-      console.log(
-        '\x1b[36m%s\x1b[0m',
-        `Router with id ${routerId} updated with simId ${createdRouterSimId}`,
-      );
-    }
-  } catch (error) {
-    console.error('\x1b[31m%s\x1b[0m', 'Error seeding Sims: ', error);
-  } finally {
-    await prisma.$disconnect();
-  }
+export default async function seedSims(prisma: PrismaClient) { 
+  const sims = await prisma.sims.createMany({
+    data: testSims,
+    skipDuplicates: true,
+  });
+  console.log(sims);
 }

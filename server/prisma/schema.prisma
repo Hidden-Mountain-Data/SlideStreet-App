@@ -1,5 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions", "fullTextSearch", "filteredRelationCount", "orderByNulls"]
+  binaryTargets   = ["native", "linux-musl", "darwin", "darwin-arm64", "windows", "debian-openssl-1.1.x", "rhel-openssl-1.1.x", "linux-arm64-openssl-1.1.x"]
 }
 
 datasource db {
@@ -78,6 +80,8 @@ model Routers {
   name             String?          @db.VarChar(200)
   notes            String?          @db.VarChar(500)
   imei             String           @db.VarChar(50)
+  iccid            String           @db.VarChar(50)
+  serialNumber     String           @map("serial_number") @db.VarChar(50)
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
   deletedAt        DateTime?        @map("deleted_at")
@@ -166,6 +170,10 @@ enum SimStatus {
   PREACTIVE
   PENDING
   UNKNOWN
+}
+
+enum Provider {
+  TEAL
 }
 
 enum Provider {

@@ -175,7 +175,3 @@ enum SimStatus {
 enum Provider {
   TEAL
 }
-
-enum Provider {
-  TEAL
-}

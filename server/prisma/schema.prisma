@@ -26,6 +26,7 @@ model DataUsages {
   @@index([simId])
   @@index([userId])
   @@map("data_usages")
+  @@unique([simId, dateId], name: "simId_dateId")
 }
 
 model Dates {
@@ -49,6 +50,8 @@ model Sims {
   userId           Int          @map("user_id")
   routerId         Int?         @map("router_id")
   iccid            String       @db.VarChar(50)
+  eid              String?      @db.VarChar(50) @unique
+  provider         Provider     @default(TEAL)
   active           Boolean?
   ipAddress        String?      @map("ip_address") @db.VarChar(50)
   status           SimStatus    @default(ACTIVE)
@@ -163,4 +166,8 @@ enum SimStatus {
   PREACTIVE
   PENDING
   UNKNOWN
+}
+
+enum Provider {
+  TEAL
 }

@@ -14,9 +14,11 @@ import { SimsModule } from './modules/sims/sims.module';
 import { UsersModule } from './modules/users/users.module';
 import { FileService } from './services/file.service';
 import { PrismaService } from './services/prisma.service';
+import { TealPollingService } from './services/teal-polling.service';
 import { SessionService } from './session/session.service';
 import { DeviceManagerModule } from './modules/device-manager/device-manager.module';
 import { InConnectModule } from './modules/in-connect/in-connect.module';
+import { TealWebhooksController } from './modules/teal-webhooks/teal-webhooks.controller';
 
 @Module({
   imports: [
@@ -31,10 +33,11 @@ import { InConnectModule } from './modules/in-connect/in-connect.module';
     DeviceManagerModule,
     InConnectModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, TealWebhooksController],
   providers: [
     AppService,
     FileService,
+    TealPollingService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ApiResponseInterceptor,

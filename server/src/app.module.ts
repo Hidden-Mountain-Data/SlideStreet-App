@@ -54,6 +54,7 @@ import { TealWebhooksModule } from './modules/teal-webhooks/teal-webhooks.module
     PrismaService,
     SessionService,
   ],
+  exports: [PrismaService],
 })
 export class AppModule { }
 // export class AppModule implements NestModule {

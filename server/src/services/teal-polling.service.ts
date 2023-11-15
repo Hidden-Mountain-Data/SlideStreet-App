@@ -72,6 +72,9 @@ export class TealPollingService {
             }
           });
 
+          this.logger.log('Sent post request to Teal API');
+          this.logger.log('Response: ', response);
+
           // response should be 200 ok if the request was successful
           if(response.status === 200) {
             this.logger.log('Successfully sent post request to Teal API');

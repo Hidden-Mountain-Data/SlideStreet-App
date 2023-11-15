@@ -5,10 +5,11 @@ import { SimsService } from '../sims/sims.service';
 import { DataUsageService } from '../data-usage/data-usage.service';
 import { DataUsageModule } from '../data-usage/data-usage.module'; // Import the DataUsageModule
 import { PrismaService } from '../../services/prisma.service';
+import { UserProvider } from '../users/user.provider';
 
 @Module({
     imports: [DataUsageModule],
     controllers: [TealWebhooksController],
-    providers: [TealPollingService, SimsService, DataUsageService, PrismaService],
+    providers: [TealPollingService, SimsService, DataUsageService, PrismaService, UserProvider],
 })
 export class TealWebhooksModule { }

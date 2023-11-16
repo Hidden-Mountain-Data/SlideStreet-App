@@ -1,4 +1,5 @@
 import 'package:client/models/data_usage.dart';
+import 'package:client/models/router.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -11,12 +12,14 @@ class RouterUsageCard extends StatefulWidget {
   final String title;
   final String totalUsage;
   final List<DataUsage> usageData;
+  final List<Routers> routerData;
 
   const RouterUsageCard({
     super.key,
     required this.title,
     required this.totalUsage,
     required this.usageData,
+    required this.routerData,
   });
 
   @override
@@ -25,6 +28,16 @@ class RouterUsageCard extends StatefulWidget {
 
 class _RouterUsageCardState extends State<RouterUsageCard> {
   int xAxisTitlesCount = 7;
+
+  // A predefined color palette for routers
+  final List<Color> routerColorsPalette = [
+    Colors.blue,
+    Colors.green,
+    Colors.orange,
+    Colors.purple,
+    Colors.red,
+    Colors.teal,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -41,54 +54,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Usage',
-                      style: TextStyle(
-                          fontSize: 28.0, fontWeight: FontWeight.bold),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 0),
-                      decoration: BoxDecoration(
-                          color: themeNotifier.isDarkMode
-                              ? const Color.fromARGB(255, 91, 91, 91)
-                              : const Color.fromARGB(255, 195, 195, 195),
-                          borderRadius: BorderRadius.circular(10)),
-                      child: DropdownButton<String>(
-                        value: selectedTimeFrame,
-                        dropdownColor: themeNotifier.isDarkMode
-                            ? const Color.fromARGB(255, 91, 91, 91)
-                            : const Color.fromARGB(255, 195, 195, 195),
-                        onChanged: (newValue) {
-                          setState(() {
-                            selectedTimeFrame = newValue!;
-                            updateXAxisTitlesCount();
-                          });
-                        },
-                        items: ['1 Week', '1 Month', '6 Months', '1 Year']
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value,
-                                style: TextStyle(
-                                    color: themeNotifier.isDarkMode
-                                        ? Colors.white
-                                        : Colors.black)),
-                          );
-                        }).toList(),
-                        icon: Icon(Icons.arrow_drop_down,
-                            color: themeNotifier.isDarkMode
-                                ? Colors.white
-                                : Colors.black),
-                        iconSize: 32,
-                        underline: const SizedBox(),
-                      ),
-                    ),
-                  ],
-                ),
+                _buildHeader(themeNotifier),
                 const SizedBox(height: 8.0),
                 Text(
                   'Total Usage: ${widget.totalUsage}',
@@ -97,62 +63,130 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
                 ),
                 const SizedBox(height: 8.0),
                 const SizedBox(height: 16.0),
-                Container(
-                  height: 200.0,
-                  margin: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: BarChart(
-                    BarChartData(
-                      alignment: BarChartAlignment.spaceEvenly,
-                      maxY: getMaxUsageValue(),
-                      gridData: const FlGridData(
-                          drawHorizontalLine: false, drawVerticalLine: false),
-                      titlesData: FlTitlesData(
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                              reservedSize: 36.0,
-                              showTitles: true,
-                              interval: getMaxUsageValue() / 5.0),
-                        ),
-                        bottomTitles: AxisTitles(
-                          axisNameSize: 16.0,
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            getTitlesWidget: getTitles,
-                          ),
-                          drawBelowEverything: true,
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                      ),
-                      borderData: FlBorderData(
-                        show: true,
-                        border: Border(
-                            bottom: BorderSide(
-                              color: themeNotifier.isDarkMode
-                                  ? Colors.white
-                                  : const Color(0xff37434d),
-                              width: 1,
-                            ),
-                            left: BorderSide(
-                              color: themeNotifier.isDarkMode
-                                  ? Colors.white
-                                  : const Color(0xff37434d),
-                              width: 1,
-                            )),
-                      ),
-                      barGroups: getBarGroups(),
-                    ),
-                  ),
-                ),
+                _buildBarChart(themeNotifier),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildHeader(ThemeNotifier themeNotifier) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Usage',
+          style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
+        ),
+        _buildDropdownButton(themeNotifier),
+      ],
+    );
+  }
+
+  Widget _buildDropdownButton(ThemeNotifier themeNotifier) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+      decoration: BoxDecoration(
+        color: themeNotifier.isDarkMode
+            ? const Color.fromARGB(255, 91, 91, 91)
+            : const Color.fromARGB(255, 195, 195, 195),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: DropdownButton<String>(
+        value: selectedTimeFrame,
+        dropdownColor: themeNotifier.isDarkMode
+            ? const Color.fromARGB(255, 91, 91, 91)
+            : const Color.fromARGB(255, 195, 195, 195),
+        onChanged: (newValue) {
+          setState(() {
+            selectedTimeFrame = newValue!;
+          });
+        },
+        items: ['1 Week', '1 Month', '6 Months', '1 Year']
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(
+              value,
+              style: TextStyle(
+                  color:
+                      themeNotifier.isDarkMode ? Colors.white : Colors.black),
+            ),
+          );
+        }).toList(),
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: themeNotifier.isDarkMode ? Colors.white : Colors.black,
+        ),
+        iconSize: 32,
+        underline: const SizedBox(),
+      ),
+    );
+  }
+
+  Widget _buildBarChart(ThemeNotifier themeNotifier) {
+    return Container(
+      height: 200.0,
+      margin: const EdgeInsets.symmetric(vertical: 16.0),
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceEvenly,
+          maxY: getMaxUsageValue(),
+          gridData: const FlGridData(
+            drawHorizontalLine: false,
+            drawVerticalLine: false,
+          ),
+          titlesData: _buildTitlesData(),
+          borderData: _buildBorderData(themeNotifier),
+          barGroups: getBarGroups(),
+        ),
+      ),
+    );
+  }
+
+  FlTitlesData _buildTitlesData() {
+    return FlTitlesData(
+      leftTitles: AxisTitles(
+        sideTitles: SideTitles(
+          reservedSize: 36.0,
+          showTitles: true,
+          interval: getMaxUsageValue() / 5.0,
+        ),
+      ),
+      bottomTitles: AxisTitles(
+        axisNameSize: 16.0,
+        sideTitles: SideTitles(
+          showTitles: true,
+          getTitlesWidget: getTitles,
+        ),
+        drawBelowEverything: true,
+      ),
+      rightTitles: const AxisTitles(
+        sideTitles: SideTitles(showTitles: false),
+      ),
+      topTitles: const AxisTitles(
+        sideTitles: SideTitles(showTitles: false),
+      ),
+    );
+  }
+
+  FlBorderData _buildBorderData(ThemeNotifier themeNotifier) {
+    return FlBorderData(
+      show: true,
+      border: Border(
+        bottom: BorderSide(
+          color:
+              themeNotifier.isDarkMode ? Colors.white : const Color(0xff37434d),
+          width: 1,
+        ),
+        left: BorderSide(
+          color:
+              themeNotifier.isDarkMode ? Colors.white : const Color(0xff37434d),
+          width: 1,
+        ),
+      ),
     );
   }
 
@@ -167,72 +201,120 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     return maxUsage.truncate() + 1.0;
   }
 
-  void updateXAxisTitlesCount() {
-    switch (selectedTimeFrame) {
-      case '1 Week':
-        xAxisTitlesCount = 7;
-        break;
-      case '1 Month':
-        xAxisTitlesCount = 4;
-        break;
-      case '6 Months':
-        xAxisTitlesCount = 6;
-        break;
-      case '1 Year':
-        xAxisTitlesCount = 4;
-        break;
-      default:
-        xAxisTitlesCount = 7;
-    }
-  }
-
   List<BarChartGroupData> getBarGroups() {
     final List<BarChartGroupData> barGroups = [];
     final routerColors = <String, Color>{};
+    final List<String> uniqueDates = getUniqueDates();
 
     for (int index = 0; index < widget.usageData.length; index++) {
       final DataUsage routerData = widget.usageData[index];
-      const String routerName = 'temp';
+      final Routers router = widget.routerData[index];
+      final String routerName = router.name;
       final double usageValue = double.parse(routerData.dataUsage) / 1000;
-      final DateTime date = DateTime.parse(routerData.createdAt!);
+      final int dateId = routerData.dateId;
+      final String dateIdString = dateId.toString();
+      final DateTime date = DateTime(
+        int.parse(dateIdString.substring(0, 4)), // Year
+        int.parse(dateIdString.substring(4, 6)), // Month
+        int.parse(dateIdString.substring(6, 8)), // Day
+      );
 
       if (isWithinTimeFrame(date)) {
+        final groupIndex = getGroupingIndex(date);
+        final colorIndex = index % routerColorsPalette.length;
+
         final color = routerColors.putIfAbsent(
           routerName,
-          () => Color(
-            (1.0 - (routerName.hashCode / 1000).abs() * 0xFFFFFF).toInt() << 0,
-          ),
+          () => routerColorsPalette[colorIndex],
         );
 
-        barGroups.add(
-          BarChartGroupData(
-            x: barGroups.length,
-            barRods: [
-              BarChartRodData(
-                toY: usageValue,
-                width: 16.0,
-                color: color,
-              ),
-            ],
-          ),
-        );
+        final existingBarGroupIndex =
+            barGroups.indexWhere((group) => group.x == groupIndex);
+
+        if (existingBarGroupIndex != -1) {
+          barGroups[existingBarGroupIndex].barRods.add(
+                BarChartRodData(
+                  toY: usageValue,
+                  width: 16.0,
+                  color: color,
+                ),
+              );
+        } else {
+          barGroups.add(
+            BarChartGroupData(
+              x: groupIndex,
+              barRods: [
+                BarChartRodData(
+                  toY: usageValue,
+                  width: 16.0,
+                  color: color,
+                ),
+              ],
+            ),
+          );
+        }
       }
     }
 
     return barGroups;
   }
 
-  List<DateTime> getUniqueDates() {
-    final List<DateTime> uniqueDates = [];
+  int getGroupingIndex(DateTime date) {
+    switch (selectedTimeFrame) {
+      case '1 Week':
+        return date.weekday - 1; // Index based on the day of the week (0-6)
+      case '1 Month':
+        return date.day - 1; // Index based on the day of the month (0-30/31)
+      case '6 Months':
+        return date.month - 1; // Index based on the month (0-11)
+      case '1 Year':
+        return (date.month - 1) ~/ 3; // Index based on the quarter (0-3)
+      default:
+        return 0;
+    }
+  }
+
+  List<String> getUniqueDates() {
+    final List<String> uniqueDates = [];
 
     for (final routerData in widget.usageData) {
-      final DateTime date = DateTime.parse(routerData.createdAt!);
-      if (!uniqueDates.contains(date)) {
-        uniqueDates.add(date);
+      final int dateId = routerData.dateId;
+      final String dateIdString = dateId.toString();
+      final DateTime date = DateTime(
+        int.parse(dateIdString.substring(0, 4)), // Year
+        int.parse(dateIdString.substring(4, 6)), // Month
+        int.parse(dateIdString.substring(6, 8)), // Day
+      );
+      if (!uniqueDates.contains(date) && isWithinTimeFrame(date)) {
+        String dayOfWeekTitle = getDayOfWeekTitle(date.weekday - 1);
+        uniqueDates.add(dayOfWeekTitle);
       }
     }
 
     return uniqueDates;
+  }
+
+  List<String> getUniqueWeekTitles() {
+    List<String> uniqueWeekTitles = [];
+    for (int index = 0; index < widget.usageData.length; index++) {
+      final DataUsage routerData = widget.usageData[index];
+      final int dateId = routerData.dateId;
+      final String dateIdString = dateId.toString();
+      final DateTime date = DateTime(
+        int.parse(dateIdString.substring(0, 4)), // Year
+        int.parse(dateIdString.substring(4, 6)), // Month
+        int.parse(dateIdString.substring(6, 8)), // Day
+      );
+      int value = date.day - 1;
+      if (isWithinTimeFrame(date)) {
+        String weekTitle = getWeekOfMonthTitle(value);
+        if (!uniqueWeekTitles.contains(weekTitle)) {
+          uniqueWeekTitles.add(weekTitle);
+        }
+      }
+    }
+
+    return uniqueWeekTitles;
   }
 
   Widget getTitles(double value, TitleMeta meta) {
@@ -245,17 +327,22 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
     switch (selectedTimeFrame) {
       case '1 Week':
+        final List<String> uniqueDates = getUniqueDates();
         final int index = value.toInt();
-        final List<DateTime> uniqueDates = getUniqueDates();
-        if (index >= 0 && index < uniqueDates.length) {
-          final DateTime date = uniqueDates[index];
-          text = DateFormat('EEE').format(date);
+        if (uniqueDates.contains(getDayOfWeekTitle(index))) {
+          text = uniqueDates[index];
         } else {
           text = '';
         }
         break;
       case '1 Month':
-        text = getWeekOfMonthTitle(value.toInt());
+        int index = value.toInt() - 1;
+        List<String> uniqueWeekTitles = getUniqueWeekTitles();
+        if (uniqueWeekTitles.contains(getWeekOfMonthTitle(index))) {
+          text = getWeekOfMonthTitle(index);
+        } else {
+          text = '';
+        }
         break;
       case '6 Months':
         text = getMonthTitle(value.toInt());
@@ -276,33 +363,12 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
   }
 }
 
-String getDayOfWeekTitle(int index) {
-  switch (index) {
-    case 0:
-      return 'Mn';
-    case 1:
-      return 'Te';
-    case 2:
-      return 'Wd';
-    case 3:
-      return 'Tu';
-    case 4:
-      return 'Fr';
-    case 5:
-      return 'St';
-    case 6:
-      return 'Sn';
-    default:
-      return '';
-  }
-}
-
 bool isWithinTimeFrame(DateTime date) {
   DateTime currentDate = DateTime.now();
 
   switch (selectedTimeFrame) {
     case '1 Week':
-      return currentDate.difference(date).inDays <= 7;
+      return currentDate.difference(date).inDays.abs() < 7;
     case '1 Month':
       return currentDate.month == date.month && currentDate.year == date.year;
     case '6 Months':
@@ -316,19 +382,33 @@ bool isWithinTimeFrame(DateTime date) {
   }
 }
 
-String getWeekOfMonthTitle(int index) {
-  switch (index) {
+String getDayOfWeekTitle(int index) {
+  String text = '';
+  switch (index + 1) {
     case 0:
-      return 'W1';
+      text = 'Sun';
     case 1:
-      return 'W2';
+      text = 'Mon';
     case 2:
-      return 'W3';
+      text = 'Tue';
     case 3:
-      return 'W4';
-    default:
-      return '';
+      text = 'Wed';
+    case 4:
+      text = 'Thu';
+    case 5:
+      text = 'Fri';
+    case 6:
+      text = 'Sat';
   }
+  print(text);
+  return text;
+}
+
+String getWeekOfMonthTitle(int index) {
+  // Calculate the week number based on the index
+  int weekNumber = (index ~/ 7) + 1;
+
+  return 'W$weekNumber';
 }
 
 String getMonthTitle(int index) {
@@ -345,6 +425,18 @@ String getMonthTitle(int index) {
       return 'May';
     case 5:
       return 'Jun';
+    case 6:
+      return 'Jul';
+    case 7:
+      return 'Aug';
+    case 8:
+      return 'Sep';
+    case 9:
+      return 'Oct';
+    case 10:
+      return 'Nov';
+    case 11:
+      return 'Dec';
     default:
       return '';
   }

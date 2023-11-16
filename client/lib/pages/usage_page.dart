@@ -87,6 +87,7 @@ class UsagePageState extends State<UsagePage> {
                                   child: RouterUsageCard(
                                     title: "name",
                                     totalUsage: "total",
+                                    routerData: routers,
                                     usageData: snapshot.data!,
                                   ),
                                 );

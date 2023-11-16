@@ -24,6 +24,8 @@ class UserService {
       await storage.write(key: 'user', value: jsonEncode(user['data']));
       return User.fromJson(user);
     } else {
+      print("response");
+      print(response.body);
       return null;
     }
   }

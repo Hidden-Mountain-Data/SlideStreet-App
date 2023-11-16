@@ -43,9 +43,9 @@ const upgradeBanner = computed(() => {
     <!-- 👉 Pages -->
     <!-- <VerticalNavSectionTitle :item="{ heading: 'Pages' }" /> -->
     <VerticalNavLink :item="{
-      title: 'Devices',
-      to: 'devices',
-      icon: { icon: 'mdi-devices' }
+      title: 'Carriers',
+      to: 'carriers',
+      icon: { icon: 'mdi-wifi' }
     }" />
     <!-- <VerticalNavLink :item="{
       title: 'Register',

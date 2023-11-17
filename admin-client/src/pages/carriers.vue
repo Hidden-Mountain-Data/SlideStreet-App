@@ -1,15 +1,15 @@
 <template>
   <VRow class="match-height">
     <VCol cols="12">
-      <DeviceDataTable />
+      <CarrierWithPlans />
     </VCol>
   </VRow>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import DeviceDataTable from '@/views/dashboards/DeviceDataTable.vue'
 import DeviceService from '@/services/deviceServices'
+import CarrierWithPlans from '@/views/dashboards/CarrierWithPlans.vue'
 const deviceService = new DeviceService()
 
 onMounted(async () => {

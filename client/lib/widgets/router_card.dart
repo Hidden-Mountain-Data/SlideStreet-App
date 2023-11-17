@@ -3,52 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 
-class TopRoundedBorderShape extends ShapeBorder {
-  final Color borderColor;
-  const TopRoundedBorderShape(this.borderColor);
-
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    return Path()
-      ..addRRect(RRect.fromRectAndCorners(rect,
-          topLeft: const Radius.circular(10.0),
-          topRight: const Radius.circular(10.0)));
-  }
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    return Path()
-      ..addRRect(RRect.fromRectAndCorners(rect,
-          topLeft: const Radius.circular(10.0),
-          topRight: const Radius.circular(10.0)))
-      ..addRect(
-          Rect.fromLTRB(rect.left, rect.bottom - 6, rect.right, rect.bottom));
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
-    final borderPaint = Paint()
-      ..color = borderColor
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    final roundedRect = RRect.fromRectAndCorners(
-        Rect.fromLTRB(rect.left, rect.top, rect.right, rect.bottom),
-        topLeft: const Radius.circular(10.0),
-        topRight: const Radius.circular(10.0));
-
-    canvas.drawRRect(roundedRect, borderPaint);
-  }
-
-  @override
-  ShapeBorder scale(double t) {
-    return TopRoundedBorderShape(borderColor);
-  }
-}
-
 class RouterCard extends StatelessWidget {
   final String name;
   final String status;
@@ -98,10 +52,22 @@ class RouterCard extends StatelessWidget {
     return Consumer<ThemeNotifier>(
       builder: (context, themeNotifier, child) {
         Color borderColor = themeNotifier.isDarkMode
-            ? const Color.fromARGB(255, 74, 74, 74)
-            : const Color.fromARGB(255, 205, 205, 205);
-        return Card(
-          shape: TopRoundedBorderShape(borderColor),
+            ? const Color.fromARGB(255, 79, 79, 83)
+            : const Color.fromARGB(255, 212, 212, 212);
+        return Container(
+          margin: const EdgeInsets.all(16.0), // Adjust margin as needed
+          decoration: BoxDecoration(
+            color: themeNotifier.isDarkMode
+                ? const Color.fromARGB(255, 62, 62, 66)
+                : const Color.fromARGB(255, 195, 195, 195),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(10.0),
+            ),
+            border: Border.all(
+              color: borderColor,
+              width: 2.0,
+            ),
+          ),
           child: ListTile(
             leading: Container(
               width: 50,
@@ -110,7 +76,10 @@ class RouterCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: _getStatusColor(),
                 border: Border.all(
-                    color: const Color.fromARGB(255, 99, 98, 98), width: 2),
+                  color: themeNotifier.isDarkMode
+                      ? const Color.fromARGB(255, 61, 61, 61)
+                      : const Color.fromARGB(255, 205, 205, 205),
+                ),
               ),
             ),
             title: Text(
@@ -125,32 +94,41 @@ class RouterCard extends StatelessWidget {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Status: $status',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: themeNotifier.isDarkMode
-                          ? const Color.fromARGB(255, 223, 223, 223)
-                          : Colors.black),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    'Status: $status',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: themeNotifier.isDarkMode
+                            ? const Color.fromARGB(255, 223, 223, 223)
+                            : Colors.black),
+                  ),
                 ),
-                Text(
-                  'Usage: $usage',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: themeNotifier.isDarkMode
-                          ? const Color.fromARGB(255, 223, 223, 223)
-                          : Colors.black),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    'Usage: $usage',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: themeNotifier.isDarkMode
+                            ? const Color.fromARGB(255, 223, 223, 223)
+                            : Colors.black),
+                  ),
                 ),
-                Text(
-                  'Signal Strength: $signalStrength',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: themeNotifier.isDarkMode
-                          ? const Color.fromARGB(255, 223, 223, 223)
-                          : Colors.black),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    'Signal Strength: $signalStrength',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: themeNotifier.isDarkMode
+                            ? const Color.fromARGB(255, 223, 223, 223)
+                            : Colors.black),
+                  ),
                 ),
               ],
             ),
@@ -192,27 +170,30 @@ class ColoredTopRoundedBorderShape extends ShapeBorder {
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     return Path()
-      ..addRRect(RRect.fromRectAndCorners(rect,
-          topLeft: const Radius.circular(10.0),
-          topRight: const Radius.circular(10.0)));
+      ..addRRect(RRect.fromRectAndCorners(
+        rect,
+        topLeft: const Radius.circular(10.0),
+        topRight: const Radius.circular(10.0),
+      ));
   }
 
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return Path()
-      ..addRRect(RRect.fromRectAndCorners(rect,
-          topLeft: const Radius.circular(10.0),
-          topRight: const Radius.circular(10.0)))
-      ..addRect(Rect.fromLTRB(
-          rect.left, rect.bottom - 6, rect.right, rect.bottom + 6));
+      ..addRRect(RRect.fromRectAndCorners(
+        rect,
+        topLeft: const Radius.circular(10.0),
+        topRight: const Radius.circular(10.0),
+      ));
   }
 
   @override
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     final paint = Paint()..color = color;
     canvas.drawRect(
-        Rect.fromLTRB(rect.left, rect.bottom - 6, rect.right, rect.bottom + 6),
-        paint);
+      Rect.fromLTRB(rect.left, rect.bottom - 4, rect.right, rect.bottom + 4),
+      paint,
+    );
   }
 
   @override
@@ -266,6 +247,9 @@ class RouterCard2 extends StatelessWidget {
     return Consumer<ThemeNotifier>(
       builder: (context, themeNotifier, child) {
         return Card(
+          color: themeNotifier.isDarkMode
+              ? const Color.fromARGB(255, 78, 72, 72)
+              : const Color.fromARGB(255, 209, 208, 208),
           shape: ColoredTopRoundedBorderShape(_getStatusColor()),
           child: ListTile(
             title: Text(

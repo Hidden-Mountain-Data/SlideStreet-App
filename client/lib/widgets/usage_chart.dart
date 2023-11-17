@@ -30,11 +30,11 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
   // A predefined color palette for routers
   final List<Color> routerColorsPalette = [
-    Colors.blue,
-    Colors.green,
-    Colors.orange,
+    const Color.fromARGB(255, 147, 193, 28),
+    const Color.fromARGB(255, 36, 136, 254),
+    const Color.fromARGB(255, 244, 146, 136),
     Colors.purple,
-    Colors.red,
+    const Color.fromARGB(255, 174, 150, 107),
     Colors.teal,
   ];
 
@@ -42,11 +42,20 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
   Widget build(BuildContext context) {
     return Consumer<ThemeNotifier>(
       builder: (context, themeNotifier, child) {
-        return Card(
-          color: themeNotifier.isDarkMode
-              ? const Color.fromARGB(255, 37, 37, 38)
-              : const Color.fromARGB(255, 195, 195, 195),
-          elevation: 4.0,
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(
+              10.0,
+            ),
+            color: themeNotifier.isDarkMode
+                ? const Color.fromARGB(255, 62, 62, 66)
+                : const Color.fromARGB(255, 195, 195, 195),
+            border: Border.all(
+              color: themeNotifier.isDarkMode
+                  ? const Color.fromARGB(255, 79, 79, 83)
+                  : const Color.fromARGB(255, 212, 212, 212),
+            ),
+          ),
           margin: const EdgeInsets.all(16.0),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -86,18 +95,18 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
   Widget _buildDropdownButton(ThemeNotifier themeNotifier) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 0),
       decoration: BoxDecoration(
         color: themeNotifier.isDarkMode
             ? const Color.fromARGB(255, 91, 91, 91)
-            : const Color.fromARGB(255, 195, 195, 195),
+            : const Color.fromARGB(255, 255, 255, 255),
         borderRadius: BorderRadius.circular(10),
       ),
       child: DropdownButton<String>(
         value: selectedTimeFrame,
         dropdownColor: themeNotifier.isDarkMode
             ? const Color.fromARGB(255, 91, 91, 91)
-            : const Color.fromARGB(255, 195, 195, 195),
+            : const Color.fromARGB(255, 255, 255, 255),
         onChanged: (newValue) {
           setState(() {
             selectedTimeFrame = newValue!;
@@ -232,8 +241,9 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
         if (existingBarGroupIndex != -1) {
           barGroups[existingBarGroupIndex].barRods.add(
                 BarChartRodData(
+                  borderRadius: const BorderRadius.all(Radius.zero),
                   toY: usageValue,
-                  width: 16.0,
+                  width: 16.0, // Set the desired width of the bars
                   color: color,
                 ),
               );
@@ -243,8 +253,9 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
               x: groupIndex,
               barRods: [
                 BarChartRodData(
+                  borderRadius: const BorderRadius.all(Radius.zero),
                   toY: usageValue,
-                  width: 16.0,
+                  width: 16.0, // Set the desired width of the bars
                   color: color,
                 ),
               ],

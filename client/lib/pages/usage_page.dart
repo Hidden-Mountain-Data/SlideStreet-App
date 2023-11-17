@@ -130,7 +130,7 @@ class UsagePageState extends State<UsagePage> {
                                         status: routerData.sims[0].status,
                                         usage: convertUsage(double.parse(
                                             snapshot.data!.dataUsage)),
-                                        signalStrength: "temp",
+                                        signalStrength: "Excellent",
                                         imei: routerData.imei,
                                         simNumber: routerData.sims[0].iccid,
                                         ipAddress:

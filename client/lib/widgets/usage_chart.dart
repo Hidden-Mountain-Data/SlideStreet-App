@@ -2,7 +2,6 @@ import 'package:client/models/data_usage.dart';
 import 'package:client/models/router.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 
@@ -204,7 +203,6 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
   List<BarChartGroupData> getBarGroups() {
     final List<BarChartGroupData> barGroups = [];
     final routerColors = <String, Color>{};
-    final List<String> uniqueDates = getUniqueDates();
 
     for (int index = 0; index < widget.usageData.length; index++) {
       final DataUsage routerData = widget.usageData[index];
@@ -264,7 +262,8 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
       case '1 Week':
         return date.weekday - 1; // Index based on the day of the week (0-6)
       case '1 Month':
-        return date.day - 1; // Index based on the day of the month (0-30/31)
+        return (date.day - 1) ~/
+            7; // Index based on the day of the month (0-30/31)
       case '6 Months':
         return date.month - 1; // Index based on the month (0-11)
       case '1 Year':
@@ -281,16 +280,16 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
       final int dateId = routerData.dateId;
       final String dateIdString = dateId.toString();
       final DateTime date = DateTime(
-        int.parse(dateIdString.substring(0, 4)), // Year
-        int.parse(dateIdString.substring(4, 6)), // Month
-        int.parse(dateIdString.substring(6, 8)), // Day
+        int.parse(dateIdString.substring(0, 4)),
+        int.parse(dateIdString.substring(4, 6)),
+        int.parse(dateIdString.substring(6, 8)),
       );
-      if (!uniqueDates.contains(date) && isWithinTimeFrame(date)) {
+
+      if (isWithinTimeFrame(date)) {
         String dayOfWeekTitle = getDayOfWeekTitle(date.weekday - 1);
         uniqueDates.add(dayOfWeekTitle);
       }
     }
-
     return uniqueDates;
   }
 
@@ -301,9 +300,9 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
       final int dateId = routerData.dateId;
       final String dateIdString = dateId.toString();
       final DateTime date = DateTime(
-        int.parse(dateIdString.substring(0, 4)), // Year
-        int.parse(dateIdString.substring(4, 6)), // Month
-        int.parse(dateIdString.substring(6, 8)), // Day
+        int.parse(dateIdString.substring(0, 4)),
+        int.parse(dateIdString.substring(4, 6)),
+        int.parse(dateIdString.substring(6, 8)),
       );
       int value = date.day - 1;
       if (isWithinTimeFrame(date)) {
@@ -329,20 +328,12 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
       case '1 Week':
         final List<String> uniqueDates = getUniqueDates();
         final int index = value.toInt();
-        if (uniqueDates.contains(getDayOfWeekTitle(index))) {
-          text = uniqueDates[index];
-        } else {
-          text = '';
-        }
+        text = uniqueDates[index + 1];
         break;
       case '1 Month':
-        int index = value.toInt() - 1;
-        List<String> uniqueWeekTitles = getUniqueWeekTitles();
-        if (uniqueWeekTitles.contains(getWeekOfMonthTitle(index))) {
-          text = getWeekOfMonthTitle(index);
-        } else {
-          text = '';
-        }
+        int index = value.toInt();
+        text = getWeekOfMonthTitle(index);
+
         break;
       case '6 Months':
         text = getMonthTitle(value.toInt());
@@ -400,13 +391,11 @@ String getDayOfWeekTitle(int index) {
     case 6:
       text = 'Sat';
   }
-  print(text);
   return text;
 }
 
 String getWeekOfMonthTitle(int index) {
-  // Calculate the week number based on the index
-  int weekNumber = (index ~/ 7) + 1;
+  int weekNumber = (index) + 1;
 
   return 'W$weekNumber';
 }

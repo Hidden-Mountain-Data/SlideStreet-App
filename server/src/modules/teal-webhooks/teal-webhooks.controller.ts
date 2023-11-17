@@ -5,7 +5,7 @@ import {
     Param
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
-import { TealPollingService } from '../../services/teal-polling.service';
+import { TealPollingService } from '../tasks/tasks.service';
 import { DataUsage } from 'src/types/teal-types';
 import { DataUsageService } from '../data-usage/data-usage.service';
 import { SimsService } from '../sims/sims.service';

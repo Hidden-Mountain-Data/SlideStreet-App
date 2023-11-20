@@ -64,7 +64,7 @@ export class TealPollingService {
           //Generate a random alphanumeric uuid for the request id of 32 characters
           const requestId = this.generateUUID();
 
-          const response = await this.tealAxiosInstance.post('/api/v1/esim/data-usage', {
+          const response = await this.tealAxiosInstance.post('/api/v1/data-consumption/data', {
             params: {
               requestId,
               limit: 100,

@@ -28,7 +28,7 @@ import UserProfile from '@/layouts/components/UserProfile.vue'
           icon="mdi-github"
         />
       </a> -->
-      <!-- <NavbarThemeSwitcher /> -->
+      <NavbarThemeSwitcher />
       <VBtn icon variant="text" color="default" class="me-2" size="small">
         <VIcon icon="mdi-bell-outline" size="24" />
       </VBtn>

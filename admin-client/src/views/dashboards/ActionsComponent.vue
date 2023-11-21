@@ -1,9 +1,9 @@
 <template>
   <div style="width: 150;">
-    <v-icon class="action-icon" icon="mdi-information" @click="info" color="info"></v-icon>
-    <v-icon class="action-icon" icon="mdi-play" @click="activate" color="success"></v-icon>
-    <v-icon class="action-icon" icon="mdi-pause" @click="suspend" color="info"></v-icon>
-    <v-icon class="action-icon" icon="mdi-delete" @click="deleteItem" color="warning"></v-icon>
+    <v-icon class="action-icon" icon="mdi-information" @click="info" color="info" />
+    <v-icon class="action-icon" icon="mdi-play" @click="confirmActivate" color="success" />
+    <v-icon class="action-icon" icon="mdi-pause" @click="confirmSuspend" color="info" />
+    <v-icon class="action-icon" icon="mdi-delete" @click="confirmDelete" color="warning" />
   </div>
 </template>
 
@@ -17,21 +17,36 @@ export default {
     },
   },
   methods: {
+    confirmActivate() {
+      if(window.confirm('Are you sure you want to activate this device?')) {
+        this.activate();
+      }
+    },
+    confirmSuspend() {
+      if(window.confirm('Are you sure you want to suspend this device?')) {
+        this.suspend();
+      }
+    },
+    confirmDelete() {
+      if(window.confirm('Are you sure you want to delete this device?')) {
+        this.deleteItem();
+      }
+    },
     activate() {
       // Logic for Activate action
-      console.log('Activate action clicked', this.params.data.iccid)
+      console.log('Activate action clicked');
     },
     suspend() {
       // Logic for Suspend action
-      console.log('Suspend action clicked')
+      console.log('Suspend action clicked');
     },
     info() {
       // Logic for Info action
-      console.log('Info action clicked')
+      console.log('Info action clicked');
     },
     deleteItem() {
       // Logic for Delete action
-      console.log('Delete action clicked')
+      console.log('Delete action clicked');
     },
   },
 }
@@ -53,3 +68,4 @@ export default {
 
 /* Add any additional styling as per your requirements */
 </style>
+      

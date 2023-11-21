@@ -2,24 +2,34 @@
   <div style="width: 100%; height: 500px;">
     <ag-grid-vue style="width: 100%; height: 100%;" class="ag-theme-alpine" :gridOptions="gridOptions"
       @gridReady="onGridReady"></ag-grid-vue>
-    <!-- <ag-grid-vue :gridOptions="gridOptions" style="width: 100%; height: 100%;" class="ag-theme-alpine-dark" /> -->
   </div>
+  <!-- :class="{ 'ag-theme-alpine': theme === 'light', 'ag-theme-alpine-dark': theme === 'dark' }" -->
 </template>
 
 <script lang="ts">
+import { useTheme } from 'vuetify'
 import { AgGridVue } from 'ag-grid-vue3'
 import ActionsComponent from './ActionsComponent.vue'
+
+
 export default {
   components: {
     AgGridVue,
     ActionsComponent
   },
+  // vuetifyTheme: useTheme(),
   data() {
     return {
+      // theme: computed(() => {
+      //   return this.vuetifyTheme.global.name.value === 'light'
+      //     ? 'light'
+      //     : 'dark'
+      // }),
       gridOptions: {
         columnDefs: [
           { headerName: 'Active', field: 'active', sortable: true, resizable: true },
           { headerName: 'Status', field: 'status', sortable: true, filter: true, resizable: true },
+          { headerName: 'Activation Date', field: 'activationDate', sortable: true, filter: true, resizable: true },
           { headerName: 'Usage', field: 'usage', sortable: true, filter: true, resizable: true },
           { headerName: 'Cap', field: 'cap', sortable: true, filter: true, resizable: true },
           { headerName: 'Plan', field: 'plan', sortable: true, filter: true, resizable: true },
@@ -43,6 +53,7 @@ export default {
           {
             active: true,
             status: 'Active',
+            activationDate: '2021-01-01',
             usage: 123456,
             cap: 54321,
             plan: 'Premium',
@@ -53,6 +64,7 @@ export default {
           {
             active: false,
             status: 'Inactive',
+            activationDate: '2021-01-01',
             usage: 123453,
             cap: 54321,
             plan: 'Basic',

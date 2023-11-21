@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../styles/button_styles.dart';
 
-class GoogleSignInButton extends StatefulWidget {
-  const GoogleSignInButton({Key? key}) : super(key: key);
+class AppleSignInButton extends StatefulWidget {
+  const AppleSignInButton({Key? key}) : super(key: key);
 
   @override
-  GoogleSignInButtonState createState() => GoogleSignInButtonState();
+  AppleSignInButtonState createState() => AppleSignInButtonState();
 }
 
-class GoogleSignInButtonState extends State<GoogleSignInButton> {
+class AppleSignInButtonState extends State<AppleSignInButton> {
   bool _isSigningIn = false;
 
   @override
@@ -29,7 +29,7 @@ class GoogleSignInButtonState extends State<GoogleSignInButton> {
                   _isSigningIn = true;
                 });
 
-                // TODO: Add method call to the Google Sign-In authentication
+                // TODO: Add method call to the Apple Sign-In authentication
 
                 setState(() {
                   _isSigningIn = false;
@@ -42,13 +42,13 @@ class GoogleSignInButtonState extends State<GoogleSignInButton> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Image(
-                      image: AssetImage("assets/google_logo.png"),
+                      image: AssetImage("assets/apple_logo.png"),
                       height: 35.0,
                     ),
                     Padding(
                       padding: EdgeInsets.only(left: 10),
                       child: Text(
-                        'Sign in with Google',
+                        'Sign in with Apple',
                         style: TextStyle(
                           fontSize: 20,
                           color: Colors.black54,

@@ -2,6 +2,7 @@ import 'package:client/notifiers/user_notifier.dart';
 import 'package:client/pages/sign_in.dart';
 import 'package:client/pages/usage_page.dart';
 import 'package:client/providers/user_service.dart';
+import 'package:client/styles/button_styles.dart';
 import 'package:client/widgets/text_fields/email_text_field.dart';
 import 'package:client/widgets/text_fields/password_text_field.dart';
 import 'package:flutter/material.dart';
@@ -218,11 +219,14 @@ class SignUpPageState extends State<SignUpPage> {
                         }
                       });
                     },
-                    child: const Text('Sign Up',
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 195, 250, 55))),
+                    child: const Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 195, 250, 55),
+                      ),
+                    ),
                   ),
                 ],
               ),

@@ -9,8 +9,6 @@ class ChangePasswordPage extends StatefulWidget {
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
 }
 
-late bool _passwordVisible;
-
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -19,7 +17,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   void initState() {
     super.initState();
-    _passwordVisible = false;
   }
 
   @override

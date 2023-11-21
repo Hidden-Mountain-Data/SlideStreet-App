@@ -14,9 +14,11 @@ import { SimsModule } from './modules/sims/sims.module';
 import { UsersModule } from './modules/users/users.module';
 import { FileService } from './services/file.service';
 import { PrismaService } from './services/prisma.service';
+import { TealPollingService } from './modules/tasks/tasks.service';
 import { SessionService } from './session/session.service';
 import { DeviceManagerModule } from './modules/device-manager/device-manager.module';
 import { InConnectModule } from './modules/in-connect/in-connect.module';
+import { TealWebhooksModule } from './modules/teal-webhooks/teal-webhooks.module';
 
 @Module({
   imports: [
@@ -30,11 +32,13 @@ import { InConnectModule } from './modules/in-connect/in-connect.module';
     ProxyModule,
     DeviceManagerModule,
     InConnectModule,
+    TealWebhooksModule
   ],
   controllers: [AppController],
   providers: [
     AppService,
     FileService,
+    TealPollingService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ApiResponseInterceptor,
@@ -50,8 +54,9 @@ import { InConnectModule } from './modules/in-connect/in-connect.module';
     PrismaService,
     SessionService,
   ],
+  exports: [PrismaService],
 })
-export class AppModule {}
+export class AppModule { }
 // export class AppModule implements NestModule {
 //   configure(consumer: MiddlewareConsumer): void {
 //     consumer.apply(DebugMiddleware).forRoutes('*');

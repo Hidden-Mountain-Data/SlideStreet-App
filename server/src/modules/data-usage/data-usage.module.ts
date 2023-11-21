@@ -27,5 +27,6 @@ import { DataUsageService } from './data-usage.service';
     SessionService,
     UserProvider,
   ],
+  exports: [DataUsageService],
 })
-export class DataUsageModule {}
+export class DataUsageModule { }

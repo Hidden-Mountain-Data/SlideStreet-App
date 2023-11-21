@@ -20,7 +20,7 @@ export class DataUsageService {
   constructor(
     private prisma: PrismaService,
     private readonly userProvider: UserProvider,
-  ) {}
+  ) { }
 
   private currentUser(): Users {
     return this.userProvider.user;
@@ -39,7 +39,7 @@ export class DataUsageService {
         where: { simId },
       });
 
-      if (!simExists) {
+      if(!simExists) {
         this.logger.error(`Router with ID ${simId} does not exist.`);
         throw new HttpException(
           `Router with ID ${simId} does not exist.`,
@@ -58,7 +58,7 @@ export class DataUsageService {
 
       (createdData.dataUsage as unknown) = createdData.dataUsage.toString();
       return createdData;
-    } catch (error: unknown) {
+    } catch(error: unknown) {
       this.logger.error(
         `Error creating data usage for userId: ${user.userId} and simId: ${simId}`,
         error,
@@ -81,7 +81,7 @@ export class DataUsageService {
         ...data,
         dataUsage: data.dataUsage.toString(),
       })) as unknown as DataUsages[];
-    } catch (error) {
+    } catch(error) {
       this.logger.error(
         `Error finding data usages for userId: ${user.userId}`,
         error,
@@ -96,7 +96,7 @@ export class DataUsageService {
         where: { simId },
       });
 
-      if (!foundDataArray.length) {
+      if(!foundDataArray.length) {
         this.logger.warn(`No data usage records found for simId ${simId}`);
         return;
       }
@@ -105,7 +105,7 @@ export class DataUsageService {
         ...data,
         dataUsage: data.dataUsage.toString(),
       })) as unknown as DataUsages[];
-    } catch (error: unknown) {
+    } catch(error: unknown) {
       this.logger.error(`Error finding data usage by simId: ${simId}`, error);
       throw new InternalServerErrorException(
         'Failed to find data usage for this sim',
@@ -121,7 +121,7 @@ export class DataUsageService {
       where: { dataUsageId },
     });
 
-    if (!existingData) {
+    if(!existingData) {
       this.logger.warn(`DataUsage with ID ${dataUsageId} does not exist.`);
       throw new NotFoundException(
         `DataUsage with ID ${dataUsageId} does not exist.`,
@@ -139,7 +139,7 @@ export class DataUsageService {
         ...updatedData,
         dataUsage: updatedData.dataUsage.toString(),
       };
-    } catch (error: unknown) {
+    } catch(error: unknown) {
       this.logger.error(
         `Error updating data usage with ID: ${dataUsageId}`,
         error,
@@ -148,12 +148,47 @@ export class DataUsageService {
     }
   }
 
+  //Create a method that uses prisma upsert to update or create a data usage record based on simId and dateId (dateId is an int with format yyyymmdd)
+  async upsertDataUsageBySimIdAndDateId(
+    userId: number,
+    simId: number,
+    dateId: number,
+    dataUsage: number,
+  ): Promise<void> {
+    try {
+      await this.prisma.dataUsages.upsert({
+        where: {
+          simId_dateId: {
+            simId,
+            dateId,
+          },
+        },
+        update: {
+          dataUsage: BigInt(dataUsage),
+        },
+        create: {
+          userId,
+          simId,
+          dateId,
+          dataUsage: BigInt(dataUsage),
+        },
+      });
+    } catch(error: unknown) {
+      this.logger.error(
+        `Error upserting data usage for simId: ${simId} and dateId: ${dateId}`,
+        error,
+      );
+      throw new InternalServerErrorException('Failed to upsert data usage');
+    }
+  }
+
+
   async removeOneDataUsage(dataUsageId: number): Promise<void | HttpException> {
     const existingData = await this.prisma.dataUsages.findUnique({
       where: { dataUsageId },
     });
 
-    if (!existingData) {
+    if(!existingData) {
       this.logger.warn(`DataUsage with ID ${dataUsageId} does not exist.`);
       throw new NotFoundException(
         `DataUsage with ID ${dataUsageId} does not exist.`,
@@ -164,7 +199,7 @@ export class DataUsageService {
       await this.prisma.dataUsages.delete({
         where: { dataUsageId },
       });
-    } catch (error: unknown) {
+    } catch(error: unknown) {
       this.logger.error(
         `Error removing data usage with ID: ${dataUsageId}`,
         error,

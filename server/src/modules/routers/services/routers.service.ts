@@ -20,7 +20,7 @@ export class RoutersService {
   constructor(
     private prisma: PrismaService,
     private readonly userProvider: UserProvider,
-  ) {}
+  ) { }
 
   private currentUser(): Users {
     return this.userProvider.user;
@@ -37,6 +37,8 @@ export class RoutersService {
       const newRouter = await this.prisma.routers.create({
         data: {
           imei: createRouterData.imei,
+          iccid: createRouterData.iccid,
+          serialNumber: createRouterData.serialNumber,
           userId: user.userId,
           name: createRouterData.name || null,
           notes: createRouterData.notes || null,
@@ -47,7 +49,7 @@ export class RoutersService {
         newRouter.routerId,
       )) as unknown as Prisma.SimsWhereUniqueInput;
 
-      if (newSim instanceof HttpException) {
+      if(newSim instanceof HttpException) {
         throw newSim;
       }
 
@@ -68,10 +70,9 @@ export class RoutersService {
         message: 'Router with embedded SIM added successfully!',
         router: updatedRouter,
       };
-    } catch (error) {
+    } catch(error) {
       this.logger.error(
-        `Error adding router to account for user: ${
-          user.userId
+        `Error adding router to account for user: ${user.userId
         }. DTO: ${JSON.stringify(createRouterData)}`,
         error instanceof Error ? error.stack : 'unknown error',
       );
@@ -99,7 +100,7 @@ export class RoutersService {
       });
 
       return newSim;
-    } catch (error) {
+    } catch(error) {
       this.logger.error(
         `Error creating embedded sim for routerId: ${routerId}`,
         error,
@@ -119,7 +120,7 @@ export class RoutersService {
         skip,
         take,
       });
-    } catch (error) {
+    } catch(error) {
       this.logger.error('Error finding All Routers:', error);
       throw new InternalServerErrorException('Could not find All Routers');
     }
@@ -137,7 +138,7 @@ export class RoutersService {
       });
 
       return routers;
-    } catch (error) {
+    } catch(error) {
       this.logger.error(
         `Error finding All Routers by userId: ${user.userId}`,
         error,
@@ -152,12 +153,12 @@ export class RoutersService {
         where: { routerId },
         include: { routerLocation: true, sims: true },
       });
-      if (!router) {
+      if(!router) {
         throw new NotFoundException('Router not found');
       }
 
       return router;
-    } catch (error) {
+    } catch(error) {
       this.logger.error(
         `Error finding details for routerId: ${routerId}`,
         error,
@@ -172,12 +173,12 @@ export class RoutersService {
         where: { routerId },
       });
 
-      if (!sim) {
+      if(!sim) {
         throw new NotFoundException('Sim not found');
       }
 
       return sim;
-    } catch (error) {
+    } catch(error) {
       this.logger.error(`Error finding sim by routerId: ${routerId}`, error);
       throw new InternalServerErrorException('Could not find sim by routerId');
     }
@@ -192,7 +193,7 @@ export class RoutersService {
         where: { routerId },
       });
 
-      if (!existingRouter) {
+      if(!existingRouter) {
         this.logger.warn(`Router with ID ${routerId} not found`);
         throw new NotFoundException(`Router with ID ${routerId} not found`);
       }
@@ -206,7 +207,7 @@ export class RoutersService {
       });
 
       return updatedRouter;
-    } catch (error) {
+    } catch(error) {
       this.logger.error(
         `Error updating sim with routerId: ${routerId}. DTO: ${JSON.stringify(
           updateRouterDto,
@@ -223,7 +224,7 @@ export class RoutersService {
       select: { simId: true },
     });
 
-    if (!routerDetails) {
+    if(!routerDetails) {
       this.logger.error(`Router with ID ${routerId} does not exist.`);
       throw new NotFoundException('Router not found');
     }
@@ -233,7 +234,7 @@ export class RoutersService {
       select: { embedded: true },
     });
 
-    if (!simDetails) {
+    if(!simDetails) {
       this.logger.error(`Sim with ID ${routerDetails.simId} does not exist.`);
       throw new NotFoundException('Sim not found');
     }
@@ -243,7 +244,7 @@ export class RoutersService {
         where: { routerId },
       });
 
-      if (simDetails && simDetails.embedded) {
+      if(simDetails && simDetails.embedded) {
         await this.prisma.sims.delete({
           where: { simId: routerDetails.simId },
         });
@@ -252,7 +253,7 @@ export class RoutersService {
       await this.prisma.routers.delete({
         where: { routerId },
       });
-    } catch (error) {
+    } catch(error) {
       this.logger.error('Error deleting router:', error);
       throw new InternalServerErrorException('Could not delete router');
     }

@@ -29,7 +29,7 @@ const testDataUsages: DataUsages[] = [
     simId: 3,
     userId: 1,
     dataUsage: 769n,
-    dateId: 20231215,
+    dateId: 20231115,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,

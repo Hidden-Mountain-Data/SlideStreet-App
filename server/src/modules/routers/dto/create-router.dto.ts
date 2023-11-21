@@ -6,6 +6,14 @@ export class CreateRouterDto {
   @IsAlphanumeric()
   imei: string;
 
+  @IsNotEmpty()
+  @IsAlphanumeric()
+  iccid: string;
+
+  @IsNotEmpty()
+  @IsAlphanumeric()
+  serialNumber: string;
+
   // @ValidateNested({ each: true })
   // @Type(() => CreateSimDto)
   // sims: CreateSimDto;

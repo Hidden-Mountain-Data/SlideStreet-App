@@ -1,15 +1,3 @@
-<script setup lang="ts">
-const newProject = {
-  title: 'PlanName',
-  color: 'primary',
-  icon: 'mdi-briefcase-variant-outline',
-  stats: '$.003 per MB',
-  change: -0,
-  subtitle: 'Cost',
-}
-import CardStatisticsVertical from '@core/components/CardStatisticsVertical.vue'
-</script>
-
 <template>
   <VCard>
     <VCardItem>
@@ -73,8 +61,8 @@ import CardStatisticsVertical from '@core/components/CardStatisticsVertical.vue'
           </VCol>
           <VCol cols="11">
             <VRow>
-              <VCol cols="3" v-for="i in 10" :key="i">
-                <CardStatisticsVertical v-bind="newProject" />
+              <VCol cols="4" v-for="i in 10" :key="i">
+                <CardStatisticsVertical v-bind="newProject" style="background-color: #232b39;" />
               </VCol>
             </VRow>
           </VCol>
@@ -83,6 +71,18 @@ import CardStatisticsVertical from '@core/components/CardStatisticsVertical.vue'
     </VCardText>
   </VCard>
 </template>
+<script setup lang="ts">
+import CardStatisticsVertical from '@core/components/CardStatisticsVertical.vue'
+const newProject = {
+  title: 'PlanName',
+  color: 'primary',
+  icon: 'mdi-briefcase-variant-outline',
+  stats: '$.003 per MB',
+  change: -0,
+  subtitle: 'Cost',
+}
+</script>
+
 
 <style lang="scss" scoped>
 .card-list {

@@ -37,6 +37,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     const Color.fromARGB(255, 174, 150, 107),
     Colors.teal,
   ];
+  final Map<double, List<String>> usageValueToNameMap = {};
 
   @override
   Widget build(BuildContext context) {
@@ -135,21 +136,109 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
   }
 
   Widget _buildBarChart(ThemeNotifier themeNotifier) {
-    return Container(
-      height: 200.0,
-      margin: const EdgeInsets.symmetric(vertical: 16.0),
-      child: BarChart(
-        BarChartData(
-          alignment: BarChartAlignment.spaceEvenly,
-          maxY: getMaxUsageValue(),
-          gridData: const FlGridData(
-            drawHorizontalLine: false,
-            drawVerticalLine: false,
+    return Expanded(
+      child: Column(
+        children: [
+          Expanded(
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceEvenly,
+                maxY: getMaxUsageValue(),
+                gridData: const FlGridData(
+                  drawHorizontalLine: false,
+                  drawVerticalLine: false,
+                ),
+                titlesData: _buildTitlesData(),
+                borderData: _buildBorderData(themeNotifier),
+                barGroups: getBarGroups(),
+                groupsSpace: 16,
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    tooltipPadding: const EdgeInsets.all(8.0),
+                    tooltipMargin: 8.0,
+                    tooltipRoundedRadius: 8.0,
+                    maxContentWidth: 500.0,
+                    tooltipBgColor: themeNotifier.isDarkMode
+                        ? const Color(0xFF1E1E1E)
+                        : const Color(0xFFEFEFEF),
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      String routerName = '';
+                      if (usageValueToNameMap.containsKey(rod.toY)) {
+                        routerName = usageValueToNameMap[rod.toY]!.join(', ');
+                      }
+
+                      return BarTooltipItem(
+                        '',
+                        TextStyle(
+                          color: themeNotifier.isDarkMode
+                              ? const Color.fromARGB(255, 255, 255, 255)
+                              : const Color.fromARGB(255, 0, 0, 0),
+                          fontSize: 14.0,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: '$routerName: ',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '${rod.toY.toStringAsFixed(2)} GB',
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  handleBuiltInTouches: true,
+                ),
+              ),
+            ),
           ),
-          titlesData: _buildTitlesData(),
-          borderData: _buildBorderData(themeNotifier),
-          barGroups: getBarGroups(),
-        ),
+          Wrap(
+            direction: Axis.horizontal,
+            alignment: WrapAlignment.spaceBetween,
+            spacing: 4.0,
+            runSpacing: 8.0,
+            children: List.generate(
+              widget.routerData.length,
+              (index) => _buildLegendItem(
+                routerName: widget.routerData[index].name,
+                routerColor: routerColorsPalette[index],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem({
+    required String routerName,
+    required Color routerColor,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Wrap(
+        direction: Axis.horizontal,
+        crossAxisAlignment: WrapCrossAlignment.start,
+        children: [
+          Container(
+            width: 12.0,
+            height: 12.0,
+            decoration: BoxDecoration(
+              color: routerColor,
+              borderRadius: BorderRadius.circular(4.0),
+            ),
+          ),
+          const SizedBox(width: 4.0),
+          Text(
+            routerName,
+            style: const TextStyle(
+              fontSize: 14.0,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -158,9 +247,21 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     return FlTitlesData(
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
-          reservedSize: 36.0,
+          reservedSize: 45.0,
           showTitles: true,
           interval: getMaxUsageValue() / 5.0,
+          getTitlesWidget: (double value, TitleMeta meta) {
+            return SideTitleWidget(
+              axisSide: meta.axisSide,
+              child: Text(
+                '${value.toInt()} GB',
+                style: const TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          },
         ),
       ),
       bottomTitles: AxisTitles(
@@ -218,6 +319,13 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
       final Routers router = widget.routerData[index];
       final String routerName = router.name;
       final double usageValue = double.parse(routerData.dataUsage) / 1000;
+
+      // Add routerName to the list associated with usageValue
+      usageValueToNameMap.putIfAbsent(usageValue, () => []);
+      if (!usageValueToNameMap[usageValue]!.contains(routerName)) {
+        usageValueToNameMap[usageValue]!.add(routerName);
+      }
+
       final int dateId = routerData.dateId;
       final String dateIdString = dateId.toString();
       final DateTime date = DateTime(
@@ -243,7 +351,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
                 BarChartRodData(
                   borderRadius: const BorderRadius.all(Radius.zero),
                   toY: usageValue,
-                  width: 16.0, // Set the desired width of the bars
+                  width: 16.0,
                   color: color,
                 ),
               );
@@ -255,7 +363,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
                 BarChartRodData(
                   borderRadius: const BorderRadius.all(Radius.zero),
                   toY: usageValue,
-                  width: 16.0, // Set the desired width of the bars
+                  width: 16.0,
                   color: color,
                 ),
               ],

@@ -77,8 +77,9 @@ class RouterCard extends StatelessWidget {
                 color: _getStatusColor(),
                 border: Border.all(
                   color: themeNotifier.isDarkMode
-                      ? const Color.fromARGB(255, 61, 61, 61)
-                      : const Color.fromARGB(255, 205, 205, 205),
+                      ? const Color.fromARGB(255, 79, 79, 83)
+                      : const Color.fromARGB(255, 212, 212, 212),
+                  width: 2.0,
                 ),
               ),
             ),

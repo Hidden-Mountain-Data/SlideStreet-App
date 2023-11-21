@@ -1,4 +1,4 @@
-import 'package:client/pages/sign_in.dart';
+import 'package:client/pages/get_started.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:page_transition/page_transition.dart';
@@ -15,7 +15,7 @@ class SplashScreenState extends State<SplashScreen> {
     return AnimatedSplashScreen.withScreenFunction(
       splash: 'assets/Original.png',
       screenFunction: () async {
-        return const LoginPage();
+        return const StartPage();
       },
       splashTransition: SplashTransition.rotationTransition,
       pageTransitionType: PageTransitionType.fade,

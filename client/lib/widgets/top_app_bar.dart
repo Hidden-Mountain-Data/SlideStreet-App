@@ -38,7 +38,7 @@ class _TopAppBarState extends State<TopAppBar> {
                       themeNotifier.isDarkMode ? Colors.white : Colors.black),
             ),
             IconButton(
-              icon: Icon(Icons.person_outline_rounded,
+              icon: Icon(Icons.account_circle_outlined,
                   size: 40,
                   color:
                       themeNotifier.isDarkMode ? Colors.white : Colors.black),

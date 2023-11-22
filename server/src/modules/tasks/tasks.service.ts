@@ -23,7 +23,7 @@ export class TealPollingService {
     },
   });
 
-  @Cron('15 * * * *')
+  @Cron('15 * * * * *')
   async updateTealDataUsage() {
 
     try {
@@ -77,7 +77,7 @@ export class TealPollingService {
           });
 
           this.logger.log('Sent post request to Teal API');
-          this.logger.log('Response: ', response);
+          console.log('Response: ', response);
 
           // response should be 200 ok if the request was successful
           if(response.status === 200) {

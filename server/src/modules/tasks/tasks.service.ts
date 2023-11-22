@@ -50,7 +50,9 @@ export class TealPollingService {
       let sims: Sims[] = [];
       try {
         // Get all sims from database
-        sims = await this.prisma.sims.findMany();
+        sims = await this.prisma.sims.findMany({
+          take: 1,
+        });
 
       } catch(error) {
         //Handle error
@@ -59,7 +61,7 @@ export class TealPollingService {
       }
 
       try {
-        [sims[0]].map(async (sim: Sims) => {
+        sims.map(async (sim: Sims) => {
           const { eid } = sim;
           //Generate a random alphanumeric uuid for the request id of 32 characters
           const requestId = this.generateUUID();

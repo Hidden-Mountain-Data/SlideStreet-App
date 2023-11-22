@@ -50,9 +50,7 @@ export class TealPollingService {
       let sims: Sims[] = [];
       try {
         // Get all sims from database
-        sims = await this.prisma.sims.findMany({
-          take: 1,
-        });
+        sims = await this.prisma.sims.findMany();
 
       } catch(error) {
         //Handle error

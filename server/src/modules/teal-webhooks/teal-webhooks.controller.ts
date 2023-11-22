@@ -33,7 +33,7 @@ export class TealWebhooksController {
                 requestId
             }
         })
-
+        this.logger.log('Response from Teal API: ' + JSON.stringify(response.data.entries));
         const entries: DataUsage[] = response.data.entries as DataUsage[];
 
         entries.map(async (entry: DataUsage) => {

@@ -2,7 +2,6 @@ import {
     Controller,
     Get,
     HttpCode,
-    Param,
     Query
 } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
@@ -27,6 +26,10 @@ export class TealWebhooksController {
     @HttpCode(200)
     async updateEsimDataUsage(@Query('requestId') requestId: any) {
         this.logger.log('Updating data usage from requestId=' + requestId);
+        // Remove commas from requestId
+        requestId = requestId.replace(/,/g, '');
+        this.logger.log(typeof requestId, requestId)
+
 
         const response = await this.tealPollingService.tealAxiosInstance.get('/api/v1/operation-result', {
             params: {

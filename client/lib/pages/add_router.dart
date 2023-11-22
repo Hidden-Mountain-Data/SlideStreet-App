@@ -1,5 +1,6 @@
 import 'package:client/widgets/text_fields/other_text_field.dart';
 import 'package:client/widgets/text_fields/password_text_field.dart';
+
 import 'package:flutter/material.dart';
 
 class AddRouterPage extends StatefulWidget {
@@ -8,8 +9,6 @@ class AddRouterPage extends StatefulWidget {
   @override
   _AddRouterPageState createState() => _AddRouterPageState();
 }
-
-late bool _passwordVisible;
 
 class _AddRouterPageState extends State<AddRouterPage> {
   final TextEditingController _simNumController = TextEditingController();
@@ -20,7 +19,6 @@ class _AddRouterPageState extends State<AddRouterPage> {
   @override
   void initState() {
     super.initState();
-    _passwordVisible = false;
   }
 
   @override

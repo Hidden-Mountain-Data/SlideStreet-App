@@ -1,19 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { SimsService } from '../modules/sims/sims.service';
+import { PrismaClient } from '@prisma/client';
 import { Sims } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 import * as dotenv from 'dotenv';
 dotenv.config();
+
 @Injectable()
 export class TealPollingService {
 
-  constructor(
-    private readonly simsService: SimsService
-  ) { }
-
+  private readonly prisma = new PrismaClient();
   private readonly logger = new Logger(TealPollingService.name);
   public readonly tealAxiosInstance = axios.create({
     baseURL: 'https://integrationapi.teal.global',
@@ -29,7 +27,6 @@ export class TealPollingService {
   async updateTealDataUsage() {
 
     try {
-
       // Get current time which will be in Pacific Time
       const currentTime = new Date();
 
@@ -50,9 +47,16 @@ export class TealPollingService {
       const periodStart = currentTime.toISOString().slice(0, 19).replace('T', ' ');
 
       this.logger.log('Polling Teal API for data usage at ' + periodEnd);
+      let sims: Sims[] = [];
+      try {
+        // Get all sims from database
+        sims = await this.prisma.sims.findMany();
 
-      // Get all sims from database
-      const sims = await this.simsService.getAllSims();
+      } catch(error) {
+        //Handle error
+        this.logger.log('Error getting sims from database: ', error);
+        throw error;
+      }
 
       try {
         sims.map(async (sim: Sims) => {
@@ -60,7 +64,7 @@ export class TealPollingService {
           //Generate a random alphanumeric uuid for the request id of 32 characters
           const requestId = this.generateUUID();
 
-          const response = await this.tealAxiosInstance.post('/api/v1/esim/data-usage', {
+          const response = await this.tealAxiosInstance.post('/api/v1/data-consumption/data', {
             params: {
               requestId,
               limit: 100,

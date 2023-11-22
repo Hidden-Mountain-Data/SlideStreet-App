@@ -33,7 +33,7 @@ export class TealWebhooksController {
                     requestId
                 }
             })
-            console.log('Response from Teal API: ', response);
+            console.log('Response from Teal API: ', response.data.entries);
             const entries: DataUsage[] = response.data.entries as DataUsage[];
 
             entries.map(async (entry: DataUsage) => {

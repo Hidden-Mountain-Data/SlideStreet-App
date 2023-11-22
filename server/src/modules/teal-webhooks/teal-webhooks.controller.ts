@@ -24,12 +24,12 @@ export class TealWebhooksController {
 
     @Get('update-data-usage')
     @HttpCode(200)
-    async updateEsimDataUsage(@Param('requestID') requestID: string) {
-        this.logger.log('Updating data usage from requestId=' + requestID);
+    async updateEsimDataUsage(@Param('RequestID') RequestID: string) {
+        this.logger.log('Updating data usage from RequestId=' + RequestID);
 
         const response = await this.tealPollingService.tealAxiosInstance.get('/api/v1/operation-result', {
             params: {
-                requestID
+                RequestID
             }
         })
 

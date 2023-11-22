@@ -76,7 +76,7 @@ export class TealPollingService {
             }
           });
 
-          this.logger.log('Sent get request to Teal API', requestId);
+          this.logger.log('Sent get request to Teal API', requestId, eid);
           // console.log('Response: ', response);
 
           // response should be 200 ok if the request was successful

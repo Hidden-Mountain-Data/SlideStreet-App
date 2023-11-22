@@ -1,9 +1,8 @@
 <template>
   <div style="width: 100%; height: 500px;">
-    <ag-grid-vue style="width: 100%; height: 100%;" class="ag-theme-alpine" :gridOptions="gridOptions"
+    <ag-grid-vue style="width: 100%; height: 100%;" class="ag-theme-custom" :gridOptions="gridOptions"
       @gridReady="onGridReady"></ag-grid-vue>
   </div>
-  <!-- :class="{ 'ag-theme-alpine': theme === 'light', 'ag-theme-alpine-dark': theme === 'dark' }" -->
 </template>
 
 <script lang="ts">
@@ -11,20 +10,13 @@ import { useTheme } from 'vuetify'
 import { AgGridVue } from 'ag-grid-vue3'
 import ActionsComponent from './ActionsComponent.vue'
 
-
 export default {
   components: {
     AgGridVue,
     ActionsComponent
   },
-  // vuetifyTheme: useTheme(),
-  data() {
+  setup() {
     return {
-      // theme: computed(() => {
-      //   return this.vuetifyTheme.global.name.value === 'light'
-      //     ? 'light'
-      //     : 'dark'
-      // }),
       gridOptions: {
         columnDefs: [
           { headerName: 'Active', field: 'active', sortable: true, resizable: true },
@@ -41,7 +33,6 @@ export default {
             cellRenderer: 'ActionsComponent',
             sortable: false,
             filter: false,
-            // width: 150,
             cellRendererParams: function (params: any) {
               return {
                 data: params.data,
@@ -74,10 +65,24 @@ export default {
           },
         ] as Device[],
       },
+      vuetifyTheme: useTheme(),
     }
+  },
+  mounted() {
+    this.$watch(
+      () => this.$vuetify.theme.global.name,
+      () => { this.updateAGGridTheme() },
+    );
   },
 
   methods: {
+    updateAGGridTheme() {
+      const agGridTheme = String(this.vuetifyTheme.global.name.value) === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+
+      const gridDiv = document.querySelector('.ag-theme-custom') as HTMLElement;
+      gridDiv.classList.remove('ag-theme-alpine', 'ag-theme-alpine-dark');
+      gridDiv.classList.add(agGridTheme);
+    },
     onGridReady(params: any) {
       const api = params.api;
 

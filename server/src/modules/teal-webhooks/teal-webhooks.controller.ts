@@ -27,7 +27,7 @@ export class TealWebhooksController {
     async updateEsimDataUsage(@Query('requestId') requestId: any) {
         this.logger.log('Updating data usage from requestId=' + requestId);
         // Remove commas from requestId
-        requestId = requestId.replace(/,/g, '');
+        // requestId = requestId.replace(/,/g, '');
         this.logger.log(typeof requestId, requestId)
 
 
@@ -47,7 +47,7 @@ export class TealWebhooksController {
             this.dataUsageService.upsertDataUsageBySimIdAndDateId(simId, dateId, usage, userId);
         })
 
-        return 'OK'
+        return { statusCode: 200, message: 'Success' };
     }
     //TODO Additional teal webhook endpoints
 }

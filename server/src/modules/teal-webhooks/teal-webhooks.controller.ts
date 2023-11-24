@@ -41,7 +41,7 @@ export class TealWebhooksController {
                 const dateId = Number(period.slice(0, 4) + period.slice(5, 7) + period.slice(8, 10));
                 const sim = await this.simsService.getSimByEid(eid);
                 const { simId, userId } = sim;
-                this.dataUsageService.upsertDataUsageBySimIdAndDateId(simId, dateId, usage, userId);
+                this.dataUsageService.upsertDataUsageBySimIdAndDateId(userId, simId, dateId, usage);
             })
 
             return { statusCode: 200, message: 'Success' };

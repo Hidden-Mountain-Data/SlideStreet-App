@@ -164,13 +164,13 @@ export class DataUsageService {
           },
         },
         update: {
-          dataUsage: BigInt(dataUsage),
+          dataUsage: dataUsage,
         },
         create: {
           userId,
           simId,
           dateId,
-          dataUsage: BigInt(dataUsage),
+          dataUsage: dataUsage,
         },
       });
     } catch(error: unknown) {

@@ -23,7 +23,7 @@ export class TealPollingService {
     },
   });
 
-  @Cron('*/2 * * * *')
+  @Cron('*/5 * * * *')
   async updateTealDataUsage() {
 
     try {

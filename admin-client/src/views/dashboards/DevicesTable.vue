@@ -60,7 +60,7 @@ export default {
       try {
         console.log("api URL", process.env.NEST_API_URL);
         const response = await DeviceService.getAll();
-        this.gridOptions.rowData = response.data;
+        this.gridOptions.rowData = response;
       } catch(error) {
         console.error('Error fetching data:', error);
       }

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 class DeviceService {
 
-  private static baseUrl = "https://3zenzw56nf.us-west-2.awsapprunner.com" + '/api/devices';
+  private static baseUrl = "https://3zenzw56nf.us-west-2.awsapprunner.com" + '/api/device-manager/devices';
 
   static async getAll(): Promise<Device[]> {
     const response = await axios.get(this.baseUrl);

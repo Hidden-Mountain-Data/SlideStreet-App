@@ -5,9 +5,9 @@
 
       <template #append>
         <div class="me-n3">
-          <v-btn icon size="x-small" variant="text" color="default">
-            <v-icon size="24" icon="mdi-dots-vertical" />
-          </v-btn>
+          <VBtn icon size="x-small" variant="text" color="default">
+            <VIcon size="24" icon="mdi-dots-vertical" />
+          </VBtn>
         </div>
       </template>
     </VCardItem>

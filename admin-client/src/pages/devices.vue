@@ -1,23 +1,23 @@
 <template>
-  <v-card>
-    <v-card-item>
-      <v-card-title>Devices</v-card-title>
+  <VCard>
+    <VCardItem>
+      <VCardTitle>Devices</VCardTitle>
       <template #append>
         <div class="me-n3">
-          <v-btn icon size="x-small" variant="text" color="default">
-            <v-icon size="24" icon="mdi-dots-vertical" />
-          </v-btn>
+          <VBtn icon size="x-small" variant="text" color="default">
+            <VIcon size="24" icon="mdi-dots-vertical" />
+          </VBtn>
         </div>
       </template>
-    </v-card-item>
-    <v-container>
-      <v-row>
-        <v-col cols="12">
+    </VCardItem>
+    <VContainer>
+      <VRow>
+        <VCol cols="12">
           <DevicesTable />
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-card>
+        </VCol>
+      </VRow>
+    </VContainer>
+  </VCard>
 </template>
 
 <script setup lang="ts">

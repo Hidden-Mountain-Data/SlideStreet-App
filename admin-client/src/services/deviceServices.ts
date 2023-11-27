@@ -1,31 +1,32 @@
 import axios from 'axios';
 
-
 class DeviceService {
-  private baseUrl = process.env.REACT_APP_API_URL + '/api/devices';
 
-  async getAll(): Promise<Device[]> {
-    const response = await axios.get<Device[]>(this.baseUrl);
+  private static baseUrl = "https://3zenzw56nf.us-west-2.awsapprunner.com" + '/api/devices';
+
+  static async getAll(): Promise<Device[]> {
+    const response = await axios.get(this.baseUrl);
     return response.data;
   }
 
-  async getById(id: number): Promise<Device> {
+  static async getById(id: number): Promise<Device> {
     const response = await axios.get<Device>(`${this.baseUrl}/${id}`);
     return response.data;
   }
 
-  async create(device: Device): Promise<Device> {
+  static async create(device: Device): Promise<Device> {
     const response = await axios.post<Device>(this.baseUrl, device);
     return response.data;
   }
 
-  async update(id: number, device: Device): Promise<Device> {
+  static async update(id: number, device: Device): Promise<Device> {
     const response = await axios.put<Device>(`${this.baseUrl}/${id}`, device);
     return response.data;
   }
 
-  async delete(id: number): Promise<void> {
+  static async delete(id: number): Promise<void> {
     await axios.delete(`${this.baseUrl}/${id}`);
   }
 }
 export default DeviceService;
+

@@ -1,15 +1,17 @@
 <template>
   <div style="width: 100%; height: 500px;">
-    <ag-grid-vue style="width: 100%; height: 100%;" class="ag-theme-custom" :gridOptions="gridOptions"
-      @gridReady="onGridReady"></ag-grid-vue>
+    <ag-grid-vue style="width: 100%; height: 100%;"
+      :class="String(vuetifyTheme.global.name.value) === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'"
+      :gridOptions="gridOptions" @gridReady="onGridReady"></ag-grid-vue>
   </div>
+  <!--FIXME Class for dark/light mode not reactive with mode switch  -->
 </template>
 
 <script lang="ts">
 import { useTheme } from 'vuetify'
 import { AgGridVue } from 'ag-grid-vue3'
 import ActionsComponent from './ActionsComponent.vue'
-
+import DeviceService from '@/services/deviceServices';
 export default {
   components: {
     AgGridVue,
@@ -40,42 +42,29 @@ export default {
             },
           },
         ],
-        rowData: [
-          {
-            active: true,
-            status: 'Active',
-            activationDate: '2021-01-01',
-            usage: 123456,
-            cap: 54321,
-            plan: 'Premium',
-            iccid: '123456789',
-            imei: '987654321',
-            eid: 'e123',
-          },
-          {
-            active: false,
-            status: 'Inactive',
-            activationDate: '2021-01-01',
-            usage: 123453,
-            cap: 54321,
-            plan: 'Basic',
-            iccid: '987654321',
-            imei: '123456789',
-            eid: 'e456',
-          },
-        ] as Device[],
+        rowData: [],
       },
       vuetifyTheme: useTheme(),
     }
   },
   mounted() {
+    this.fetchData();
     this.$watch(
-      () => this.$vuetify.theme.global.name,
+      () => this.$vuetify.theme.global.name.value,
       () => { this.updateAGGridTheme() },
     );
   },
 
   methods: {
+    async fetchData() {
+      try {
+        console.log("api URL", process.env.NEST_API_URL);
+        const response = await DeviceService.getAll();
+        this.gridOptions.rowData = response.data;
+      } catch(error) {
+        console.error('Error fetching data:', error);
+      }
+    },
     updateAGGridTheme() {
       const agGridTheme = String(this.vuetifyTheme.global.name.value) === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 

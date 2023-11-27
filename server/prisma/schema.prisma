@@ -24,9 +24,9 @@ model DataUsages {
   sim         Sims      @relation("DataUsageSim", fields: [simId], references: [simId])
   user        Users     @relation("DataUsageUser", fields: [userId], references: [userId])
 
-  @@index([dateId])
-  @@index([simId])
-  @@index([userId])
+  // @@index([dateId])
+  // @@index([simId])
+  // @@index([userId])
   @@map("data_usages")
   @@unique([simId, dateId], name: "simId_dateId")
 }

@@ -23,7 +23,7 @@ export class TealPollingService {
     },
   });
 
-  @Cron('15 * * * *')
+  @Cron('*/2 * * * *')
   async updateTealDataUsage() {
 
     try {
@@ -64,7 +64,7 @@ export class TealPollingService {
           //Generate a random alphanumeric uuid for the request id of 32 characters
           const requestId = this.generateUUID();
 
-          const response = await this.tealAxiosInstance.post('/api/v1/data-consumption/data', {
+          const response = await this.tealAxiosInstance.get('/api/v1/data-consumption/data', {
             params: {
               requestId,
               limit: 100,
@@ -76,14 +76,14 @@ export class TealPollingService {
             }
           });
 
-          this.logger.log('Sent post request to Teal API');
-          this.logger.log('Response: ', response);
+          this.logger.log('Sent get request to Teal API', requestId, eid);
+          // console.log('Response: ', response);
 
           // response should be 200 ok if the request was successful
           if(response.status === 200) {
-            this.logger.log('Successfully sent post request to Teal API');
+            this.logger.log('Successfully sent get request to Teal API');
           } else {
-            throw new Error('Error sending post request to Teal API' + response);
+            throw new Error('Error sending get request to Teal API' + response);
           }
 
         });
@@ -99,6 +99,6 @@ export class TealPollingService {
 
   //Generates a UUID for the Teal API request id
   generateUUID() {
-    return uuidv4().replace(/-/g, '');
+    return uuidv4().replace(/-/g, '').replace(/,/g, '');
   }
 }

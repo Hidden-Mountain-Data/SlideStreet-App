@@ -55,8 +55,8 @@ class DeviceListPageState extends State<DeviceListPage> {
 
   String convertUsage(double usage) {
     if (usage > 1000) {
-      double usageInGb = usage / 1000;
-      return '$usageInGb Gb';
+      double usageInGb = usage / 1048576;
+      return '${usageInGb.toStringAsFixed(2)} Mb.';
     } else {
       return '$usage Mb';
     }

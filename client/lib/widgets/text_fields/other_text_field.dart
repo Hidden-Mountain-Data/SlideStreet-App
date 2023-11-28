@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class OtherField extends StatelessWidget {
   const OtherField(
@@ -22,7 +23,8 @@ class OtherField extends StatelessWidget {
             filled: true,
             fillColor: const Color.fromARGB(255, 225, 225, 225),
             labelText: labelText,
-            hintStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+            hintStyle: GoogleFonts.montserrat(
+                color: const Color.fromARGB(255, 0, 0, 0)),
             hintText: hintText,
           ),
         ),

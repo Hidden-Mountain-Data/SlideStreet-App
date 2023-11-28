@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../styles/button_styles.dart';
 
@@ -35,21 +36,21 @@ class AppleSignInButtonState extends State<AppleSignInButton> {
                   _isSigningIn = false;
                 });
               },
-              child: const Padding(
-                padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Image(
+                    const Image(
                       image: AssetImage("assets/apple_logo.png"),
                       height: 35.0,
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 10),
+                      padding: const EdgeInsets.only(left: 10),
                       child: Text(
                         'Sign in with Apple',
-                        style: TextStyle(
+                        style: GoogleFonts.openSans(
                           fontSize: 20,
                           color: Colors.black54,
                           fontWeight: FontWeight.w600,

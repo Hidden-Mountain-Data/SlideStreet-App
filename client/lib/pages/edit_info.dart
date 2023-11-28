@@ -2,6 +2,7 @@ import 'package:client/widgets/text_fields/email_text_field.dart';
 import 'package:client/widgets/text_fields/other_text_field.dart';
 import 'package:client/widgets/text_fields/password_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EditInformationPage extends StatefulWidget {
   const EditInformationPage({super.key});
@@ -39,12 +40,12 @@ class _EditInformationPageState extends State<EditInformationPage> {
               'assets/Original.png',
               height: 50,
             ),
-            const Text(
+            Text(
               'Profile',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w900,
-                color: Color.fromARGB(255, 0, 0, 0),
+              style: GoogleFonts.openSans(
+                fontSize: 40,
+                fontWeight: FontWeight.w800,
+                color: const Color.fromARGB(255, 0, 0, 0),
               ),
             ),
             IconButton(
@@ -84,12 +85,12 @@ class _EditInformationPageState extends State<EditInformationPage> {
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {},
-                    child: const Text(
+                    child: Text(
                       "Edit Information",
-                      style: TextStyle(
+                      style: GoogleFonts.montserrat(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        color: const Color.fromARGB(255, 0, 0, 0),
                       ),
                     ),
                   ),
@@ -107,13 +108,13 @@ class _EditInformationPageState extends State<EditInformationPage> {
                 const SizedBox(height: 20),
                 EmailField(emailController: _emailController),
                 const SizedBox(height: 20),
-                const Align(
+                Align(
                   child: Text(
                     "To modify personal information, please enter your password to confirm your identity",
-                    style: TextStyle(
+                    style: GoogleFonts.montserrat(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Color.fromARGB(255, 0, 0, 0),
+                      color: const Color.fromARGB(255, 0, 0, 0),
                     ),
                   ),
                 ),
@@ -125,13 +126,13 @@ class _EditInformationPageState extends State<EditInformationPage> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: const Padding(
-                    padding: EdgeInsets.all(20.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
                     child: Text('Save',
-                        style: TextStyle(
+                        style: GoogleFonts.openSans(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 195, 250, 55))),
+                            color: const Color.fromARGB(255, 195, 250, 55))),
                   ),
                 ),
               ],

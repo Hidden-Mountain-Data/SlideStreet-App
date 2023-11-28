@@ -1,9 +1,14 @@
+import 'dart:math';
+
 import 'package:client/models/data_usage.dart';
 import 'package:client/models/router.dart';
+import 'package:client/providers/router_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
+import 'package:intl/intl.dart';
 
 String selectedTimeFrame = '1 Week';
 
@@ -27,6 +32,10 @@ class RouterUsageCard extends StatefulWidget {
 
 class _RouterUsageCardState extends State<RouterUsageCard> {
   int xAxisTitlesCount = 7;
+  RouterService routerService = RouterService();
+  double totalUsage = 0.0;
+  String dateRangeText =
+      '${DateFormat('yyyy/MM/dd').format(DateTime.now().subtract(const Duration(days: 6)).toLocal())} - ${DateFormat('yyyy/MM/dd').format(DateTime.now().toLocal())}';
 
   // A predefined color palette for routers
   final List<Color> routerColorsPalette = [
@@ -36,6 +45,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     Colors.purple,
     const Color.fromARGB(255, 174, 150, 107),
     Colors.teal,
+    Colors.pink,
   ];
   final Map<double, List<String>> usageValueToNameMap = {};
 
@@ -66,8 +76,14 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
                 _buildHeader(themeNotifier),
                 const SizedBox(height: 8.0),
                 Text(
-                  'Total Usage: ${widget.totalUsage}',
-                  style: const TextStyle(
+                  'Total Usage: ${totalUsage.toStringAsFixed(2)} Mb',
+                  style: GoogleFonts.montserrat(
+                      fontSize: 16.0, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  'Date Range: $dateRangeText',
+                  style: GoogleFonts.montserrat(
                       fontSize: 16.0, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8.0),
@@ -85,9 +101,10 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Usage',
-          style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
+        Text(
+          'Usage (Mb)',
+          style: GoogleFonts.montserrat(
+              fontSize: 28.0, fontWeight: FontWeight.bold),
         ),
         _buildDropdownButton(themeNotifier),
       ],
@@ -111,6 +128,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
         onChanged: (newValue) {
           setState(() {
             selectedTimeFrame = newValue!;
+            updateDateRangeText();
           });
         },
         items: ['1 Week', '1 Month', '6 Months', '1 Year']
@@ -119,7 +137,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
             value: value,
             child: Text(
               value,
-              style: TextStyle(
+              style: GoogleFonts.montserrat(
                   color:
                       themeNotifier.isDarkMode ? Colors.white : Colors.black),
             ),
@@ -135,7 +153,66 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     );
   }
 
+  void updateDateRangeText() {
+    DateTime currentDate = DateTime.now();
+    DateTime startDate;
+
+    switch (selectedTimeFrame) {
+      case '1 Week':
+        startDate = currentDate.subtract(const Duration(days: 6));
+        break;
+      case '1 Month':
+        startDate = DateTime(currentDate.year, currentDate.month, 1);
+        break;
+      case '6 Months':
+        startDate = currentDate.subtract(const Duration(days: 180));
+        break;
+      case '1 Year':
+        startDate =
+            DateTime(currentDate.year - 1, currentDate.month, currentDate.day);
+        break;
+      default:
+        startDate = currentDate;
+    }
+
+    // Format dates to 'yyyy-MM-dd'
+    String formattedStartDate = DateFormat('yyyy/MM/dd').format(startDate);
+    String formattedEndDate = DateFormat('yyyy/MM/dd').format(currentDate);
+
+    dateRangeText = '$formattedStartDate - $formattedEndDate';
+  }
+
   Widget _buildBarChart(ThemeNotifier themeNotifier) {
+    final Map<String, double> totalUsagePerRouterAndGroup = {};
+    for (int index = 0; index < widget.usageData.length; index++) {
+      final DataUsage routerData = widget.usageData[index];
+      if (routerData.routerId != null) {
+        final Routers router = widget.routerData.firstWhere(
+          (router) => router.routerId == routerData.routerId,
+        );
+        final String routerName = router.name;
+        final double usageValue = double.parse(routerData.dataUsage) / 1048576;
+
+        final int dateId = routerData.dateId;
+        final String dateIdString = dateId.toString();
+        final DateTime date = DateTime(
+          int.parse(dateIdString.substring(0, 4)),
+          int.parse(dateIdString.substring(4, 6)),
+          int.parse(dateIdString.substring(6, 8)),
+        );
+
+        if (isWithinTimeFrame(date)) {
+          final groupIndex = getGroupingIndex(date);
+
+          // Combine usage for the same router name and group
+          final String key = '$routerName-$groupIndex';
+          totalUsagePerRouterAndGroup[key] =
+              (totalUsagePerRouterAndGroup[key] ?? 0) + usageValue;
+        }
+      }
+    }
+    final Map<String, Color> routerColorMap = {};
+
     return Expanded(
       child: Column(
         children: [
@@ -143,14 +220,15 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
             child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceEvenly,
-                maxY: getMaxUsageValue(),
+                maxY: getMaxUsageValue(totalUsagePerRouterAndGroup),
                 gridData: const FlGridData(
                   drawHorizontalLine: false,
                   drawVerticalLine: false,
                 ),
-                titlesData: _buildTitlesData(),
+                titlesData: _buildTitlesData(totalUsagePerRouterAndGroup),
                 borderData: _buildBorderData(themeNotifier),
-                barGroups: getBarGroups(),
+                barGroups:
+                    getBarGroups(totalUsagePerRouterAndGroup, routerColorMap),
                 groupsSpace: 16,
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
@@ -169,7 +247,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
                       return BarTooltipItem(
                         '',
-                        TextStyle(
+                        GoogleFonts.montserrat(
                           color: themeNotifier.isDarkMode
                               ? const Color.fromARGB(255, 255, 255, 255)
                               : const Color.fromARGB(255, 0, 0, 0),
@@ -178,12 +256,12 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
                         children: [
                           TextSpan(
                             text: '$routerName: ',
-                            style: const TextStyle(
+                            style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           TextSpan(
-                            text: '${rod.toY.toStringAsFixed(2)} GB',
+                            text: '${rod.toY.toStringAsFixed(2)} Mb',
                           ),
                         ],
                       );
@@ -203,7 +281,8 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
               widget.routerData.length,
               (index) => _buildLegendItem(
                 routerName: widget.routerData[index].name,
-                routerColor: routerColorsPalette[index],
+                routerColor: routerColorMap[widget.routerData[index].name] ??
+                    Colors.grey,
               ),
             ),
           ),
@@ -216,6 +295,15 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     required String routerName,
     required Color routerColor,
   }) {
+    // Check if the color is grey
+    if (routerColor == Colors.grey) {
+      // If the color is grey, don't display the legend item
+      return const SizedBox(
+        height: 0,
+        width: 0,
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Wrap(
@@ -233,7 +321,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
           const SizedBox(width: 4.0),
           Text(
             routerName,
-            style: const TextStyle(
+            style: GoogleFonts.montserrat(
               fontSize: 14.0,
               fontWeight: FontWeight.w400,
             ),
@@ -243,19 +331,20 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     );
   }
 
-  FlTitlesData _buildTitlesData() {
+  FlTitlesData _buildTitlesData(totalUsagePerRouterAndGroup) {
     return FlTitlesData(
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
           reservedSize: 45.0,
           showTitles: true,
-          interval: getMaxUsageValue() / 5.0,
+          interval: getMaxUsageValue(totalUsagePerRouterAndGroup) / 5.0,
           getTitlesWidget: (double value, TitleMeta meta) {
             return SideTitleWidget(
               axisSide: meta.axisSide,
+              space: 8,
               child: Text(
-                '${value.toInt()} GB',
-                style: const TextStyle(
+                value.toStringAsFixed(2),
+                style: GoogleFonts.montserrat(
                   fontSize: 14.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -299,81 +388,156 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     );
   }
 
-  double getMaxUsageValue() {
+  double getMaxUsageValue(Map<String, double> totalUsagePerRouterAndGroup) {
     double maxUsage = 0.0;
-    for (final routerData in widget.usageData) {
-      final double usageValue = double.parse(routerData.dataUsage) / 1000;
-      if (usageValue > maxUsage) {
-        maxUsage = usageValue;
+
+    // Iterate over the combined values and find the maximum
+    for (final value in totalUsagePerRouterAndGroup.values) {
+      if (value > maxUsage) {
+        maxUsage = value;
       }
     }
-    return maxUsage.truncate() + 1.0;
+
+    return maxUsage;
   }
 
-  List<BarChartGroupData> getBarGroups() {
+  List<BarChartGroupData> getBarGroups(
+      Map<String, double> totalUsagePerRouterAndGroup,
+      Map<String, Color> routerColorMap) {
     final List<BarChartGroupData> barGroups = [];
-    final routerColors = <String, Color>{};
 
     for (int index = 0; index < widget.usageData.length; index++) {
       final DataUsage routerData = widget.usageData[index];
-      final Routers router = widget.routerData[index];
-      final String routerName = router.name;
-      final double usageValue = double.parse(routerData.dataUsage) / 1000;
+      if (routerData.routerId != null) {
+        final Routers router = widget.routerData.firstWhere(
+          (router) => router.routerId == routerData.routerId,
+        );
+        final String routerName = router.name;
+        final double usageValue = double.parse(routerData.dataUsage) / 1048576;
 
-      // Add routerName to the list associated with usageValue
-      usageValueToNameMap.putIfAbsent(usageValue, () => []);
-      if (!usageValueToNameMap[usageValue]!.contains(routerName)) {
-        usageValueToNameMap[usageValue]!.add(routerName);
-      }
+        usageValueToNameMap.putIfAbsent(usageValue, () => []);
+        if (!usageValueToNameMap[usageValue]!.contains(routerName)) {
+          usageValueToNameMap[usageValue]!.add(routerName);
+        }
 
-      final int dateId = routerData.dateId;
-      final String dateIdString = dateId.toString();
-      final DateTime date = DateTime(
-        int.parse(dateIdString.substring(0, 4)), // Year
-        int.parse(dateIdString.substring(4, 6)), // Month
-        int.parse(dateIdString.substring(6, 8)), // Day
-      );
-
-      if (isWithinTimeFrame(date)) {
-        final groupIndex = getGroupingIndex(date);
-        final colorIndex = index % routerColorsPalette.length;
-
-        final color = routerColors.putIfAbsent(
-          routerName,
-          () => routerColorsPalette[colorIndex],
+        final int dateId = routerData.dateId;
+        final String dateIdString = dateId.toString();
+        final DateTime date = DateTime(
+          int.parse(dateIdString.substring(0, 4)),
+          int.parse(dateIdString.substring(4, 6)),
+          int.parse(dateIdString.substring(6, 8)),
         );
 
-        final existingBarGroupIndex =
-            barGroups.indexWhere((group) => group.x == groupIndex);
+        if (isWithinTimeFrame(date)) {
+          final groupIndex = getGroupingIndex(date);
 
-        if (existingBarGroupIndex != -1) {
-          barGroups[existingBarGroupIndex].barRods.add(
+          // Combine usage for the same router name and group
+          final String key = '$routerName-$groupIndex';
+
+          // Assign a unique color to each router
+          if (!routerColorMap.containsKey(routerName)) {
+            Set<Color> existingColors = Set.from(routerColorMap.values);
+            routerColorMap[routerName] = _generateRandomColor(existingColors);
+          }
+
+          final existingBarGroupIndex =
+              barGroups.indexWhere((group) => group.x == groupIndex);
+
+          if (existingBarGroupIndex != -1) {
+            // Check if a bar for the same router and x-axis combination already exists
+            final existingBarGroup = barGroups[existingBarGroupIndex];
+            final existingRodIndex = existingBarGroup.barRods.indexWhere(
+              (rod) => rod.color == routerColorMap[routerName],
+            );
+
+            if (existingRodIndex != -1) {
+              continue;
+            } else {
+              // Add a new rod for the router
+              existingBarGroup.barRods.add(
                 BarChartRodData(
                   borderRadius: const BorderRadius.all(Radius.zero),
-                  toY: usageValue,
+                  toY: totalUsagePerRouterAndGroup[key]!,
                   width: 16.0,
-                  color: color,
+                  color: routerColorMap[routerName],
                 ),
               );
-        } else {
-          barGroups.add(
-            BarChartGroupData(
-              x: groupIndex,
-              barRods: [
-                BarChartRodData(
-                  borderRadius: const BorderRadius.all(Radius.zero),
-                  toY: usageValue,
-                  width: 16.0,
-                  color: color,
-                ),
-              ],
-            ),
-          );
+            }
+          } else {
+            barGroups.add(
+              BarChartGroupData(
+                x: groupIndex,
+                barRods: [
+                  BarChartRodData(
+                    borderRadius: const BorderRadius.all(Radius.zero),
+                    toY: totalUsagePerRouterAndGroup[key]!,
+                    width: 16.0,
+                    color: routerColorMap[routerName],
+                  ),
+                ],
+              ),
+            );
+          }
         }
       }
     }
 
+    double total = totalUsagePerRouterAndGroup.values.reduce((a, b) => a + b);
+    totalUsage = total;
+
     return barGroups;
+  }
+
+  Color _generateRandomColor(Set<Color> existingColors) {
+    final Random random = Random();
+
+    // Define a subset of pastel-like colors in green, blue, and red spectrum
+    final List<Color> pastelColors = [
+      const Color.fromARGB(255, 61, 155, 64),
+      const Color.fromARGB(255, 170, 102, 187),
+      const Color.fromARGB(255, 226, 249, 144),
+      Colors.blue[400]!,
+      Colors.red[200]!,
+      Colors.red[400]!,
+    ];
+
+    Color selectedColor = Colors.grey;
+
+    // Try up to 10 times to find a distinct color
+    for (int i = 0; i < 10; i++) {
+      selectedColor = pastelColors[random.nextInt(pastelColors.length)];
+
+      // Check the similarity with existing colors
+      bool isDistinct = true;
+      for (final existingColor in existingColors) {
+        if (_isColorSimilar(selectedColor, existingColor)) {
+          isDistinct = false;
+          break;
+        }
+      }
+
+      if (isDistinct) {
+        break;
+      }
+    }
+
+    existingColors.add(selectedColor);
+
+    return selectedColor;
+  }
+
+  bool _isColorSimilar(Color color1, Color color2) {
+    final double threshold = 30.0;
+
+    // Calculate the difference in hue
+    double hueDifference =
+        (HSLColor.fromColor(color1).hue - HSLColor.fromColor(color2).hue).abs();
+
+    // Ensure the hue difference is within the threshold
+    hueDifference =
+        hueDifference > 180.0 ? 360.0 - hueDifference : hueDifference;
+
+    return hueDifference < threshold;
   }
 
   int getGroupingIndex(DateTime date) {
@@ -404,7 +568,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
         int.parse(dateIdString.substring(6, 8)),
       );
 
-      if (isWithinTimeFrame(date)) {
+      if (isWithinTimeFrame(date) && routerData.routerId != null) {
         String dayOfWeekTitle = getDayOfWeekTitle(date.weekday - 1);
         uniqueDates.add(dayOfWeekTitle);
       }
@@ -423,8 +587,9 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
         int.parse(dateIdString.substring(4, 6)),
         int.parse(dateIdString.substring(6, 8)),
       );
+
       int value = date.day - 1;
-      if (isWithinTimeFrame(date)) {
+      if (isWithinTimeFrame(date) && routerData.routerId != null) {
         String weekTitle = getWeekOfMonthTitle(value);
         if (!uniqueWeekTitles.contains(weekTitle)) {
           uniqueWeekTitles.add(weekTitle);
@@ -436,7 +601,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
   }
 
   Widget getTitles(double value, TitleMeta meta) {
-    const style = TextStyle(
+    var style = GoogleFonts.montserrat(
       fontWeight: FontWeight.bold,
       fontSize: 14,
     );
@@ -445,9 +610,8 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
     switch (selectedTimeFrame) {
       case '1 Week':
-        final List<String> uniqueDates = getUniqueDates();
-        final int index = value.toInt();
-        text = uniqueDates[index + 1];
+        text = getDayOfWeekTitle(value.toInt());
+
         break;
       case '1 Month':
         int index = value.toInt();
@@ -494,7 +658,7 @@ bool isWithinTimeFrame(DateTime date) {
 
 String getDayOfWeekTitle(int index) {
   String text = '';
-  switch (index + 1) {
+  switch (index) {
     case 0:
       text = 'Sun';
     case 1:

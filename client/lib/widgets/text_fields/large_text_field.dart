@@ -1,25 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class EmailField extends StatelessWidget {
-  const EmailField({super.key, required this.emailController});
-  final TextEditingController emailController;
+class LargeTextField extends StatelessWidget {
+  const LargeTextField({
+    super.key,
+    required this.textController,
+    required this.hintText,
+    required this.labelText,
+  });
+
+  final TextEditingController textController;
+  final String hintText;
+  final String labelText;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         TextFormField(
-          controller: emailController,
-          keyboardType: TextInputType.emailAddress,
+          controller: textController,
+          maxLines: 5, // Set the number of lines you want
+          keyboardType: TextInputType.multiline,
           decoration: InputDecoration(
             border: InputBorder.none,
             filled: true,
             fillColor: const Color.fromARGB(255, 225, 225, 225),
-            labelText: 'Email',
+            labelText: labelText,
             hintStyle: GoogleFonts.montserrat(
                 color: const Color.fromARGB(255, 0, 0, 0)),
-            hintText: 'Enter your email address',
+            hintText: hintText,
           ),
         ),
       ],

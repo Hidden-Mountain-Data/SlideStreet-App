@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "559447401908",
+    "project_id": "slidestreet",
+    "storage_bucket": "slidestreet.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:559447401908:android:be322bb5d4ec5e2896fee1",
+        "android_client_info": {
+          "package_name": "io.slidestreet.client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT91LcXY9PnBHT-xllwIQRbXy1Tqo4KkQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

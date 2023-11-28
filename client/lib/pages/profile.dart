@@ -5,6 +5,7 @@ import 'package:client/pages/sign_in.dart';
 import 'package:client/providers/user_service.dart';
 import 'package:client/widgets/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 
@@ -45,12 +46,13 @@ class ProfilePageState extends State<ProfilePage> {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+              style: GoogleFonts.openSans(
+                  fontSize: 20, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 5),
             Text(
               value,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+              style: GoogleFonts.montserrat(fontSize: 18),
             ),
           ],
         ),
@@ -88,7 +90,7 @@ class ProfilePageState extends State<ProfilePage> {
                       ),
                       Text(
                         'Profile',
-                        style: TextStyle(
+                        style: GoogleFonts.montserrat(
                           fontSize: 32,
                           fontWeight: FontWeight.w900,
                           color: themeNotifier.isDarkMode
@@ -120,12 +122,12 @@ class ProfilePageState extends State<ProfilePage> {
                         buildTextField(
                             'First Name',
                             userProvider.user!.firstName,
-                            70,
+                            80,
                             cardColor,
                             borderColor),
                         buildTextField('Last Name', userProvider.user!.lastName,
-                            70, cardColor, borderColor),
-                        buildTextField('Email', userProvider.user!.email, 70,
+                            80, cardColor, borderColor),
+                        buildTextField('Email', userProvider.user!.email, 80,
                             cardColor, borderColor),
                         ProfileButton(
                           text: 'Change Password',
@@ -187,7 +189,8 @@ class ProfileButton extends StatelessWidget {
         onPressed: onPressed,
         child: Text(
           text,
-          style: const TextStyle(fontSize: 18),
+          style:
+              GoogleFonts.openSans(fontSize: 20, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -212,7 +215,8 @@ class LogoutButton extends StatelessWidget {
         onPressed: onPressed,
         child: Text(
           text,
-          style: const TextStyle(fontSize: 18),
+          style:
+              GoogleFonts.openSans(fontSize: 24, fontWeight: FontWeight.w600),
         ),
       ),
     );

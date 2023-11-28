@@ -1,6 +1,7 @@
 import 'package:client/models/data_usage.dart';
 import 'package:client/pages/add_router.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 import 'package:client/notifiers/user_notifier.dart';
@@ -13,7 +14,7 @@ import 'package:client/widgets/usage_chart.dart';
 import 'package:client/models/router.dart';
 
 class UsagePage extends StatefulWidget {
-  const UsagePage({Key? key});
+  const UsagePage({super.key});
 
   @override
   UsagePageState createState() => UsagePageState();
@@ -61,89 +62,138 @@ class UsagePageState extends State<UsagePage> {
                     : const Color.fromARGB(255, 168, 168, 168),
                 body: FutureBuilder<List<Routers>>(
                   future: _routerService.fetchRouters(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
+                  builder: (context, routerSnapshot) {
+                    if (routerSnapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
-                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                      List<Routers> routers = snapshot.data!;
+                    } else if (routerSnapshot.hasError) {
+                      return Center(
+                          child: Text('Error: ${routerSnapshot.error}'));
+                    } else if (routerSnapshot.hasData &&
+                        routerSnapshot.data!.isNotEmpty) {
+                      List<Routers> routers = routerSnapshot.data!;
 
-                      return Column(
+                      return Stack(
                         children: [
-                          FutureBuilder<List<DataUsage>>(
-                            future: _usageService.fetchDataUsage(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              } else if (snapshot.hasError) {
-                                return Center(
-                                    child: Text('Error: ${snapshot.error}'));
-                              } else {
-                                return SizedBox(
-                                  height: 400,
-                                  child: RouterUsageCard(
-                                    title: "name",
-                                    totalUsage: "total",
-                                    routerData: routers,
-                                    usageData: snapshot.data!,
+                          Column(
+                            children: [
+                              FutureBuilder<List<DataUsage>>(
+                                future: _usageService.fetchDataUsage(),
+                                builder: (context, usageSnapshot) {
+                                  if (usageSnapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  } else if (usageSnapshot.hasError) {
+                                    return Center(
+                                        child: Text(
+                                            'Error: ${usageSnapshot.error}'));
+                                  } else {
+                                    return SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.55,
+                                      child: RouterUsageCard(
+                                        title: "name",
+                                        totalUsage: "total",
+                                        routerData: routers,
+                                        usageData: usageSnapshot.data!,
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    "Connected Routers",
+                                    style: GoogleFonts.openSans(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                    ),
                                   ),
-                                );
-                              }
-                            },
+                                ),
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  itemCount: routers.length,
+                                  itemBuilder: (context, index) {
+                                    final routerData = routers[index];
+                                    return FutureBuilder(
+                                      future: _usageService.fetchDataUsageBySim(
+                                          routerData.simId),
+                                      builder: (context, usageSnapshot) {
+                                        if (usageSnapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return const Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        } else if (usageSnapshot.hasError) {
+                                          return Center(
+                                              child: Text(
+                                                  'Error: ${usageSnapshot.error}'));
+                                        } else {
+                                          // Use fetchRouterById to get router details
+                                          return FutureBuilder(
+                                            future:
+                                                _routerService.fetchRouterById(
+                                                    routerData.routerId),
+                                            builder: (context,
+                                                routerDetailsSnapshot) {
+                                              if (routerDetailsSnapshot
+                                                      .connectionState ==
+                                                  ConnectionState.waiting) {
+                                                return const Center(
+                                                    child:
+                                                        CircularProgressIndicator());
+                                              } else if (routerDetailsSnapshot
+                                                  .hasError) {
+                                                return Center(
+                                                    child: Text(
+                                                        'Error: ${routerDetailsSnapshot.error}'));
+                                              } else {
+                                                final routerDetails =
+                                                    routerDetailsSnapshot.data!;
+                                                return RouterCard(
+                                                  name: routerDetails.name,
+                                                  status: routerDetails
+                                                      .sims[0].status,
+                                                  usage: convertUsage(
+                                                      double.parse(usageSnapshot
+                                                          .data!.dataUsage)),
+                                                  signalStrength: "Excellent",
+                                                  imei: routerDetails.imei,
+                                                  simNumber:
+                                                      routerData.sims[0].iccid,
+                                                  ipAddress: routerData
+                                                          .sims[0].ipAddress ??
+                                                      "No IP Address",
+                                                  notes: routerDetails.notes ??
+                                                      "No notes",
+                                                );
+                                              }
+                                            },
+                                          );
+                                        }
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                          const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "Connected Routers",
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w900,
+                          if (routerSnapshot.connectionState ==
+                              ConnectionState.waiting)
+                            Container(
+                              color: Colors.black.withOpacity(0.7),
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: routers.length,
-                              itemBuilder: (context, index) {
-                                final routerData = routers[index];
-                                return FutureBuilder(
-                                  future: _usageService
-                                      .fetchDataUsageBySim(routerData.simId),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return const Center(
-                                          child: CircularProgressIndicator());
-                                    } else if (snapshot.hasError) {
-                                      return Center(
-                                          child:
-                                              Text('Error: ${snapshot.error}'));
-                                    } else {
-                                      return RouterCard(
-                                        name: routerData.name,
-                                        status: routerData.sims[0].status,
-                                        usage: convertUsage(double.parse(
-                                            snapshot.data!.dataUsage)),
-                                        signalStrength: "Excellent",
-                                        imei: routerData.imei,
-                                        simNumber: routerData.sims[0].iccid,
-                                        ipAddress:
-                                            routerData.sims[0].ipAddress ??
-                                                "No IP Address",
-                                        notes: routerData.notes ?? "No notes",
-                                      );
-                                    }
-                                  },
-                                );
-                              },
-                            ),
-                          ),
                         ],
                       );
                     } else {
@@ -164,9 +214,10 @@ class UsagePageState extends State<UsagePage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text(
+        Text(
           'No connected routers',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+          style:
+              GoogleFonts.montserrat(fontSize: 24, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 16),
         Padding(
@@ -190,9 +241,9 @@ class UsagePageState extends State<UsagePage> {
               Icons.add,
               color: Colors.white,
             ),
-            label: const Text(
+            label: Text(
               "Add Router",
-              style: TextStyle(
+              style: GoogleFonts.montserrat(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold),

@@ -1,9 +1,12 @@
 import 'package:client/models/data_usage.dart';
 import 'package:client/models/router.dart';
+import 'package:client/providers/router_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
+import 'package:intl/intl.dart';
 
 String selectedTimeFrame = '1 Week';
 
@@ -27,6 +30,10 @@ class RouterUsageCard extends StatefulWidget {
 
 class _RouterUsageCardState extends State<RouterUsageCard> {
   int xAxisTitlesCount = 7;
+  RouterService routerService = RouterService();
+  double totalUsage = 0.0;
+  String dateRangeText =
+      '${DateFormat('yyyy/MM/dd').format(DateTime.now().subtract(const Duration(days: 6)).toLocal())} - ${DateFormat('yyyy/MM/dd').format(DateTime.now().toLocal())}';
 
   // A predefined color palette for routers
   final List<Color> routerColorsPalette = [
@@ -36,6 +43,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     Colors.purple,
     const Color.fromARGB(255, 174, 150, 107),
     Colors.teal,
+    Colors.pink,
   ];
   final Map<double, List<String>> usageValueToNameMap = {};
 
@@ -66,8 +74,14 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
                 _buildHeader(themeNotifier),
                 const SizedBox(height: 8.0),
                 Text(
-                  'Total Usage: ${widget.totalUsage}',
-                  style: const TextStyle(
+                  'Total Usage: ${totalUsage.toStringAsFixed(2)} Gb',
+                  style: GoogleFonts.montserrat(
+                      fontSize: 16.0, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  'Date Range: $dateRangeText',
+                  style: GoogleFonts.montserrat(
                       fontSize: 16.0, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 8.0),
@@ -85,9 +99,10 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Usage',
-          style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold),
+        Text(
+          'Usage (Gb)',
+          style: GoogleFonts.montserrat(
+              fontSize: 28.0, fontWeight: FontWeight.bold),
         ),
         _buildDropdownButton(themeNotifier),
       ],
@@ -111,6 +126,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
         onChanged: (newValue) {
           setState(() {
             selectedTimeFrame = newValue!;
+            updateDateRangeText();
           });
         },
         items: ['1 Week', '1 Month', '6 Months', '1 Year']
@@ -119,7 +135,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
             value: value,
             child: Text(
               value,
-              style: TextStyle(
+              style: GoogleFonts.montserrat(
                   color:
                       themeNotifier.isDarkMode ? Colors.white : Colors.black),
             ),
@@ -135,7 +151,38 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     );
   }
 
+  void updateDateRangeText() {
+    DateTime currentDate = DateTime.now();
+    DateTime startDate;
+
+    switch (selectedTimeFrame) {
+      case '1 Week':
+        startDate = currentDate.subtract(const Duration(days: 6));
+        break;
+      case '1 Month':
+        startDate = DateTime(currentDate.year, currentDate.month, 1);
+        break;
+      case '6 Months':
+        startDate = currentDate.subtract(const Duration(days: 180));
+        break;
+      case '1 Year':
+        startDate =
+            DateTime(currentDate.year - 1, currentDate.month, currentDate.day);
+        break;
+      default:
+        startDate = currentDate;
+    }
+
+    // Format dates to 'yyyy-MM-dd'
+    String formattedStartDate = DateFormat('yyyy/MM/dd').format(startDate);
+    String formattedEndDate = DateFormat('yyyy/MM/dd').format(currentDate);
+
+    dateRangeText = '$formattedStartDate - $formattedEndDate';
+  }
+
   Widget _buildBarChart(ThemeNotifier themeNotifier) {
+    final Map<int, double> totalUsagePerGroup = {};
+
     return Expanded(
       child: Column(
         children: [
@@ -150,7 +197,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
                 ),
                 titlesData: _buildTitlesData(),
                 borderData: _buildBorderData(themeNotifier),
-                barGroups: getBarGroups(),
+                barGroups: getBarGroups(totalUsagePerGroup),
                 groupsSpace: 16,
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
@@ -169,7 +216,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
                       return BarTooltipItem(
                         '',
-                        TextStyle(
+                        GoogleFonts.montserrat(
                           color: themeNotifier.isDarkMode
                               ? const Color.fromARGB(255, 255, 255, 255)
                               : const Color.fromARGB(255, 0, 0, 0),
@@ -178,7 +225,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
                         children: [
                           TextSpan(
                             text: '$routerName: ',
-                            style: const TextStyle(
+                            style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -233,7 +280,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
           const SizedBox(width: 4.0),
           Text(
             routerName,
-            style: const TextStyle(
+            style: GoogleFonts.montserrat(
               fontSize: 14.0,
               fontWeight: FontWeight.w400,
             ),
@@ -253,9 +300,10 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
           getTitlesWidget: (double value, TitleMeta meta) {
             return SideTitleWidget(
               axisSide: meta.axisSide,
+              space: 8,
               child: Text(
-                '${value.toInt()} GB',
-                style: const TextStyle(
+                '${value.toInt()}',
+                style: GoogleFonts.montserrat(
                   fontSize: 14.0,
                   fontWeight: FontWeight.bold,
                 ),
@@ -310,68 +358,77 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
     return maxUsage.truncate() + 1.0;
   }
 
-  List<BarChartGroupData> getBarGroups() {
+  List<BarChartGroupData> getBarGroups(Map<int, double> totalUsagePerGroup) {
     final List<BarChartGroupData> barGroups = [];
     final routerColors = <String, Color>{};
 
     for (int index = 0; index < widget.usageData.length; index++) {
       final DataUsage routerData = widget.usageData[index];
-      final Routers router = widget.routerData[index];
-      final String routerName = router.name;
-      final double usageValue = double.parse(routerData.dataUsage) / 1000;
+      if (routerData.routerId != null) {
+        final Routers router = widget.routerData.firstWhere(
+          (router) => router.routerId == routerData.routerId,
+        );
+        final String routerName = router.name;
+        final double usageValue = double.parse(routerData.dataUsage) / 1000;
 
-      // Add routerName to the list associated with usageValue
-      usageValueToNameMap.putIfAbsent(usageValue, () => []);
-      if (!usageValueToNameMap[usageValue]!.contains(routerName)) {
-        usageValueToNameMap[usageValue]!.add(routerName);
-      }
+        // Add routerName to the list associated with usageValue
+        usageValueToNameMap.putIfAbsent(usageValue, () => []);
+        if (!usageValueToNameMap[usageValue]!.contains(routerName)) {
+          usageValueToNameMap[usageValue]!.add(routerName);
+        }
 
-      final int dateId = routerData.dateId;
-      final String dateIdString = dateId.toString();
-      final DateTime date = DateTime(
-        int.parse(dateIdString.substring(0, 4)), // Year
-        int.parse(dateIdString.substring(4, 6)), // Month
-        int.parse(dateIdString.substring(6, 8)), // Day
-      );
-
-      if (isWithinTimeFrame(date)) {
-        final groupIndex = getGroupingIndex(date);
-        final colorIndex = index % routerColorsPalette.length;
-
-        final color = routerColors.putIfAbsent(
-          routerName,
-          () => routerColorsPalette[colorIndex],
+        final int dateId = routerData.dateId;
+        final String dateIdString = dateId.toString();
+        final DateTime date = DateTime(
+          int.parse(dateIdString.substring(0, 4)), // Year
+          int.parse(dateIdString.substring(4, 6)), // Month
+          int.parse(dateIdString.substring(6, 8)), // Day
         );
 
-        final existingBarGroupIndex =
-            barGroups.indexWhere((group) => group.x == groupIndex);
+        if (isWithinTimeFrame(date)) {
+          final groupIndex = getGroupingIndex(date);
+          final colorIndex = index - (index ~/ routerColorsPalette.length);
 
-        if (existingBarGroupIndex != -1) {
-          barGroups[existingBarGroupIndex].barRods.add(
-                BarChartRodData(
-                  borderRadius: const BorderRadius.all(Radius.zero),
-                  toY: usageValue,
-                  width: 16.0,
-                  color: color,
-                ),
-              );
-        } else {
-          barGroups.add(
-            BarChartGroupData(
-              x: groupIndex,
-              barRods: [
-                BarChartRodData(
-                  borderRadius: const BorderRadius.all(Radius.zero),
-                  toY: usageValue,
-                  width: 16.0,
-                  color: color,
-                ),
-              ],
-            ),
+          final color = routerColors.putIfAbsent(
+            routerName,
+            () => routerColorsPalette[colorIndex],
           );
+
+          totalUsagePerGroup[groupIndex] =
+              (totalUsagePerGroup[groupIndex] ?? 0) + usageValue;
+
+          final existingBarGroupIndex =
+              barGroups.indexWhere((group) => group.x == groupIndex);
+
+          if (existingBarGroupIndex != -1) {
+            barGroups[existingBarGroupIndex].barRods.add(
+                  BarChartRodData(
+                    borderRadius: const BorderRadius.all(Radius.zero),
+                    toY: usageValue,
+                    width: 16.0,
+                    color: color,
+                  ),
+                );
+          } else {
+            barGroups.add(
+              BarChartGroupData(
+                x: groupIndex,
+                barRods: [
+                  BarChartRodData(
+                    borderRadius: const BorderRadius.all(Radius.zero),
+                    toY: usageValue,
+                    width: 16.0,
+                    color: color,
+                  ),
+                ],
+              ),
+            );
+          }
         }
       }
     }
+    double total = totalUsagePerGroup.values.reduce((a, b) => a + b);
+    totalUsage = total;
 
     return barGroups;
   }
@@ -404,10 +461,11 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
         int.parse(dateIdString.substring(6, 8)),
       );
 
-      if (isWithinTimeFrame(date)) {
+      if (isWithinTimeFrame(date) && routerData.routerId != null) {
         String dayOfWeekTitle = getDayOfWeekTitle(date.weekday - 1);
         uniqueDates.add(dayOfWeekTitle);
       }
+      print(uniqueDates);
     }
     return uniqueDates;
   }
@@ -423,8 +481,9 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
         int.parse(dateIdString.substring(4, 6)),
         int.parse(dateIdString.substring(6, 8)),
       );
+
       int value = date.day - 1;
-      if (isWithinTimeFrame(date)) {
+      if (isWithinTimeFrame(date) && routerData.routerId != null) {
         String weekTitle = getWeekOfMonthTitle(value);
         if (!uniqueWeekTitles.contains(weekTitle)) {
           uniqueWeekTitles.add(weekTitle);
@@ -436,7 +495,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
   }
 
   Widget getTitles(double value, TitleMeta meta) {
-    const style = TextStyle(
+    var style = GoogleFonts.montserrat(
       fontWeight: FontWeight.bold,
       fontSize: 14,
     );
@@ -445,9 +504,8 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
 
     switch (selectedTimeFrame) {
       case '1 Week':
-        final List<String> uniqueDates = getUniqueDates();
-        final int index = value.toInt();
-        text = uniqueDates[index + 1];
+        text = getDayOfWeekTitle(value.toInt());
+
         break;
       case '1 Month':
         int index = value.toInt();

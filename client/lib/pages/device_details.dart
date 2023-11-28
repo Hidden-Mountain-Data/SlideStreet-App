@@ -1,5 +1,6 @@
 import 'package:client/widgets/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 
@@ -57,12 +58,14 @@ class DeviceDetailsPageState extends State<DeviceDetailsPage> {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+              style: GoogleFonts.openSans(
+                  fontSize: 20, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 5),
             Text(
               value,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+              style: GoogleFonts.montserrat(
+                  fontSize: 18, fontWeight: FontWeight.w400),
             ),
           ],
         ),
@@ -99,7 +102,7 @@ class DeviceDetailsPageState extends State<DeviceDetailsPage> {
                   ),
                   Text(
                     'Device Details',
-                    style: TextStyle(
+                    style: GoogleFonts.montserrat(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
                       color: themeNotifier.isDarkMode
@@ -127,13 +130,15 @@ class DeviceDetailsPageState extends State<DeviceDetailsPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 const SizedBox(height: 20),
-                buildTextField('Router Name', widget.routerName, 70, cardColor,
+                buildTextField('Router Name', widget.routerName, 80, cardColor,
                     borderColor),
-                buildTextField('IMEI', widget.imei, 70, cardColor, borderColor),
+                buildTextField('IMEI', widget.imei, 80, cardColor, borderColor),
                 buildTextField(
-                    'SIM #', widget.simNumber, 70, cardColor, borderColor),
+                    'SIM #', widget.simNumber, 80, cardColor, borderColor),
                 buildTextField(
-                    'IP Address', widget.ipAddress, 70, cardColor, borderColor),
+                    'IP Address', widget.ipAddress, 80, cardColor, borderColor),
+                buildTextField(
+                    'Signal Strength', 'Excellent', 80, cardColor, borderColor),
                 buildTextField(
                     'Notes', widget.notes, 120, cardColor, borderColor),
                 const SizedBox(height: 20),
@@ -147,7 +152,7 @@ class DeviceDetailsPageState extends State<DeviceDetailsPage> {
                     ),
                     child: Text(
                       isSuspended ? 'Suspended' : 'Reactivate',
-                      style: const TextStyle(
+                      style: GoogleFonts.montserrat(
                           fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),

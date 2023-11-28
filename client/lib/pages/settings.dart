@@ -6,6 +6,7 @@ import 'package:client/providers/user_service.dart';
 import 'package:client/widgets/bottom_nav_bar.dart';
 import 'package:client/widgets/top_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 
@@ -113,9 +114,9 @@ class SettingsPageState extends State<SettingsPage> {
                 Icons.add,
                 color: Colors.white,
               ),
-              label: const Text(
+              label: Text(
                 "Add Router",
-                style: TextStyle(
+                style: GoogleFonts.montserrat(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.bold),
@@ -137,7 +138,7 @@ class SettingsPageState extends State<SettingsPage> {
       ),
       label: Text(
         label,
-        style: TextStyle(
+        style: GoogleFonts.montserrat(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white : Colors.black),
@@ -160,7 +161,7 @@ class SettingsPageState extends State<SettingsPage> {
       ),
       label: Text(
         label,
-        style: TextStyle(
+        style: GoogleFonts.montserrat(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: isDarkMode ? Colors.white : Colors.black),
@@ -193,7 +194,7 @@ class SettingsPageState extends State<SettingsPage> {
           ),
           title: Text(
             label,
-            style: TextStyle(
+            style: GoogleFonts.montserrat(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: isDarkMode ? Colors.white : Colors.black),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class PasswordField extends StatefulWidget {
   const PasswordField({super.key, required this.passwordController});
@@ -31,7 +32,8 @@ class _PasswordFieldState extends State<PasswordField> {
             fillColor: const Color.fromARGB(255, 225, 225, 225),
             labelText: 'Password',
             hintText: 'Enter your password',
-            hintStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+            hintStyle: GoogleFonts.montserrat(
+                color: const Color.fromARGB(255, 0, 0, 0)),
             suffixIcon: IconButton(
               icon: Icon(
                 _passwordVisible ? Icons.visibility : Icons.visibility_off,

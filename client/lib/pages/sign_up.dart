@@ -6,6 +6,7 @@ import 'package:client/styles/button_styles.dart';
 import 'package:client/widgets/text_fields/email_text_field.dart';
 import 'package:client/widgets/text_fields/password_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 final emailController = TextEditingController();
@@ -41,12 +42,12 @@ class SignUpPageState extends State<SignUpPage> {
                 'assets/Original.png',
                 height: 60,
               ),
-              const Text(
+              Text(
                 "Sign Up",
-                style: TextStyle(
+                style: GoogleFonts.openSans(
                   fontSize: 40,
                   fontWeight: FontWeight.w900,
-                  color: Color.fromARGB(255, 0, 0, 0),
+                  color: const Color.fromARGB(255, 0, 0, 0),
                 ),
               ),
               const SizedBox(width: 65),
@@ -77,12 +78,12 @@ class SignUpPageState extends State<SignUpPage> {
                     alignment: Alignment.centerLeft,
                     child: InkWell(
                       onTap: () {},
-                      child: const Text(
+                      child: Text(
                         "Welcome!",
-                        style: TextStyle(
+                        style: GoogleFonts.openSans(
                           fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: Color.fromARGB(255, 0, 0, 0),
+                          fontWeight: FontWeight.bold,
+                          color: const Color.fromARGB(255, 0, 0, 0),
                         ),
                       ),
                     ),
@@ -92,12 +93,12 @@ class SignUpPageState extends State<SignUpPage> {
                     alignment: Alignment.centerLeft,
                     child: InkWell(
                       onTap: () {},
-                      child: const Text(
+                      child: Text(
                         "To keep connected with us, please create an account",
-                        style: TextStyle(
+                        style: GoogleFonts.montserrat(
                           fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color.fromARGB(255, 0, 0, 0),
+                          fontWeight: FontWeight.w600,
+                          color: const Color.fromARGB(255, 0, 0, 0),
                         ),
                       ),
                     ),
@@ -111,14 +112,15 @@ class SignUpPageState extends State<SignUpPage> {
                           child: TextFormField(
                             controller: firstNameController,
                             keyboardType: TextInputType.text,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               border: InputBorder.none,
                               filled: true,
-                              fillColor: Color.fromARGB(255, 225, 225, 225),
+                              fillColor:
+                                  const Color.fromARGB(255, 225, 225, 225),
                               labelText: 'First Name',
-                              hintStyle: TextStyle(
-                                  color: Color.fromARGB(255, 0, 0, 0)),
-                              hintText: 'Enter your first name',
+                              hintStyle: GoogleFonts.montserrat(
+                                  color: const Color.fromARGB(255, 0, 0, 0)),
+                              hintText: 'First name',
                             ),
                           ),
                         ),
@@ -129,14 +131,15 @@ class SignUpPageState extends State<SignUpPage> {
                           child: TextFormField(
                             controller: lastNameController,
                             keyboardType: TextInputType.text,
-                            decoration: const InputDecoration(
+                            decoration: InputDecoration(
                               border: InputBorder.none,
                               filled: true,
-                              fillColor: Color.fromARGB(255, 225, 225, 225),
+                              fillColor:
+                                  const Color.fromARGB(255, 225, 225, 225),
                               labelText: 'Last Name',
-                              hintStyle: TextStyle(
-                                  color: Color.fromARGB(255, 0, 0, 0)),
-                              hintText: 'Enter your last name',
+                              hintStyle: GoogleFonts.montserrat(
+                                  color: const Color.fromARGB(255, 0, 0, 0)),
+                              hintText: 'Last name',
                             ),
                           ),
                         ),
@@ -162,12 +165,12 @@ class SignUpPageState extends State<SignUpPage> {
                               builder: (context) => const LoginPage()),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         "Already have an account? Sign in!",
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Color.fromARGB(255, 127, 126, 128),
-                          fontWeight: FontWeight.w700,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 19,
+                          color: const Color.fromARGB(255, 127, 126, 128),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -219,12 +222,12 @@ class SignUpPageState extends State<SignUpPage> {
                         }
                       });
                     },
-                    child: const Text(
+                    child: Text(
                       'Sign Up',
-                      style: TextStyle(
+                      style: GoogleFonts.openSans(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 195, 250, 55),
+                        color: const Color.fromARGB(255, 195, 250, 55),
                       ),
                     ),
                   ),
@@ -268,7 +271,8 @@ class _ConfirmPasswordFieldState extends State<ConfirmPasswordField> {
             fillColor: const Color.fromARGB(255, 225, 225, 225),
             labelText: 'Confirm Password',
             hintText: 'Confirm your password',
-            hintStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+            hintStyle: GoogleFonts.montserrat(
+                color: const Color.fromARGB(255, 0, 0, 0)),
             suffixIcon: IconButton(
               icon: Icon(
                 _passwordVisible ? Icons.visibility : Icons.visibility_off,
@@ -302,13 +306,14 @@ class _PhoneNumberFieldState extends State<PhoneNumberField> {
         TextFormField(
           controller: phoneNumberController,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: InputBorder.none,
             filled: true,
-            fillColor: Color.fromARGB(255, 225, 225, 225),
+            fillColor: const Color.fromARGB(255, 225, 225, 225),
             labelText: 'Phone Number',
             hintText: 'Enter your phone number',
-            hintStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
+            hintStyle: GoogleFonts.montserrat(
+                color: const Color.fromARGB(255, 0, 0, 0)),
           ),
         ),
       ],

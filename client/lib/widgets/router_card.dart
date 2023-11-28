@@ -2,6 +2,13 @@ import 'package:client/pages/device_details.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
+  }
+}
 
 class RouterCard extends StatelessWidget {
   final String name;
@@ -85,7 +92,7 @@ class RouterCard extends StatelessWidget {
             ),
             title: Text(
               name,
-              style: TextStyle(
+              style: GoogleFonts.openSans(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: themeNotifier.isDarkMode
@@ -98,8 +105,8 @@ class RouterCard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                   child: Text(
-                    'Status: $status',
-                    style: TextStyle(
+                    'Status: ${status.capitalize()}',
+                    style: GoogleFonts.montserrat(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: themeNotifier.isDarkMode
@@ -111,7 +118,7 @@ class RouterCard extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                   child: Text(
                     'Usage: $usage',
-                    style: TextStyle(
+                    style: GoogleFonts.montserrat(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: themeNotifier.isDarkMode
@@ -123,8 +130,8 @@ class RouterCard extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                   child: Text(
                     'Signal Strength: $signalStrength',
-                    style: TextStyle(
-                        fontSize: 16,
+                    style: GoogleFonts.montserrat(
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: themeNotifier.isDarkMode
                             ? const Color.fromARGB(255, 223, 223, 223)
@@ -255,7 +262,7 @@ class RouterCard2 extends StatelessWidget {
           child: ListTile(
             title: Text(
               name,
-              style: TextStyle(
+              style: GoogleFonts.openSans(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: themeNotifier.isDarkMode
@@ -265,32 +272,53 @@ class RouterCard2 extends StatelessWidget {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Status: $status',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: themeNotifier.isDarkMode
-                          ? const Color.fromARGB(255, 207, 207, 207)
-                          : Colors.black),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    'Status: ${status.capitalize()}',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: themeNotifier.isDarkMode
+                            ? const Color.fromARGB(255, 207, 207, 207)
+                            : Colors.black),
+                  ),
                 ),
-                Text(
-                  'Usage: $usage',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: themeNotifier.isDarkMode
-                          ? const Color.fromARGB(255, 207, 207, 207)
-                          : Colors.black),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    'Usage: $usage',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: themeNotifier.isDarkMode
+                            ? const Color.fromARGB(255, 207, 207, 207)
+                            : Colors.black),
+                  ),
                 ),
-                Text(
-                  'Speed: $speed',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: themeNotifier.isDarkMode
-                          ? const Color.fromARGB(255, 207, 207, 207)
-                          : Colors.black),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    'Speed: 100 Mbps',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: themeNotifier.isDarkMode
+                            ? const Color.fromARGB(255, 207, 207, 207)
+                            : Colors.black),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                  child: Text(
+                    'Last Activity: 2 days ago',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: themeNotifier.isDarkMode
+                            ? const Color.fromARGB(255, 207, 207, 207)
+                            : Colors.black),
+                  ),
                 ),
               ],
             ),

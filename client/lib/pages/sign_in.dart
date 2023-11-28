@@ -8,6 +8,7 @@ import 'package:client/widgets/google_sign_in_button.dart';
 import 'package:client/widgets/text_fields/email_text_field.dart';
 import 'package:client/widgets/text_fields/password_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 final emailController = TextEditingController();
@@ -48,12 +49,12 @@ class LoginPageState extends State<LoginPage> {
                 'assets/Original.png',
                 height: 60,
               ),
-              const Text(
+              Text(
                 "Sign In",
-                style: TextStyle(
+                style: GoogleFonts.openSans(
                   fontSize: 40,
                   fontWeight: FontWeight.w900,
-                  color: Color.fromARGB(255, 0, 0, 0),
+                  color: const Color.fromARGB(255, 0, 0, 0),
                 ),
               ),
               const SizedBox(width: 65),
@@ -84,12 +85,12 @@ class LoginPageState extends State<LoginPage> {
                     alignment: Alignment.centerLeft,
                     child: InkWell(
                       onTap: () {},
-                      child: const Text(
+                      child: Text(
                         "Welcome back!",
-                        style: TextStyle(
+                        style: GoogleFonts.openSans(
                           fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: Color.fromARGB(255, 0, 0, 0),
+                          fontWeight: FontWeight.bold,
+                          color: const Color.fromARGB(255, 0, 0, 0),
                         ),
                       ),
                     ),
@@ -99,12 +100,12 @@ class LoginPageState extends State<LoginPage> {
                     alignment: Alignment.centerLeft,
                     child: InkWell(
                       onTap: () {},
-                      child: const Text(
+                      child: Text(
                         "To keep connected with us, please login",
-                        style: TextStyle(
+                        style: GoogleFonts.montserrat(
                           fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color.fromARGB(255, 0, 0, 0),
+                          fontWeight: FontWeight.w600,
+                          color: const Color.fromARGB(255, 0, 0, 0),
                         ),
                       ),
                     ),
@@ -124,12 +125,12 @@ class LoginPageState extends State<LoginPage> {
                               builder: (context) => const SignUpPage()),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         "Don't have an account? Sign up!",
-                        style: TextStyle(
+                        style: GoogleFonts.montserrat(
                           fontSize: 20,
-                          color: Color.fromARGB(255, 127, 126, 128),
-                          fontWeight: FontWeight.w700,
+                          color: const Color.fromARGB(255, 127, 126, 128),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -173,41 +174,41 @@ class LoginPageState extends State<LoginPage> {
                         }
                       });
                     },
-                    child: const Text(
+                    child: Text(
                       'Login',
-                      style: TextStyle(
+                      style: GoogleFonts.openSans(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 195, 250, 55),
+                        color: const Color.fromARGB(255, 195, 250, 55),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
-                        Divider(
+                        const Divider(
                           height: 1,
                           color: Color.fromARGB(255, 127, 126, 128),
                         ),
                         Text(
                           'or continue with',
-                          style: TextStyle(
-                            fontSize: 24,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 20,
                             fontWeight: FontWeight.w600,
-                            color: Color.fromARGB(255, 127, 126, 128),
+                            color: const Color.fromARGB(255, 127, 126, 128),
                           ),
                         ),
-                        Divider(
+                        const Divider(
                           height: 1,
                           color: Color.fromARGB(255, 127, 126, 128),
                         ),
-                        SizedBox(height: 20),
-                        AppleSignInButton(),
-                        SizedBox(height: 10),
-                        GoogleSignInButton(),
-                        SizedBox(height: 50),
+                        const SizedBox(height: 20),
+                        const AppleSignInButton(),
+                        const SizedBox(height: 10),
+                        const GoogleSignInButton(),
+                        const SizedBox(height: 50),
                       ],
                     ),
                   ),

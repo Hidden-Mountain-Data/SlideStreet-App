@@ -1,5 +1,6 @@
 import 'package:client/pages/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 
@@ -31,7 +32,7 @@ class _TopAppBarState extends State<TopAppBar> {
             ),
             Text(
               widget.title,
-              style: TextStyle(
+              style: GoogleFonts.openSans(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color:

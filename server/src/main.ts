@@ -31,7 +31,10 @@ async function bootstrap(): Promise<void> {
     }),
   );
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-  app.enableCors({ origin: "http://10.0.2.2:3000", credentials: true});
+  app.enableCors({
+    origin: ["http://10.0.2.2:3000", "http://localhost:5173"],
+    credentials: true
+  });
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.use(
@@ -44,7 +47,7 @@ async function bootstrap(): Promise<void> {
   const port = parseInt(process.env.PORT ?? '3000', 10);
   await app.listen(port);
 
-  if (module.hot) {
+  if(module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
   }

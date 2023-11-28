@@ -23,7 +23,7 @@ export class TealPollingService {
     },
   });
 
-  @Cron('*/2 * * * *')
+  @Cron('*/5 * * * *')
   async updateTealDataUsage() {
 
     try {
@@ -76,7 +76,7 @@ export class TealPollingService {
             }
           });
 
-          this.logger.log('Sent get request to Teal API');
+          this.logger.log('Sent get request to Teal API', requestId, eid);
           // console.log('Response: ', response);
 
           // response should be 200 ok if the request was successful
@@ -99,6 +99,6 @@ export class TealPollingService {
 
   //Generates a UUID for the Teal API request id
   generateUUID() {
-    return uuidv4().replace(/-/g, '');
+    return uuidv4().replace(/-/g, '').replace(/,/g, '');
   }
 }

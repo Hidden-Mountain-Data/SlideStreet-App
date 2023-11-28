@@ -64,8 +64,7 @@ class DeviceDetailsPageState extends State<DeviceDetailsPage> {
             const SizedBox(height: 5),
             Text(
               value,
-              style: GoogleFonts.montserrat(
-                  fontSize: 18, fontWeight: FontWeight.w400),
+              style: GoogleFonts.montserrat(fontSize: 18),
             ),
           ],
         ),

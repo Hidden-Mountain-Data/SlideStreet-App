@@ -25,21 +25,6 @@ class RouterService {
     }
   }
 
-  Future<Routers> fetchRouter(int routerId) async {
-    final header = await getAuth();
-    //final url = dotenv.env['NEST_API_URL'];
-    final url = dotenv.env['NEST_API_URL_ANDROID'];
-    final response = await http.get(
-        Uri.parse('$url/api/routers/router-details/$routerId'),
-        headers: header);
-    if (response.statusCode == 200) {
-      final router = jsonDecode(response.body);
-      return router;
-    } else {
-      throw Exception('Failed to fetch router');
-    }
-  }
-
   Future<Routers> fetchRouterById(int id) async {
     final header = await getAuth();
     //final url = dotenv.env['NEST_API_URL'];

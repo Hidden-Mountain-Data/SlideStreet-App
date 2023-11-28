@@ -107,7 +107,7 @@ class RouterCard extends StatelessWidget {
                   child: Text(
                     'Status: ${status.capitalize()}',
                     style: GoogleFonts.montserrat(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: themeNotifier.isDarkMode
                             ? const Color.fromARGB(255, 223, 223, 223)
@@ -119,7 +119,7 @@ class RouterCard extends StatelessWidget {
                   child: Text(
                     'Usage: $usage',
                     style: GoogleFonts.montserrat(
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: themeNotifier.isDarkMode
                             ? const Color.fromARGB(255, 223, 223, 223)

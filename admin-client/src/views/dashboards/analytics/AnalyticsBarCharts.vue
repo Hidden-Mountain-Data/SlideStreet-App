@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import VueApexCharts from 'vue3-apexcharts'
 import { useTheme } from 'vuetify'
+import { useThemeConfig } from '@core/composable/useThemeConfig'
 
 const vuetifyTheme = useTheme()
+const { theme } = useThemeConfig()
 
-const currentTheme = computed(() => { return vuetifyTheme.current.value.colors })
+const currentTheme = controlledComputed(theme, () => vuetifyTheme.current.value.colors)
 
 const series = [
   {
@@ -13,7 +15,7 @@ const series = [
   },
 ]
 
-const chartOptions = computed(() => {
+const chartOptions = controlledComputed(theme, () => {
   const backgroundColor = currentTheme.value.background
 
   return {
@@ -89,9 +91,9 @@ const chartOptions = computed(() => {
         :height="95"
       />
 
-      <p class="text-center font-weight-semibold mb-0">
+      <h6 class="text-sm text-center font-weight-medium">
         Sessions
-      </p>
+      </h6>
     </VCardText>
   </VCard>
 </template>

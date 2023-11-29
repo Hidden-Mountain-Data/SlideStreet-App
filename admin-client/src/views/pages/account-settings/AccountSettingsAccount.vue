@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import avatar1 from '@/assets/images/avatars/avatar-1.png'
+import avatar1 from '@images/avatars/avatar-1.png'
+
 const accountData = {
   avatarImg: avatar1,
   firstName: 'john',
@@ -18,6 +19,7 @@ const accountData = {
 
 const refInputEl = ref<HTMLElement>()
 
+const isConfirmDialogOpen = ref(false)
 const accountDataLocal = ref(structuredClone(accountData))
 const isAccountDeactivated = ref(false)
 
@@ -107,22 +109,19 @@ const currencies = [
 <template>
   <VRow>
     <VCol cols="12">
-      <VCard title="Account Details">
+      <VCard>
         <VCardText class="d-flex">
           <!-- 👉 Avatar -->
           <VAvatar
-            rounded="lg"
-            size="100"
+            rounded="sm"
+            size="120"
             class="me-6"
             :image="accountDataLocal.avatarImg"
           />
 
           <!-- 👉 Upload Photo -->
-          <form
-            ref="refForm"
-            class="d-flex flex-column justify-center gap-5"
-          >
-            <div class="d-flex flex-wrap gap-2">
+          <form class="d-flex flex-column justify-center gap-4">
+            <div class="d-flex flex-wrap gap-4">
               <VBtn
                 color="primary"
                 @click="refInputEl?.click()"
@@ -157,13 +156,11 @@ const currencies = [
               </VBtn>
             </div>
 
-            <p class="text-body-1 mb-0">
+            <p class="text-xs mb-0">
               Allowed JPG, GIF or PNG. Max size of 800K
             </p>
           </form>
         </VCardText>
-
-        <VDivider />
 
         <VCardText>
           <!-- 👉 Form -->
@@ -254,6 +251,7 @@ const currencies = [
               >
                 <VTextField
                   v-model="accountDataLocal.zip"
+
                   label="Zip Code"
                 />
               </VCol>
@@ -317,7 +315,7 @@ const currencies = [
 
                 <VBtn
                   color="secondary"
-                  variant="tonal"
+                  variant="outlined"
                   type="reset"
                   @click.prevent="resetForm"
                 >
@@ -335,30 +333,17 @@ const currencies = [
       <VCard title="Delete Account">
         <VCardText>
           <!-- 👉 Checkbox and Button  -->
-          <VAlert
-            color="warning"
-            variant="tonal"
-            class="mb-4"
-          >
-            <VAlertTitle class="mb-1">
-              Are you sure you want to delete your account?
-            </VAlertTitle>
-            <p class="mb-0">
-              Once you delete your account, there is no going back. Please be certain.
-            </p>
-          </VAlert>
-          <div>
-            <VCheckbox
-              v-model="isAccountDeactivated"
-              :rules="validateAccountDeactivation"
-              label="I confirm my account deactivation"
-            />
-          </div>
+          <VCheckbox
+            v-model="isAccountDeactivated"
+            :rules="validateAccountDeactivation"
+            label="I confirm my account deactivation"
+          />
 
           <VBtn
             :disabled="!isAccountDeactivated"
             color="error"
             class="mt-3"
+            @click="isConfirmDialogOpen = true"
           >
             Deactivate Account
           </VBtn>
@@ -366,4 +351,14 @@ const currencies = [
       </VCard>
     </VCol>
   </VRow>
+
+  <!-- Confirm Dialog -->
+  <ConfirmDialog
+    v-model:isDialogVisible="isConfirmDialogOpen"
+    confirmation-question="Are you sure you want to deactivate your account?"
+    confirm-title="Deactivated!"
+    confirm-msg="Your account has been deactivated successfully."
+    cancel-title="Cancelled"
+    cancel-msg="Account Deactivation Cancelled!"
+  />
 </template>

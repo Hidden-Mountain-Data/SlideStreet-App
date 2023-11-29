@@ -1,10 +1,8 @@
 <template>
   <div style="width: 100%; height: 500px;">
-    <ag-grid-vue style="width: 100%; height: 100%;"
-      :class="String(vuetifyTheme.global.name.value) === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine'"
-      :gridOptions="gridOptions" @gridReady="onGridReady"></ag-grid-vue>
+    <ag-grid-vue style="width: 100%; height: 100%;" class="ag-theme-alpine-dark" :gridOptions="gridOptions"
+      @gridReady="onGridReady"></ag-grid-vue>
   </div>
-  <!--FIXME Class for dark/light mode not reactive with mode switch  -->
 </template>
 
 <script lang="ts">
@@ -42,36 +40,60 @@ export default {
             },
           },
         ],
-        rowData: [],
+        rowData: [
+          {
+            active: true,
+            status: 'Active',
+            activationDate: '2021-01-01',
+            usage: '1.2 GB',
+            cap: '2 GB',
+            plan: 'Unlimited',
+            iccid: '12345678901234567890',
+            imei: '123456789012345',
+            eid: '12345678901234567890',
+          },
+          {
+            active: false,
+            status: 'Inactive',
+            activationDate: '2021-01-01',
+            usage: '1.2 GB',
+            cap: '2 GB',
+            plan: 'Unlimited',
+            iccid: '12345678901234567890',
+            imei: '123456789012345',
+            eid: '12345678901234567890',
+          }
+
+        ],
       },
       vuetifyTheme: useTheme(),
     }
   },
   mounted() {
-    this.fetchData();
-    this.$watch(
-      () => this.$vuetify.theme.global.name.value,
-      () => { this.updateAGGridTheme() },
-    );
+    // this.fetchData();
+    // this.$watch(
+    //   () => this.$vuetify.theme.global.name,
+    //   () => { this.updateAGGridTheme() },
+    // );
   },
 
   methods: {
-    async fetchData() {
-      try {
-        console.log("api URL", process.env.NEST_API_URL);
-        const response = await DeviceService.getAll();
-        this.gridOptions.rowData = response;
-      } catch(error) {
-        console.error('Error fetching data:', error);
-      }
-    },
-    updateAGGridTheme() {
-      const agGridTheme = String(this.vuetifyTheme.global.name.value) === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
+    // async fetchData() {
+    //   try {
+    //     console.log("api URL", process.env.NEST_API_URL);
+    //     const response = await DeviceService.getAll();
+    //     this.gridOptions.rowData = response;
+    //   } catch(error) {
+    //     console.error('Error fetching data:', error);
+    //   }
+    // },
+    // updateAGGridTheme() {
+    //   const agGridTheme = String(this.vuetifyTheme.global.name.value) === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
-      const gridDiv = document.querySelector('.ag-theme-custom') as HTMLElement;
-      gridDiv.classList.remove('ag-theme-alpine', 'ag-theme-alpine-dark');
-      gridDiv.classList.add(agGridTheme);
-    },
+    //   const gridDiv = document.querySelector('.ag-theme-custom') as HTMLElement;
+    //   gridDiv.classList.remove('ag-theme-alpine', 'ag-theme-alpine-dark');
+    //   gridDiv.classList.add(agGridTheme);
+    // },
     onGridReady(params: any) {
       const api = params.api;
 

@@ -1,70 +1,65 @@
 <script lang="ts" setup>
-import DrawerContent from './DrawerContent.vue'
-import { VerticalNavLayout } from '@layouts'
+import navItems from '@/navigation/vertical'
+import { useThemeConfig } from '@core/composable/useThemeConfig'
 
 // Components
 import Footer from '@/layouts/components/Footer.vue'
+import NavBarI18n from '@/layouts/components/NavBarI18n.vue'
+import NavBarNotifications from '@/layouts/components/NavBarNotifications.vue'
+import NavbarShortcuts from '@/layouts/components/NavbarShortcuts.vue'
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
+import NavSearchBar from '@/layouts/components/NavSearchBar.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
+
+// @layouts plugin
+import { VerticalNavLayout } from '@layouts'
+
+const { appRouteTransition, isLessThanOverlayNavBreakpoint } = useThemeConfig()
+const { width: windowWidth } = useWindowSize()
 </script>
 
 <template>
-  <VerticalNavLayout>
+  <VerticalNavLayout :nav-items="navItems">
     <!-- 👉 navbar -->
-    <template #navbar>
-      <!-- <VTextField rounded prepend-inner-icon="mdi-magnify" density="compact" max-width="100px"
-        class="app-bar-search d-none d-sm-block" /> -->
+    <template #navbar="{ toggleVerticalOverlayNavActive }">
+      <div class="d-flex h-100 align-center">
+        <IconBtn
+          v-if="isLessThanOverlayNavBreakpoint(windowWidth)"
+          id="vertical-nav-toggle-btn"
+          class="ms-n3"
+          @click="toggleVerticalOverlayNavActive(true)"
+        >
+          <VIcon icon="mdi-menu" />
+        </IconBtn>
 
-      <VSpacer />
+        <NavSearchBar class="ms-lg-n3" />
 
-      <!-- <a
-        href="https://github.com/themeselection/materio-vuetify-vuejs-admin-template-free"
-        target="_blank"
-        rel="noopener noreferrer"
-        style="color: inherit"
-      >
-        <VIcon
-          class="ms-6 me-4"
-          icon="mdi-github"
-        />
-      </a> -->
-      <NavbarThemeSwitcher />
-      <VBtn icon variant="text" color="default" class="me-2" size="small">
-        <VIcon icon="mdi-bell-outline" size="24" />
-      </VBtn>
-      <UserProfile />
-    </template>
+        <VSpacer />
 
-    <!-- 👉 Drawer content -->
-    <template #navigation-drawer-content>
-      <DrawerContent />
+        <NavBarI18n />
+        <NavbarThemeSwitcher />
+        <NavbarShortcuts />
+        <NavBarNotifications class="me-2" />
+        <UserProfile />
+      </div>
     </template>
 
     <!-- 👉 Pages -->
-    <div class="layout-page-content">
-      <RouterView />
-    </div>
+    <RouterView v-slot="{ Component }">
+      <Transition
+        :name="appRouteTransition"
+        mode="out-in"
+      >
+        <Component :is="Component" />
+      </Transition>
+    </RouterView>
 
     <!-- 👉 Footer -->
     <template #footer>
       <Footer />
     </template>
+
+    <!-- 👉 Customizer -->
+    <TheCustomizer />
   </VerticalNavLayout>
 </template>
-
-<style lang="scss">
-.app-bar-search {
-  .v-input__control {
-    width: 236px
-  }
-
-  .v-field__outline__start {
-    border-radius: 28px 0 0 28px !important;
-    flex-basis: 20px !important;
-  }
-
-  .v-field__outline__end {
-    border-radius: 0 28px 28px 0 !important;
-  }
-}
-</style>

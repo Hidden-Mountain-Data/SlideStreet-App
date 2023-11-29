@@ -1,10 +1,13 @@
 <script lang="ts" setup>
+import { VDataTable } from 'vuetify/labs/VDataTable'
+import poseFs9 from '@images/pages/pose-fs-9.png'
+
 const isCurrentPasswordVisible = ref(false)
 const isNewPasswordVisible = ref(false)
 const isConfirmPasswordVisible = ref(false)
-const currentPassword = ref('12345678')
-const newPassword = ref('87654321')
-const confirmPassword = ref('87654321')
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
 
 const passwordRequirements = [
   'Minimum 8 characters long - the more, the better',
@@ -32,13 +35,21 @@ const serverKeys = [
     permission: 'Full Access',
   },
 ]
+
+const recentDevicesHeaders = [
+  { title: 'BROWSER', key: 'browser' },
+  { title: 'DEVICE', key: 'device' },
+  { title: 'LOCATION', key: 'location' },
+  { title: 'RECENT ACTIVITY', key: 'recentActivity' },
+]
+
 const recentDevices = [
   {
     browser: 'Chrome on Windows',
     device: 'HP Spectre 360',
     location: 'New York, NY',
     recentActivity: '28 Apr 2022, 18:20',
-    deviceIcon: { icon: 'mdi-microsoft-windows', color: 'primary' },
+    deviceIcon: { icon: 'mdi-microsoft-windows', color: 'info' },
   },
   {
     browser: 'Chrome on iPhone',
@@ -66,7 +77,7 @@ const recentDevices = [
     device: 'HP Spectre 360',
     location: 'Los Angeles, CA',
     recentActivity: '20 Apr 2022, 10:20',
-    deviceIcon: { icon: 'mdi-microsoft-windows', color: 'primary' },
+    deviceIcon: { icon: 'mdi-microsoft-windows', color: 'info' },
   },
   {
     browser: 'Chrome on Android',
@@ -76,6 +87,8 @@ const recentDevices = [
     deviceIcon: { icon: 'mdi-android', color: 'success' },
   },
 ]
+
+const isOneTimePasswordDialogVisible = ref(false)
 </script>
 
 <template>
@@ -84,9 +97,9 @@ const recentDevices = [
     <VCol cols="12">
       <VCard title="Change Password">
         <VForm>
-          <VCardText>
+          <VCardText class="pt-0">
             <!-- 👉 Current Password -->
-            <VRow class="mb-3">
+            <VRow>
               <VCol
                 cols="12"
                 md="6"
@@ -136,11 +149,11 @@ const recentDevices = [
 
           <!-- 👉 Password Requirements -->
           <VCardText>
-            <p class="text-base font-weight-medium mt-2">
+            <p class="text-base mt-2">
               Password Requirements:
             </p>
 
-            <ul class="d-flex flex-column gap-y-3">
+            <ul class="d-flex flex-column gap-y-4">
               <li
                 v-for="item in passwordRequirements"
                 :key="item"
@@ -153,7 +166,7 @@ const recentDevices = [
                     class="me-3"
                   />
                 </div>
-                <span class="font-weight-medium">{{ item }}</span>
+                <span class="text-base">{{ item }}</span>
               </li>
             </ul>
           </VCardText>
@@ -165,7 +178,7 @@ const recentDevices = [
             <VBtn
               type="reset"
               color="secondary"
-              variant="tonal"
+              variant="outlined"
             >
               Reset
             </VBtn>
@@ -178,11 +191,11 @@ const recentDevices = [
     <!-- SECTION Two-steps verification -->
     <VCol cols="12">
       <VCard title="Two-steps verification">
-        <VCardText>
-          <p class="font-weight-semibold">
+        <VCardText class="text-base">
+          <p>
             Two factor authentication is not enabled yet.
           </p>
-          <p>
+          <p class="mb-6">
             Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to log in.
             <a
               href="javascript:void(0)"
@@ -190,8 +203,8 @@ const recentDevices = [
             >Learn more.</a>
           </p>
 
-          <VBtn>
-            Enable two-factor authentication
+          <VBtn @click="isOneTimePasswordDialogVisible = true">
+            Enable 2FA
           </VBtn>
         </VCardText>
       </VCard>
@@ -238,6 +251,21 @@ const recentDevices = [
               </VForm>
             </VCardText>
           </VCol>
+
+          <!-- 👉 Lady image -->
+          <VCol
+            cols="12"
+            md="7"
+            order="0"
+            order-md="1"
+            class="d-flex flex-column justify-center align-center"
+          >
+            <VImg
+              :src="poseFs9"
+              :width="180"
+              :style="$vuetify.display.smAndDown ? '' : 'position: absolute; bottom: 0;'"
+            />
+          </VCol>
         </VRow>
       </VCard>
     <!-- !SECTION -->
@@ -247,11 +275,13 @@ const recentDevices = [
       <!-- SECTION: API Keys List -->
       <VCard title="API Key List &amp; Access">
         <VCardText>
-          An API key is a simple encrypted string that identifies an application without any principal. They are useful for accessing public data anonymously, and are used to associate API requests with your project for quota and billing.
+          <span class="text-base">
+            An API key is a simple encrypted string that identifies an application without any principal. They are useful for accessing public data anonymously, and are used to associate API requests with your project for quota and billing.
+          </span>
         </VCardText>
 
         <!-- 👉 Server Status -->
-        <VCardText class="d-flex flex-column gap-y-4">
+        <VCardText class="d-flex flex-column gap-y-6">
           <div
             v-for="serverKey in serverKeys"
             :key="serverKey.key"
@@ -262,22 +292,21 @@ const recentDevices = [
                 {{ serverKey.name }}
               </h6>
               <VChip
-                label
                 color="primary"
-                size="small"
+                density="comfortable"
               >
                 {{ serverKey.permission }}
               </VChip>
             </div>
-            <p class="text-base font-weight-semibold">
+            <p class="text-base font-weight-medium">
               <span class="me-3">{{ serverKey.key }}</span>
               <VIcon
-                :size="18"
+                :size="20"
                 icon="mdi-content-copy"
                 class="cursor-pointer"
               />
             </p>
-            <span>Created on {{ serverKey.createdOn }}</span>
+            <span class="text-disabled">Created on {{ serverKey.createdOn }}</span>
           </div>
         </VCardText>
       </VCard>
@@ -288,44 +317,33 @@ const recentDevices = [
     <VCol cols="12">
       <!-- 👉 Table -->
       <VCard title="Recent Devices">
-        <VTable class="text-no-wrap">
-          <thead>
-            <tr>
-              <th scope="col">
-                BROWSER
-              </th>
-              <th scope="col">
-                DEVICE
-              </th>
-              <th scope="col">
-                LOCATION
-              </th>
-              <th scope="col">
-                RECENT ACTIVITIES
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="device in recentDevices"
-              :key="device.recentActivity"
-            >
-              <td>
-                <VIcon
-                  start
-                  :icon="device.deviceIcon.icon"
-                  :color="device.deviceIcon.color"
-                />
-                {{ device.browser }}
-              </td>
-              <td>{{ device.device }}</td>
-              <td>{{ device.location }}</td>
-              <td>{{ device.recentActivity }}</td>
-            </tr>
-          </tbody>
-        </VTable>
+        <VDataTable
+          :headers="recentDevicesHeaders"
+          :items="recentDevices"
+          hide-default-footer
+          class="text-sm"
+        >
+          <template #item.browser="{ item }">
+            <div class="d-flex">
+              <VIcon
+                start
+                :icon="item.raw.deviceIcon.icon"
+                :color="item.raw.deviceIcon.color"
+              />
+              <span class="text-high-emphasis text-base">
+                {{ item.raw.browser }}
+              </span>
+            </div>
+          </template>
+          <!-- TODO Refactor this after vuetify provides proper solution for removing default footer -->
+          <template #bottom />
+        </VDataTable>
       </VCard>
     </VCol>
     <!-- !SECTION -->
   </VRow>
+
+  <!-- SECTION Enable One time password -->
+  <TwoFactorAuthDialog v-model:isDialogVisible="isOneTimePasswordDialogVisible" />
+  <!-- !SECTION -->
 </template>

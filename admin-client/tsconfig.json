@@ -17,6 +17,9 @@
       "@/*": [
         "src/*"
       ],
+      "@themeConfig": [
+        "themeConfig.ts"
+      ],
       "@layouts/*": [
         "src/@layouts/*"
       ],
@@ -29,8 +32,17 @@
       "@core": [
         "src/@core"
       ],
+      "@images/*": [
+        "src/assets/images/*"
+      ],
+      "@styles/*": [
+        "src/styles/*"
+      ],
       "@axios": [
         "src/plugins/axios"
+      ],
+      "@validators": [
+        "src/@core/utils/validators"
       ]
     },
     "lib": [
@@ -43,7 +55,8 @@
     "types": [
       "vite/client",
       "vite-plugin-pages/client",
-      "vite-plugin-vue-layouts/client"
+      "vite-plugin-vue-layouts/client",
+      "unplugin-vue-define-options/macros-global"
     ]
   },
   "include": [
@@ -52,7 +65,9 @@
     "shims.d.ts",
     "src/**/*",
     "src/**/*.vue",
-    "themeConfig.ts"
+    "themeConfig.ts",
+    "auto-imports.d.ts",
+    "components.d.ts"
   ],
   "exclude": [
     "dist",

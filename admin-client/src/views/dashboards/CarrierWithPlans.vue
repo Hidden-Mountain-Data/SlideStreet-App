@@ -41,16 +41,16 @@
             Services
           </VCol>
           <VCol cols="11">
-            <VBtn color="error" class="me-2" text>
+            <VBtn color="error" class="me-2">
               Multi-Carrier
             </VBtn>
-            <VBtn color="warning" class="me-2" text>
+            <VBtn color="warning" class="me-2">
               Global
             </VBtn>
-            <VBtn color="info" class="me-2" text>
+            <VBtn color="info" class="me-2">
               PPU
             </VBtn>
-            <VBtn color="success" class="me-2" text>
+            <VBtn color="success" class="me-2">
               US Domestic
             </VBtn>
           </VCol>

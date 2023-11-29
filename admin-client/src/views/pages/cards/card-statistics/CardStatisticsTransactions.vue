@@ -30,6 +30,9 @@ const statistics = [
 <template>
   <VCard title="Transactions">
     <VCardText>
+      <span class="font-weight-medium text-high-emphasis">Total 48.5% Growth 😎</span>  this month
+    </VCardText>
+    <VCardText>
       <VRow>
         <VCol
           v-for="item in statistics"
@@ -41,7 +44,7 @@ const statistics = [
             <VAvatar
               :color="item.color"
               rounded
-              size="42"
+              size="40"
               class="elevation-1 me-3"
             >
               <VIcon
@@ -54,7 +57,7 @@ const statistics = [
               <span class="text-caption">
                 {{ item.title }}
               </span>
-              <span class="text-h6 font-weight-medium">{{ item.stats }}</span>
+              <span class="text-h6">{{ item.stats }}</span>
             </div>
           </div>
         </VCol>

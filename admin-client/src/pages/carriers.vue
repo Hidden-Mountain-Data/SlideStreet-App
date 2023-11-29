@@ -12,12 +12,12 @@ import DeviceService from '@/services/deviceServices'
 import CarrierWithPlans from '@/views/dashboards/CarrierWithPlans.vue'
 const deviceService = new DeviceService()
 
-onMounted(async () => {
-  try {
-    const devices = await deviceService.getAll()
-    console.log(devices)
-  } catch(error) {
-    console.error(error)
-  }
-})
+// onMounted(async () => {
+//   try {
+//     const devices = await deviceService.getAll()
+//     console.log(devices)
+//   } catch(error) {
+//     console.error(error)
+//   }
+// })
 </script>

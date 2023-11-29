@@ -1,16 +1,15 @@
 <script lang="ts">
-import { h } from 'vue'
-
-// @ts-expect-error There won't be declaration file for it
-import { VMain } from 'vuetify/lib/components/VMain/VMain'
+import { useSkins } from '@core/composable/useSkins'
 
 export default defineComponent({
   setup() {
     const routerView = resolveComponent('router-view')
+    const { injectSkinClasses } = useSkins()
 
-    return () => h(VMain, { class: 'layout-wrapper layout-blank' }, {
-      default: () => h(routerView),
-    })
+    // ℹ️ This will inject classes in body tag for accurate styling
+    injectSkinClasses()
+
+    return () => h('div', { class: 'layout-wrapper layout-blank' }, h(routerView))
   },
 })
 </script>

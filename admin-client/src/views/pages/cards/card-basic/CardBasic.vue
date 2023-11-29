@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import avatar1 from '@/assets/images/avatars/avatar-1.png'
-import avatar2 from '@/assets/images/avatars/avatar-2.png'
-import avatar3 from '@/assets/images/avatars/avatar-3.png'
-import avatar4 from '@/assets/images/avatars/avatar-4.png'
-import eCommerce2 from '@/assets/images/eCommerce/2.png'
-import pages1 from '@/assets/images/pages/1.png'
-import pages2 from '@/assets/images/pages/2.png'
-import pages3 from '@/assets/images/pages/3.png'
-import pages5 from '@/assets/images/pages/5.jpg'
-import pages6 from '@/assets/images/pages/6.jpg'
+import avatar1 from '@images/avatars/avatar-1.png'
+import avatar2 from '@images/avatars/avatar-2.png'
+import avatar3 from '@images/avatars/avatar-3.png'
+import avatar4 from '@images/avatars/avatar-4.png'
+import eCommerce2 from '@images/eCommerce/2.png'
+import pages1 from '@images/pages/1.png'
+import pages2 from '@images/pages/2.png'
+import pages3 from '@images/pages/3.png'
+import pages5 from '@images/pages/5.jpg'
+import pages6 from '@images/pages/6.jpg'
 
 const avatars = [
   avatar1,
@@ -29,10 +29,7 @@ const isCardDetailsVisible = ref(false)
       md="4"
     >
       <VCard>
-        <VImg
-          :src="pages1"
-          cover
-        />
+        <VImg :src="pages1" />
 
         <VCardItem>
           <VCardTitle>Influencing The Influencer</VCardTitle>
@@ -80,10 +77,10 @@ const isCardDetailsVisible = ref(false)
 
             <div class="v-avatar-group">
               <VAvatar
-                v-for="avatar in avatars"
-                :key="avatar"
+                v-for="(avatar, index) in avatars"
+                :key="index"
                 :image="avatar"
-                size="45"
+                size="40"
               />
             </div>
           </div>
@@ -108,21 +105,14 @@ const isCardDetailsVisible = ref(false)
           Although cards can support multiple actions, UI controls, and an overflow menu.
         </VCardText>
 
-        <VCardActions>
-          <VBtn @click="isCardDetailsVisible = !isCardDetailsVisible">
-            Details
-          </VBtn>
-
-          <VSpacer />
-
+        <VCardText class="d-flex justify-space-between">
           <VBtn
-            icon
-            size="small"
+            variant="text"
             @click="isCardDetailsVisible = !isCardDetailsVisible"
           >
-            <VIcon :icon="isCardDetailsVisible ? 'mdi-chevron-up' : 'mdi-chevron-down'" />
+            Details
           </VBtn>
-        </VCardActions>
+        </VCardText>
 
         <VExpandTransition>
           <div v-show="isCardDetailsVisible">
@@ -145,6 +135,7 @@ const isCardDetailsVisible = ref(false)
           <div class="ma-auto pa-5">
             <VImg
               width="137"
+              height="176"
               :src="eCommerce2"
             />
           </div>
@@ -157,11 +148,14 @@ const isCardDetailsVisible = ref(false)
             </VCardItem>
 
             <VCardText>
-              Apple iPhone 11 Pro smartphone. Announced Sep 2019. Features 5.8″ display Apple A13 Bionic
-            </VCardText>
+              <p class="mb-2">
+                Apple iPhone 11 Pro smartphone. Announced Sep 2019. Features 5.8″ display Apple A13 Bionic
+              </p>
 
-            <VCardText class="text-subtitle-1">
-              <span>Price :</span> <span class="font-weight-bold">$899</span>
+              <h6 class="text-base font-weight-medium">
+                <span class="font-weight-regular">Price :</span>
+                <span class="font-weight-medium">$899</span>
+              </h6>
             </VCardText>
 
             <VCardActions class="justify-space-between">
@@ -170,10 +164,12 @@ const isCardDetailsVisible = ref(false)
                 <span class="ms-2">Add to cart</span>
               </VBtn>
 
-              <VBtn
-                color="secondary"
-                icon="mdi-share-variant-outline"
-              />
+              <IconBtn>
+                <VIcon
+                  size="20"
+                  icon="mdi-share-variant"
+                />
+              </IconBtn>
             </VCardActions>
           </div>
         </div>
@@ -192,18 +188,26 @@ const isCardDetailsVisible = ref(false)
               <VCardTitle>Stumptown Roasters</VCardTitle>
             </VCardItem>
 
-            <VCardText class="d-flex align-center flex-wrap body-1">
+            <VCardText class="d-flex align-center flex-wrap text-body-1">
               <VRating
-                :model-value="5"
+                :model-value="4"
                 readonly
-                class="me-3"
                 density="compact"
+                size="20"
+                active-color="warning"
+                color="grey-400"
+                empty-icon="mdi-star"
+                full-icon="mdi-star"
+                half-icon="mdi-star-half"
+                class="me-3"
               />
-              <span>5 Star | 98 reviews</span>
+              <h6 class="text-base font-weight-regular">
+                4 Star | 98 reviews
+              </h6>
             </VCardText>
 
             <VCardText>
-              Before there was a United States of America, there were coffee houses, because how are you supposed to build.
+              Before there was a United States of America, there were coffee houses.
             </VCardText>
 
             <VCardActions>
@@ -225,21 +229,21 @@ const isCardDetailsVisible = ref(false)
 
     <!-- 👉 Apple Watch card -->
     <VCol
-      lg="4"
+      md="4"
       sm="6"
       cols="12"
     >
       <VCard>
         <VImg :src="pages6" />
 
-        <VCardItem>
+        <VCardItem class="pb-2">
           <VCardTitle>Apple Watch</VCardTitle>
         </VCardItem>
 
         <VCardText>
-          <p class="font-weight-medium text-base">
+          <h6 class="font-weight-regular text-base mb-2">
             $249.40
-          </p>
+          </h6>
 
           <p class="mb-0">
             3.1GHz 6-core 10th-generation Intel Core i5 processor, Turbo Boost up to 4.5GHz
@@ -257,8 +261,7 @@ const isCardDetailsVisible = ref(false)
 
     <!-- 👉 Lifetime Membership -->
     <VCol
-      md="6"
-      lg="8"
+      md="8"
       cols="12"
     >
       <VCard>
@@ -266,7 +269,6 @@ const isCardDetailsVisible = ref(false)
           <VCol
             cols="12"
             sm="8"
-            md="12"
             lg="7"
             order="2"
             order-lg="1"
@@ -280,7 +282,7 @@ const isCardDetailsVisible = ref(false)
             </VCardText>
 
             <VCardText>
-              <VDivider />
+              <VDivider class="my-1" />
             </VCardText>
 
             <VCardText class="d-flex justify-center">
@@ -289,6 +291,7 @@ const isCardDetailsVisible = ref(false)
                   <VIcon
                     color="primary"
                     icon="mdi-lock-open-outline"
+                    size="20"
                   />
                   <span class="ms-3">Full Access</span>
                 </p>
@@ -296,6 +299,7 @@ const isCardDetailsVisible = ref(false)
                 <p class="d-flex align-center mb-0">
                   <VIcon
                     color="primary"
+                    size="20"
                     icon="mdi-account-outline"
                   />
                   <span class="ms-3">15 Members</span>
@@ -305,14 +309,14 @@ const isCardDetailsVisible = ref(false)
               <VDivider
                 v-if="$vuetify.display.smAndUp"
                 vertical
-                inset
               />
 
               <div class="ms-auto ps-4">
                 <p class="d-flex align-center mb-6">
                   <VIcon
                     color="primary"
-                    icon="mdi-star-outline"
+                    size="20"
+                    icon="mdi-lock-open-outline"
                   />
                   <span class="ms-3">Access all Features</span>
                 </p>
@@ -320,7 +324,8 @@ const isCardDetailsVisible = ref(false)
                 <p class="d-flex align-center mb-0">
                   <VIcon
                     color="primary"
-                    icon="mdi-trending-up"
+                    size="20"
+                    icon="mdi-account-outline"
                   />
                   <span class="ms-3">Lifetime Free Update</span>
                 </p>
@@ -331,7 +336,6 @@ const isCardDetailsVisible = ref(false)
           <VCol
             cols="12"
             sm="4"
-            md="12"
             lg="5"
             order="1"
             order-lg="2"
@@ -340,7 +344,7 @@ const isCardDetailsVisible = ref(false)
             <div class="membership-pricing d-flex flex-column align-center py-14 h-100 justify-center">
               <p class="mb-5">
                 <sub class="text-h5">$</sub>
-                <sup class="text-h2 font-weight-medium">899</sup>
+                <sup class="text-h3">899</sup>
                 <sub class="text-h5">USD</sub>
               </p>
 
@@ -348,7 +352,7 @@ const isCardDetailsVisible = ref(false)
                 5 Tips For Offshore <br> Software Development
               </p>
 
-              <VBtn class="mt-8">
+              <VBtn class="mt-4">
                 Contact Now
               </VBtn>
             </div>
@@ -387,12 +391,20 @@ const isCardDetailsVisible = ref(false)
       <VCard title="The Best Answers">
         <VCardText class="d-flex align-center flex-wrap">
           <VRating
-            :model-value="5"
+            :model-value="4"
             readonly
             density="compact"
+            size="20"
+            active-color="warning"
+            color="grey-400"
+            empty-icon="mdi-star"
+            full-icon="mdi-star"
+            half-icon="mdi-star-half"
             class="me-3"
           />
-          <span class="text-subtitle-2">5 Star | 98 reviews</span>
+          <h6 class="text-base font-weight-regular">
+            4 Star | 98 reviews
+          </h6>
         </VCardText>
 
         <VCardText>
@@ -417,12 +429,12 @@ const isCardDetailsVisible = ref(false)
       lg="4"
     >
       <VCard class="text-center">
-        <VCardText class="d-flex flex-column justify-center align-center">
+        <VCardItem class="d-flex flex-column justify-center align-center">
           <VAvatar
             color="primary"
             variant="tonal"
-            size="50"
-            class="mb-4"
+            size="56"
+            class="mb-2"
           >
             <VIcon
               size="2rem"
@@ -433,19 +445,17 @@ const isCardDetailsVisible = ref(false)
           <h6 class="text-h6">
             Support
           </h6>
-        </VCardText>
+        </VCardItem>
 
         <VCardText>
-          <p>
-            According to us blisters are a very common thing and we come across them very often in our daily lives. It is a very common occurrence like cold or fever depending upon your lifestyle.
-          </p>
+          According to us blisters are a very common thing and we come across them very often in our daily lives. It is a very common occurrence like cold or fever depending upon your lifestyle.
         </VCardText>
 
-        <VCardActions class="justify-center">
+        <VCardText class="justify-center">
           <VBtn variant="elevated">
             Contact Now
           </VBtn>
-        </VCardActions>
+        </VCardText>
       </VCard>
     </VCol>
   </VRow>
@@ -454,7 +464,7 @@ const isCardDetailsVisible = ref(false)
 <style lang="scss" scoped>
 .avatar-center {
   position: absolute;
-  border: 3px solid rgb(var(--v-theme-surface));
+  border: 5px solid rgb(var(--v-theme-surface));
   inset-block-start: -2rem;
   inset-inline-start: 1rem;
 }

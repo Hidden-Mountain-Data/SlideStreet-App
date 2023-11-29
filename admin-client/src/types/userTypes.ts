@@ -1,3 +1,4 @@
+import { UserAbility } from "@/plugins/casl/AppAbility";
 
 
 interface User {
@@ -11,4 +12,5 @@ interface User {
   refreshToken: string;
   updatedAt: Date;
   imageUrl: string;
+  abilities: UserAbility[];
 }

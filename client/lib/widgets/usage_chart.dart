@@ -527,7 +527,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
   }
 
   bool _isColorSimilar(Color color1, Color color2) {
-    final double threshold = 30.0;
+    const double threshold = 30.0;
 
     // Calculate the difference in hue
     double hueDifference =

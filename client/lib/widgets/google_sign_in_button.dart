@@ -34,7 +34,6 @@ class GoogleSignInButtonState extends State<GoogleSignInButton> {
 
                 conroller.login();
 
-                print(conroller.googleAccount.value?.displayName);
                 setState(() {
                   _isSigningIn = false;
                 });

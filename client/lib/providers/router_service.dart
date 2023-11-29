@@ -59,7 +59,6 @@ class RouterService {
         'notes': notes,
       },
     );
-    print(response.body);
     if (response.statusCode == 200) {
       final router = jsonDecode(response.body);
       final routerData = router['data'];

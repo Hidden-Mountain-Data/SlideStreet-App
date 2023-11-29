@@ -38,6 +38,7 @@ const email = ref('joe@email.com')
 const password = ref('redtentbluehouse')
 const rememberMe = ref(false)
 
+
 const login = async () => {
   try {
     const response = await axios.post<LoginResponse>(`/auth/login`, { email: email.value, password: password.value })
@@ -51,17 +52,17 @@ const login = async () => {
       email: response.data.data.email,
       role: response.data.data.role,
     }
-    const userAbilities: string[] = []
+    const userAbilities = []
 
     switch(userData.role) {
       case 'SUPER_ADMIN':
-        userAbilities.push('create', 'read', 'update', 'delete')
+        userAbilities.push({ action: 'manage', subject: 'all' })
         break
       case 'ADMIN':
-        userAbilities.push('read', 'update')
+        userAbilities.push({ action: 'manage', subject: 'all' })
         break
       default:
-        userAbilities.push('read')
+        userAbilities.push({ action: 'read', subject: 'all' })
         break
     }
 

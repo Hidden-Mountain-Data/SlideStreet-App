@@ -31,7 +31,7 @@
             6
           </VCol>
           <VCol cols="10" class="d-flex justify-end">
-            <VBtn color="primary" to="/devices">
+            <VBtn color="primary" @click="$emit('showDeviceTable')">
               View SIMs
             </VBtn>
           </VCol>
@@ -81,6 +81,8 @@ const newProject = {
   change: -0,
   subtitle: 'Cost',
 }
+
+
 </script>
 
 
@@ -89,3 +91,9 @@ const newProject = {
   --v-card-list-gap: 2.625rem;
 }
 </style>
+
+<route lang="yaml">
+meta:
+  action: read
+  subject: AclDemo
+</route>

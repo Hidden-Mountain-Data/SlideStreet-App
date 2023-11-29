@@ -189,6 +189,8 @@ export interface RegisterResponse {
 export interface UserProperties {
   id: number
   fullName: string
+  firstName: string
+  lastName: string
   company: string
   role: string
   username: string
@@ -228,15 +230,15 @@ export interface Client {
 
 // 👉 Invoice
 export interface Invoice {
-    id: number,
-    issuedDate: string
-    client: Client
-    service: string
-    total: number
-    avatar: string
-    invoiceStatus: string
-    balance: number
-    dueDate: string
+  id: number,
+  issuedDate: string
+  client: Client
+  service: string
+  total: number
+  avatar: string
+  invoiceStatus: string
+  balance: number
+  dueDate: string
 }
 
 // 👉 PaymentDetails
@@ -374,7 +376,7 @@ export interface ChatContactWithChat extends ChatContact {
 //----------------
 export type SearchItem = {
   id: number
-  url: { name:string, params?: object}
+  url: { name: string, params?: object }
   icon: string
   title: string
   category: string
@@ -382,7 +384,7 @@ export type SearchItem = {
 
 export type SearchHeader = {
   header: string
-  title:string
+  title: string
 }
 
 
@@ -395,7 +397,7 @@ export type Permission = {
 
 export type Data = {
   responsive_id: string,
-  id: number, 
+  id: number,
   avatar: string,
   full_name: string,
   post: string,
@@ -404,7 +406,7 @@ export type Data = {
   start_date: date,
   salary: number,
   age: string | number,
-  experience: string, 
+  experience: string,
   status: number,
 }
 
@@ -426,14 +428,14 @@ export interface Buyer {
   avatar: string | null,
 }
 
-export interface Payment{
+export interface Payment {
   total: number,
   received_payment_status: string,
   paid_amount: number,
   status: string,
 }
 
-export type SalesDetails= {
+export type SalesDetails = {
   product: Product,
   buyer: Buyer,
   date: string,

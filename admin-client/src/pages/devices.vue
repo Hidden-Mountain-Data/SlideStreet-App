@@ -20,8 +20,16 @@
   </VCard>
 </template>
 
-<script setup lang="ts">
-import DevicesTable from '@/views/dashboards/DevicesTable.vue';
+<script lang="ts">
+import DevicesTable from '@/@layouts/components/DevicesTable.vue';
+export default {
+  name: 'devices',
+  components: {
+    DevicesTable
+  }
+}
+
+
 </script>
 
 <style lang="scss" scoped>
@@ -29,3 +37,9 @@ import DevicesTable from '@/views/dashboards/DevicesTable.vue';
   --v-card-list-gap: 2.625rem;
 }
 </style>
+
+<route lang="yaml">
+meta:
+  action: read
+  subject: Admin
+</route>

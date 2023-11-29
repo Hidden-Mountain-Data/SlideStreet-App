@@ -4,6 +4,8 @@ export default [
     title: 'Carriers',
     icon: { icon: 'mdi-wifi' },
     to: 'carriers',
+    action: 'read',
+    subject: 'AclDemo',
   },
   {
     title: 'Chat',

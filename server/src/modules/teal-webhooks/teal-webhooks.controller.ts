@@ -59,7 +59,7 @@ export class TealWebhooksController {
                 }
             })
             const entries = response.data.entries;
-            console.log("got esims entries", entries);
+            console.log("got esims entries", response.data.entries);
             // entries.map(async (entry: DataUsage) => {
             //     const { eid, usage, period } = entry;
             //     const dateId = Number(period.slice(0, 4) + period.slice(5, 7) + period.slice(8, 10));

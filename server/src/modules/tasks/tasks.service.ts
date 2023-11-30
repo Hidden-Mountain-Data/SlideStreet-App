@@ -117,7 +117,6 @@ export class TealPollingService {
       });
 
 
-      console.log('Response for geteSims: ', response);
 
       // response should be 200 ok if the request was successful
       if(response.status === 200) {

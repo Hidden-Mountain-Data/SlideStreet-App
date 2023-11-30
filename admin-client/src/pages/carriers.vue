@@ -2,7 +2,7 @@
   <VRow class="match-height">
     <VCol cols="12">
       <CarrierWithPlans v-if="!devices" @show-device-table="showDeviceTable" />
-      <DevicesTable v-if="devices" @hide-device-table="hideDeviceTable" />
+      <DevicesTableAG v-if="devices" @hide-device-table="hideDeviceTable" />
     </VCol>
   </VRow>
 </template>
@@ -10,9 +10,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import CarrierWithPlans from '@/@layouts/components/CarrierWithPlans.vue';
-import DevicesTable from './components/DevicesTable.vue';
+import DevicesTableAG from './components/DevicesTableAG.vue';
 
-let devices = ref(true);
+let devices = ref(false);
 const showDeviceTable = () => {
   devices.value = true;
 };

@@ -1381,15 +1381,17 @@ acorn@^8.5.0, acorn@^8.8.0, acorn@^8.8.2:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.8.2.tgz#1b2f25db02af965399b9776b0c2c391276d37c4a"
   integrity sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==
 
-ag-grid-community@^31.0.0:
+ag-grid-community@~31.0.0:
   version "31.0.0"
   resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-31.0.0.tgz#cd97210f47c79847bbe2fcc3e4053fc514b4d9f4"
   integrity sha512-OUrXSAbLs0s5DTL9G/J626IKF2mzENHtLzLo5SV0RMO34ZzQANZd1mWlahT0uhZyUFnhyyEEecJBE5nSI88VEw==
 
-ag-grid-vue3@^30.2.1:
-  version "30.2.1"
-  resolved "https://registry.yarnpkg.com/ag-grid-vue3/-/ag-grid-vue3-30.2.1.tgz#05e542e60823b6742bfbb9b37efa7d0c46f118af"
-  integrity sha512-uIsBv5H7Nu6ao1V7cuReVj27gFdlK4kfvo/4M6AWmYswghMpc1GwzczZNV8HUypGcwxONW9YSfr8zabYQNGcAg==
+ag-grid-vue3@^31.0.0:
+  version "31.0.0"
+  resolved "https://registry.yarnpkg.com/ag-grid-vue3/-/ag-grid-vue3-31.0.0.tgz#03e38911b8aa57d2460b649b460008a02405964a"
+  integrity sha512-K4V0whDJDCk7JCgkneAna+hP5QmJkjo0bbBdXaRaelXLpb1LoxU+8hE0q2X0/GdToF9UUdbDb0nEZshR6EyxuQ==
+  dependencies:
+    ag-grid-community "~31.0.0"
 
 ajv@^6.10.0, ajv@^6.12.4:
   version "6.12.6"

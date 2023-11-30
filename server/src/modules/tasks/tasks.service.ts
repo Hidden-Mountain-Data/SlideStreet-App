@@ -106,6 +106,7 @@ export class TealPollingService {
     try {
 
       const requestId = this.generateUUID()
+      this.logger.log('Get eSims from Teal API')
 
       const response = await this.tealAxiosInstance.get('/api/v1/esims', {
         params: {
@@ -116,8 +117,7 @@ export class TealPollingService {
       });
 
 
-      this.logger.log('Sent get request to Teal API for GetSims', requestId);
-      // console.log('Response: ', response);
+      console.log('Response for geteSims: ', response);
 
       // response should be 200 ok if the request was successful
       if(response.status === 200) {

@@ -441,3 +441,37 @@ export type SalesDetails = {
   date: string,
   payment: Payment,
 }
+
+export type Router = {
+  router_id: number
+  sim_id: number
+  user_id: number
+  iccid: string
+  imei: string
+  name: string
+  notes: string
+  serial_number: string
+  created_at: string
+  deleted_at: string
+  updated_at: string
+  sims: Sim[]
+}
+
+export type Sim = {
+  active: boolean
+  created_at: string
+  deleted_at: string
+  eid: string
+  embedded: boolean
+  iccid: string
+  imei: string
+  ip_address: string
+  notes: string
+  provider: string
+  router_id: number
+  sim_id: number
+  status: string
+  updated_at: string
+  user_id: number
+
+}

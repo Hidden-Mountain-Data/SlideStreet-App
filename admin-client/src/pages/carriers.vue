@@ -9,11 +9,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { onMounted } from 'vue'
-import DeviceService from '@/services/deviceServices'
 import CarrierWithPlans from '@/@layouts/components/CarrierWithPlans.vue';
-import DevicesTable from '@/@layouts/components/DevicesTable.vue';
-import dataTable from './tables/data-table.vue';
+import DevicesTable from './components/DevicesTable.vue';
 
 let devices = ref(true);
 const showDeviceTable = () => {

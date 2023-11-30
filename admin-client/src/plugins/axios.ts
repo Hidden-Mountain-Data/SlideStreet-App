@@ -4,7 +4,7 @@ import router from '@/router'
 const axiosIns = axios.create({
   // You can add your headers here
   // ================================
-  baseURL: "https://3zenzw56nf.us-west-2.awsapprunner.com/api/",
+  baseURL: "http://localhost:3000/api/",
   timeout: 1000,
   // headers: { 'X-Custom-Header': 'foobar' }
 })

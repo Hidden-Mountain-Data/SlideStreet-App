@@ -9,7 +9,15 @@ export class DeviceActionsService {
   ) { }
 
   async getDevices(): Promise<Routers[]> {
-    const routers = await this.prisma.routers.findMany();
+    const routers = await this.prisma.routers.findMany(
+      {
+        include: {
+          sims: true,
+          dataUsageEntries: true
+
+        }
+      }
+    );
     return routers
   }
   async getDevicesByUserId(userId: number): Promise<Routers[]> {

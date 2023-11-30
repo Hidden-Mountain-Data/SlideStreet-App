@@ -39,7 +39,8 @@ import { TealModule } from './modules/teal/teal.module';
     InConnectModule,
     TealWebhooksModule,
     DeviceActionsModule,
-    TealModule
+    TealModule,
+    DeviceActionsModule
   ],
   controllers: [AppController, DeviceActionsController, TealController],
   providers: [

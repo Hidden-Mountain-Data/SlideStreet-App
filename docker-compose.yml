@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # slide-street.server:
+  #   build:
+  #     context: ./server
+  #     dockerfile: Dockerfile
+  #     target: 'develop-stage'
+  #   container_name: slide-street.server
+  #   volumes:
+  #     - './server/:/var/www/html'
+  #     - /var/www/html/node_modules
+  #   command: bash -c "yarn start --debug --watch"
+  #   ports:
+  #     - 3020:3000
+  #   depends_on:
+  #     - slide-street.postgres
+  #   networks:
+  #     - slide-street.network
+
+  slide-street.postgres:
+    image: postgres:10.5
+    container_name: slide-street.postgres
+    restart: always
+    env_file:
+      - .env
+    # environment:
+    #   - POSTGRES_USER=postgres
+    #   - POSTGRES_PASSWORD=1234
+
+    logging:
+      options:
+        max-size: 10m
+        max-file: '3'
+    ports:
+      - "5438:5432"
+    volumes:
+      - ./docker/postgres-data:/var/lib/postgresql/data
+#     networks:
+#       - slide-street.network
+
+# networks:
+#   slide-street.network:
+#     driver: bridge

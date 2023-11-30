@@ -1,6 +1,7 @@
 import 'package:client/pages/sign_in.dart';
 import 'package:client/styles/button_styles.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 final emailController = TextEditingController();
 final passwordController = TextEditingController();
@@ -57,12 +58,12 @@ class StartPageState extends State<StartPage> {
                       ),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     'Get Started',
-                    style: TextStyle(
+                    style: GoogleFonts.openSans(
                       fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      color: Color.fromARGB(255, 195, 250, 55),
+                      fontWeight: FontWeight.w800,
+                      color: const Color.fromARGB(255, 195, 250, 55),
                     ),
                   ),
                 ),

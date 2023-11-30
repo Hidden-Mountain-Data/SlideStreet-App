@@ -2,6 +2,7 @@ import 'package:client/notifiers/user_notifier.dart';
 import 'package:client/pages/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:client/notifiers/theme_notifier.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -76,16 +77,15 @@ class SlideStreet extends StatelessWidget {
                 ),
               ),
               textTheme: ThemeData().textTheme.copyWith(
-                    titleLarge: const TextStyle(
-                      fontFamily: 'OpenSauceOne',
+                    titleLarge: GoogleFonts.openSans(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 0, 0, 0),
+                      color: const Color.fromARGB(255, 0, 0, 0),
                     ),
-                    bodyMedium: const TextStyle(
+                    bodyMedium: GoogleFonts.montserrat(
                       fontSize: 18,
                       fontWeight: FontWeight.normal,
-                      color: Color.fromARGB(255, 0, 0, 0),
+                      color: const Color.fromARGB(255, 0, 0, 0),
                     ),
                   ),
             ),
@@ -125,16 +125,15 @@ class SlideStreet extends StatelessWidget {
                 ),
               ),
               textTheme: ThemeData().textTheme.copyWith(
-                    titleLarge: const TextStyle(
-                      fontFamily: 'OpenSauceOne',
+                    titleLarge: GoogleFonts.openSans(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 255, 255, 255),
+                      color: const Color.fromARGB(255, 255, 255, 255),
                     ),
-                    bodyMedium: const TextStyle(
+                    bodyMedium: GoogleFonts.montserrat(
                       fontSize: 18,
                       fontWeight: FontWeight.normal,
-                      color: Color.fromARGB(255, 255, 255, 255),
+                      color: const Color.fromARGB(255, 255, 255, 255),
                     ),
                   ),
             ),

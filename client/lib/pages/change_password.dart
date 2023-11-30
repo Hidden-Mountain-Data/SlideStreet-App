@@ -1,6 +1,7 @@
 import 'package:client/widgets/text_fields/other_text_field.dart';
 import 'package:client/widgets/text_fields/password_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -37,12 +38,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               'assets/Original.png',
               height: 50,
             ),
-            const Text(
+            Text(
               'Password',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w900,
-                color: Color.fromARGB(255, 0, 0, 0),
+              style: GoogleFonts.openSans(
+                fontSize: 40,
+                fontWeight: FontWeight.w800,
+                color: const Color.fromARGB(255, 0, 0, 0),
               ),
             ),
             IconButton(
@@ -82,12 +83,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {},
-                    child: const Text(
+                    child: Text(
                       "Create new password",
-                      style: TextStyle(
+                      style: GoogleFonts.openSans(
                         fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 0, 0, 0),
                       ),
                     ),
                   ),
@@ -97,12 +98,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {},
-                    child: const Text(
+                    child: Text(
                       "Your new password must be different from previous used passwords",
-                      style: TextStyle(
+                      style: GoogleFonts.montserrat(
                         fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        fontWeight: FontWeight.w600,
+                        color: const Color.fromARGB(255, 0, 0, 0),
                       ),
                     ),
                   ),
@@ -120,13 +121,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: const Padding(
-                    padding: EdgeInsets.all(20.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
                     child: Text('Change Password',
-                        style: TextStyle(
+                        style: GoogleFonts.openSans(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 195, 250, 55))),
+                            color: const Color.fromARGB(255, 195, 250, 55))),
                   ),
                 ),
               ],

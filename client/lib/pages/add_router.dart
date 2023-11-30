@@ -1,7 +1,10 @@
+import 'package:client/models/router.dart';
+import 'package:client/providers/router_service.dart';
 import 'package:client/widgets/text_fields/other_text_field.dart';
-import 'package:client/widgets/text_fields/password_text_field.dart';
+import 'package:client/widgets/text_fields/large_text_field.dart';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AddRouterPage extends StatefulWidget {
   const AddRouterPage({super.key});
@@ -11,10 +14,11 @@ class AddRouterPage extends StatefulWidget {
 }
 
 class _AddRouterPageState extends State<AddRouterPage> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _simNumController = TextEditingController();
   final TextEditingController _imeiController = TextEditingController();
-  final TextEditingController _ipController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _SNController = TextEditingController();
+  final TextEditingController _notesController = TextEditingController();
 
   @override
   void initState() {
@@ -39,12 +43,12 @@ class _AddRouterPageState extends State<AddRouterPage> {
               'assets/Original.png',
               height: 50,
             ),
-            const Text(
+            Text(
               'Add Router',
-              style: TextStyle(
+              style: GoogleFonts.openSans(
                 fontSize: 32,
                 fontWeight: FontWeight.w900,
-                color: Color.fromARGB(255, 0, 0, 0),
+                color: const Color.fromARGB(255, 0, 0, 0),
               ),
             ),
             IconButton(
@@ -84,12 +88,12 @@ class _AddRouterPageState extends State<AddRouterPage> {
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {},
-                    child: const Text(
+                    child: Text(
                       "Add new router",
-                      style: TextStyle(
+                      style: GoogleFonts.montserrat(
                         fontSize: 24,
                         fontWeight: FontWeight.w900,
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        color: const Color.fromARGB(255, 0, 0, 0),
                       ),
                     ),
                   ),
@@ -99,21 +103,26 @@ class _AddRouterPageState extends State<AddRouterPage> {
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: () {},
-                    child: const Text(
+                    child: Text(
                       "To add a new router, please enter the router's information below",
-                      style: TextStyle(
+                      style: GoogleFonts.montserrat(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        color: const Color.fromARGB(255, 0, 0, 0),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
                 OtherField(
+                    textController: _nameController,
+                    hintText: 'Input your device name',
+                    labelText: 'Device Name'),
+                const SizedBox(height: 20),
+                OtherField(
                     textController: _simNumController,
-                    hintText: 'Input your sim number',
-                    labelText: 'Sim Number'),
+                    hintText: 'Input your sim number(ICCID)',
+                    labelText: 'Sim Number(ICCID)'),
                 const SizedBox(height: 20),
                 OtherField(
                     textController: _imeiController,
@@ -121,24 +130,58 @@ class _AddRouterPageState extends State<AddRouterPage> {
                     labelText: 'IMEI'),
                 const SizedBox(height: 20),
                 OtherField(
-                    textController: _ipController,
-                    hintText: 'Enter device IP address',
-                    labelText: 'IP Address'),
+                    textController: _SNController,
+                    hintText: 'Enter device\'s serial number',
+                    labelText: 'Serial Number'),
                 const SizedBox(height: 20),
-                PasswordField(passwordController: _passwordController),
+                LargeTextField(
+                  textController: _notesController,
+                  hintText: 'Enter notes here',
+                  labelText: 'Notes (Optional)',
+                ),
                 const SizedBox(height: 40),
                 ElevatedButton(
                   style: raisedButtonStyle,
-                  onPressed: () {
-                    Navigator.pop(context);
+                  onPressed: () async {
+                    try {
+                      String name = _nameController.text;
+                      String imei = _imeiController.text;
+                      String iccid = _simNumController.text;
+                      String serialNumber = _SNController.text;
+                      String notes = _notesController.text;
+
+                      // Validate input fields (add your own validation logic)
+                      if (name.isEmpty || imei.isEmpty || iccid.isEmpty) {
+                        // Show an error message or handle validation accordingly
+                        return;
+                      }
+
+                      // Call the addRouter method from RouterService
+                      Routers addedRouter = await RouterService().addRouter(
+                        name,
+                        imei,
+                        iccid,
+                        serialNumber,
+                        notes,
+                      );
+
+                      // Handle success (addedRouter now contains the added router details)
+                      print('Router added successfully: ${addedRouter.name}');
+
+                      // Navigate back to the previous screen
+                      Navigator.pop(context);
+                    } catch (e) {
+                      // Handle error (e.g., display an error message)
+                      print('Error adding router: $e');
+                    }
                   },
-                  child: const Padding(
-                    padding: EdgeInsets.all(20.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
                     child: Text('Add Router',
-                        style: TextStyle(
+                        style: GoogleFonts.openSans(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Color.fromARGB(255, 195, 250, 55))),
+                            color: const Color.fromARGB(255, 195, 250, 55))),
                   ),
                 ),
               ],

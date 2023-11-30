@@ -25,18 +25,47 @@ class RouterService {
     }
   }
 
-  Future<Routers> fetchRouter(int routerId) async {
+  Future<Routers> fetchRouterById(int id) async {
     final header = await getAuth();
     //final url = dotenv.env['NEST_API_URL'];
     final url = dotenv.env['NEST_API_URL_ANDROID'];
-    final response = await http.get(
-        Uri.parse('$url/api/routers/router-details/$routerId'),
-        headers: header);
+    final response = await http
+        .get(Uri.parse('$url/api/routers/router-details/$id'), headers: header);
     if (response.statusCode == 200) {
       final router = jsonDecode(response.body);
-      return router;
+      final routerData = router['data'];
+      return Routers.fromJson(routerData);
     } else {
-      throw Exception('Failed to fetch router');
+      throw Exception('Failed to fetch usage data');
+    }
+  }
+
+  Future<Routers> addRouter(String name, String imei, String iccid,
+      String serialNumber, String notes) async {
+    final header = await getAuth();
+    final userString = await getUser();
+    final user = jsonDecode(userString!);
+    final userId = user['user_id'];
+    //final url = dotenv.env['NEST_API_URL'];
+    final url = dotenv.env['NEST_API_URL_ANDROID'];
+    final response = await http.post(
+      Uri.parse('$url/api/routers/$userId'),
+      headers: header,
+      body: {
+        'name': name,
+        'imei': imei,
+        'iccid': iccid,
+        'serialNumber': serialNumber,
+        'notes': notes,
+      },
+    );
+    print(response.body);
+    if (response.statusCode == 200) {
+      final router = jsonDecode(response.body);
+      final routerData = router['data'];
+      return Routers.fromJson(routerData);
+    } else {
+      throw Exception('Failed to add router');
     }
   }
 }

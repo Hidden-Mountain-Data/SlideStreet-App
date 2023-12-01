@@ -19,6 +19,11 @@ import { SessionService } from './session/session.service';
 import { DeviceManagerModule } from './modules/device-manager/device-manager.module';
 import { InConnectModule } from './modules/in-connect/in-connect.module';
 import { TealWebhooksModule } from './modules/teal-webhooks/teal-webhooks.module';
+import { DeviceActionsModule } from './modules/device-actions/device-actions.module';
+import { DeviceActionsController } from './modules/device-actions/device-actions.controller';
+import { TealController } from './modules/teal/teal.controller';
+import { TealService } from './modules/teal/teal.service';
+import { TealModule } from './modules/teal/teal.module';
 
 @Module({
   imports: [
@@ -32,9 +37,12 @@ import { TealWebhooksModule } from './modules/teal-webhooks/teal-webhooks.module
     ProxyModule,
     DeviceManagerModule,
     InConnectModule,
-    TealWebhooksModule
+    TealWebhooksModule,
+    DeviceActionsModule,
+    TealModule,
+    DeviceActionsModule
   ],
-  controllers: [AppController],
+  controllers: [AppController, DeviceActionsController, TealController],
   providers: [
     AppService,
     FileService,
@@ -53,6 +61,7 @@ import { TealWebhooksModule } from './modules/teal-webhooks/teal-webhooks.module
     },
     PrismaService,
     SessionService,
+    TealService,
   ],
   exports: [PrismaService],
 })

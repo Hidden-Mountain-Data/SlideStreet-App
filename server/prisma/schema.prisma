@@ -178,6 +178,6 @@ enum SimStatus {
   UNKNOWN
 }
 
-enum Provider {
+enum Provider { //NOTE We probably need a carriers model when we get more
   TEAL
 }

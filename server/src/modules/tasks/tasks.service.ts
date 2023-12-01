@@ -25,7 +25,9 @@ export class TealPollingService {
 
   @Cron('*/5 * * * *')
   async updateTealDataUsage() {
-
+    if(process.env.stage === 'dev') {
+      return
+    }
     try {
       // Get current time which will be in Pacific Time
       const currentTime = new Date();
@@ -76,14 +78,14 @@ export class TealPollingService {
             }
           });
 
-          this.logger.log('Sent get request to Teal API', requestId, eid);
+          this.logger.log('Sent get request to Teal API for data usage', requestId, eid);
           // console.log('Response: ', response);
 
           // response should be 200 ok if the request was successful
           if(response.status === 200) {
-            this.logger.log('Successfully sent get request to Teal API');
+            this.logger.log('Successfully sent get request to Teal API for data usage');
           } else {
-            throw new Error('Error sending get request to Teal API' + response);
+            throw new Error('Error sending get request to Teal API for data usage' + response);
           }
 
         });
@@ -96,6 +98,38 @@ export class TealPollingService {
       this.logger.log('Error polling Teal API:', error);
     }
   }
+  @Cron('*/5 * * * *')
+  async geteSIMS() {
+    // if(process.env.stage === 'dev') {
+    //   return
+    // }
+    try {
+
+      const requestId = this.generateUUID()
+      this.logger.log('Get eSims from Teal API')
+
+      const response = await this.tealAxiosInstance.get('/api/v1/esims', {
+        params: {
+          requestId,
+          // limit: 100,
+          callbackUrl: process.env.TEAL_CALLBACK_URL + '/esims',
+        }
+      });
+
+
+
+      // response should be 200 ok if the request was successful
+      if(response.status === 200) {
+        this.logger.log('Successfully sent get request to Teal API');
+      } else {
+        throw new Error('Error sending get request to Teal API' + response);
+      }
+
+    } catch(error) {
+      this.logger.log('Error polling Teal API:', error);
+    }
+  }
+
 
   //Generates a UUID for the Teal API request id
   generateUUID() {

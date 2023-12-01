@@ -82,6 +82,7 @@ model Routers {
   imei             String           @db.VarChar(50)
   iccid            String           @db.VarChar(50)
   serialNumber     String           @map("serial_number") @db.VarChar(50)
+  model            Model            @default(CR202)
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
   deletedAt        DateTime?        @map("deleted_at")
@@ -155,6 +156,11 @@ model Addresses {
 
   @@index([userId])
   @@map("addresses")
+}
+
+enum Model {
+    CR202
+    FWA02
 }
 
 enum Roles {

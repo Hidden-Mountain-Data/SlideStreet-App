@@ -1,4 +1,4 @@
-import { Routers, PrismaClient } from '@prisma/client';
+import { Routers,Model, PrismaClient } from '@prisma/client';
 
 const testRouters: Routers[] = [
 {
@@ -12,6 +12,7 @@ const testRouters: Routers[] = [
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: null,
+  model: Model.CR202,
   simId: 1,
 },
 {
@@ -25,6 +26,7 @@ const testRouters: Routers[] = [
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: null,
+  model: Model.CR202,
   simId: 2,
 },
 {
@@ -37,6 +39,7 @@ const testRouters: Routers[] = [
   serialNumber: 'CR2022313SCIWHO',
   createdAt: new Date(),
   updatedAt: new Date(),
+  model: Model.FWA02,
   deletedAt: null,
   simId: 3,
 },
@@ -50,6 +53,7 @@ const testRouters: Routers[] = [
   serialNumber: 'CR2022313SCIWHO',
   createdAt: new Date(),
   updatedAt: new Date(),
+  model: Model.FWA02,
   deletedAt: null,
   simId: 4,
 },
@@ -63,6 +67,7 @@ const testRouters: Routers[] = [
   serialNumber: 'CR2022313SCIWHO',
   createdAt: new Date(),
   updatedAt: new Date(),
+  model: Model.CR202,
   deletedAt: null,
   simId: 5,
 },
@@ -76,6 +81,7 @@ const testRouters: Routers[] = [
   serialNumber: 'CR2022313SCIWHO',
   createdAt: new Date(),
   updatedAt: new Date(),
+  model: Model.CR202,
   deletedAt: null,
   simId: 6,
 }

@@ -1,13 +1,15 @@
 <template>
   <div style="width: 150;">
-    <v-icon class="action-icon" icon="mdi-information" @click="info" color="info" />
+    <IconBtn class="action-icon" icon="mdi-pencil" color="primary" @click="() => { info() }"></IconBtn>
     <v-icon class="action-icon" icon="mdi-play" @click="confirmActivate" color="success" />
     <v-icon class="action-icon" icon="mdi-pause" @click="confirmSuspend" color="info" />
     <v-icon class="action-icon" icon="mdi-delete" @click="confirmDelete" color="warning" />
   </div>
+  <EditDeviceModal :device="device" v-model:is-dialog-visible="isDialogVisible" :data="params.data" />
 </template>
 
 <script lang="ts">
+import EditDeviceModal from './EditDeviceModal.vue';
 export default {
   name: 'ActionsComponent',
   props: {
@@ -41,14 +43,25 @@ export default {
       console.log('Suspend action clicked');
     },
     info() {
-      // Logic for Info action
-      console.log('Info action clicked');
+      this.device = this.$props.params.data;
+      this.isDialogVisible = !this.isDialogVisible;
+      console.log(this.$props.params.data)
     },
     deleteItem() {
       // Logic for Delete action
       console.log('Delete action clicked');
     },
   },
+  setup() {
+    const isDialogVisible = ref(false);
+    const device = ref();
+    return {
+      isDialogVisible,
+      device,
+
+    };
+  },
+  components: { EditDeviceModal }
 }
 </script>
 

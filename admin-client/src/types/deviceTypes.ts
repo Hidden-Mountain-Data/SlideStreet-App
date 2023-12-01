@@ -9,9 +9,9 @@ interface Device {
   imei: string;
   iccid: string;
   serialNumber: string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
   //Calculated data
   dataUsage: string;
   //sim data

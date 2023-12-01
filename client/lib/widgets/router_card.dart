@@ -219,6 +219,7 @@ class RouterCard2 extends StatelessWidget {
   final String simNumber;
   final String ipAddress;
   final String notes;
+  final String model;
 
   const RouterCard2(
       {super.key,
@@ -229,7 +230,8 @@ class RouterCard2 extends StatelessWidget {
       required this.imei,
       required this.simNumber,
       required this.ipAddress,
-      required this.notes});
+      required this.notes,
+      required this.model});
 
   Color _getStatusColor() {
     switch (status) {
@@ -263,7 +265,7 @@ class RouterCard2 extends StatelessWidget {
             title: Text(
               name,
               style: GoogleFonts.openSans(
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: themeNotifier.isDarkMode
                       ? const Color.fromARGB(255, 207, 207, 207)
@@ -275,9 +277,9 @@ class RouterCard2 extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                   child: Text(
-                    'Status: ${status.capitalize()}',
+                    'Usage: $usage',
                     style: GoogleFonts.montserrat(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: themeNotifier.isDarkMode
                             ? const Color.fromARGB(255, 207, 207, 207)
@@ -287,10 +289,10 @@ class RouterCard2 extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                   child: Text(
-                    'Usage: $usage',
+                    'Status: ${status.capitalize()}',
                     style: GoogleFonts.montserrat(
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: themeNotifier.isDarkMode
                             ? const Color.fromARGB(255, 207, 207, 207)
                             : Colors.black),
@@ -302,7 +304,7 @@ class RouterCard2 extends StatelessWidget {
                     'Speed: 100 Mbps',
                     style: GoogleFonts.montserrat(
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: themeNotifier.isDarkMode
                             ? const Color.fromARGB(255, 207, 207, 207)
                             : Colors.black),
@@ -314,7 +316,7 @@ class RouterCard2 extends StatelessWidget {
                     'Last Activity: 2 days ago',
                     style: GoogleFonts.montserrat(
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                         color: themeNotifier.isDarkMode
                             ? const Color.fromARGB(255, 207, 207, 207)
                             : Colors.black),

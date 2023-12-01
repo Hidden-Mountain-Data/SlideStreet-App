@@ -174,6 +174,7 @@ class DeviceListPageState extends State<DeviceListPage> {
                                     simNumber: routerData.sims[0].iccid,
                                     ipAddress: routerData.sims[0].ipAddress ??
                                         "No IP Address",
+                                    model: routerData.model,
                                     notes: routerData.notes ?? "No notes",
                                   );
                                 }

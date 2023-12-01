@@ -59,9 +59,9 @@ class RouterService {
         'notes': notes,
       },
     );
-    if (response.statusCode == 200) {
+    if (response.statusCode == 201) {
       final router = jsonDecode(response.body);
-      final routerData = router['data'];
+      final routerData = router['data']['router'];
       return Routers.fromJson(routerData);
     } else {
       throw Exception('Failed to add router');

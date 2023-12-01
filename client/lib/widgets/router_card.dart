@@ -221,34 +221,44 @@ class RouterCard2 extends StatelessWidget {
   final String notes;
   final String model;
 
-  const RouterCard2(
-      {super.key,
-      required this.name,
-      required this.status,
-      required this.usage,
-      required this.speed,
-      required this.imei,
-      required this.simNumber,
-      required this.ipAddress,
-      required this.notes,
-      required this.model});
+  const RouterCard2({
+    Key? key,
+    required this.name,
+    required this.status,
+    required this.usage,
+    required this.speed,
+    required this.imei,
+    required this.simNumber,
+    required this.ipAddress,
+    required this.notes,
+    required this.model,
+  }) : super(key: key);
 
   Color _getStatusColor() {
     switch (status) {
       case 'Suspended':
-        return Colors.yellow;
       case 'SUSPENDED':
         return Colors.yellow;
       case 'Active':
-        return Colors.green;
       case 'ACTIVE':
         return Colors.green;
       case 'Deactivated':
-        return Colors.red;
       case 'DEACTIVATED':
         return Colors.red;
       default:
         return Colors.grey;
+    }
+  }
+
+  String _getModelImage() {
+    // Determine which image to display based on the model
+    switch (model) {
+      case 'CR202':
+        return 'assets/cr202.png';
+      case 'FWA02':
+        return 'assets/fwa02.png';
+      default:
+        return 'default.png'; // You can replace 'default.png' with a default image
     }
   }
 
@@ -265,62 +275,72 @@ class RouterCard2 extends StatelessWidget {
             title: Text(
               name,
               style: GoogleFonts.openSans(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: themeNotifier.isDarkMode
-                      ? const Color.fromARGB(255, 207, 207, 207)
-                      : Colors.black),
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: themeNotifier.isDarkMode
+                    ? const Color.fromARGB(255, 207, 207, 207)
+                    : Colors.black,
+              ),
             ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            subtitle: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                  child: Text(
-                    'Usage: $usage',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: themeNotifier.isDarkMode
-                            ? const Color.fromARGB(255, 207, 207, 207)
-                            : Colors.black),
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                      child: Text(
+                        'Usage: $usage',
+                        style: GoogleFonts.montserrat(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: themeNotifier.isDarkMode
+                                ? const Color.fromARGB(255, 207, 207, 207)
+                                : Colors.black),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                      child: Text(
+                        'Status: ${status.capitalize()}',
+                        style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: themeNotifier.isDarkMode
+                                ? const Color.fromARGB(255, 207, 207, 207)
+                                : Colors.black),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                      child: Text(
+                        'Speed: 100 Mbps',
+                        style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: themeNotifier.isDarkMode
+                                ? const Color.fromARGB(255, 207, 207, 207)
+                                : Colors.black),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
+                      child: Text(
+                        'Last Activity: 2 days ago',
+                        style: GoogleFonts.montserrat(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: themeNotifier.isDarkMode
+                                ? const Color.fromARGB(255, 207, 207, 207)
+                                : Colors.black),
+                      ),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                  child: Text(
-                    'Status: ${status.capitalize()}',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: themeNotifier.isDarkMode
-                            ? const Color.fromARGB(255, 207, 207, 207)
-                            : Colors.black),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                  child: Text(
-                    'Speed: 100 Mbps',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: themeNotifier.isDarkMode
-                            ? const Color.fromARGB(255, 207, 207, 207)
-                            : Colors.black),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
-                  child: Text(
-                    'Last Activity: 2 days ago',
-                    style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: themeNotifier.isDarkMode
-                            ? const Color.fromARGB(255, 207, 207, 207)
-                            : Colors.black),
-                  ),
+                Image(
+                  image: AssetImage(_getModelImage()),
+                  height: 100,
                 ),
               ],
             ),
@@ -328,13 +348,14 @@ class RouterCard2 extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => DeviceDetailsPage(
-                          routerName: name,
-                          imei: imei,
-                          simNumber: simNumber,
-                          ipAddress: ipAddress,
-                          notes: notes,
-                        )),
+                  builder: (context) => DeviceDetailsPage(
+                    routerName: name,
+                    imei: imei,
+                    simNumber: simNumber,
+                    ipAddress: ipAddress,
+                    notes: notes,
+                  ),
+                ),
               );
             },
           ),

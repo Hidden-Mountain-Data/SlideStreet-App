@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma.service';
-import { Routers } from '@prisma/client'
+import { Routers, Model } from '@prisma/client'
 import { RouterDto } from './dto/router.dto';
 @Injectable()
 export class DeviceActionsService {
@@ -27,6 +27,7 @@ export class DeviceActionsService {
         simId: router.simId,
         userId: router.userId,
         name: router.name,
+        model: router.model,
         notes: router.notes,
         imei: router.imei,
         iccid: router.iccid,

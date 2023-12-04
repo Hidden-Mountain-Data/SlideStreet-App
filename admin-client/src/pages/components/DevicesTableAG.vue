@@ -8,11 +8,12 @@
       <input type="text" id="filter-text-box" placeholder="Filter..." v-on:input="onFilterTextBoxChanged()">
     </div>
     <ag-grid-vue style="width: 100%; height: 100%;" class="ag-theme-alpine-dark" :columnDefs="columnDefs"
-      :rowData="rowData" :defaultColDef="defaultColDef" @grid-ready="onGridReady" />
+      :rowData="rowData" :defaultColDef="defaultColDef" @grid-ready="onGridReady" :autoSizeStrategy="autoSizeStrategy" />
   </div>
 </template>
 
 <script lang="ts">
+import * as demoCode from '@/views/demos/components/dialog/demoCodeDialog'
 import { AgGridVue } from 'ag-grid-vue3'
 import ActionsComponent from './ActionsComponent.vue'
 import 'ag-grid-community/styles/ag-grid.css'
@@ -27,7 +28,7 @@ export default {
   setup() {
     const gridApi = ref()
     const defaultColDef = ref({
-      flex: 1,
+      // flex: 1,
     })
     const onFilterTextBoxChanged = () => {
       gridApi.value.setGridOption(
@@ -36,6 +37,19 @@ export default {
         document.getElementById('filter-text-box')?.value
       );
     };
+    const autoSizeStrategy = ref();
+    onBeforeMount(() => {
+      autoSizeStrategy.value = {
+        type: 'fitGridWidth',
+        defaultMinWidth: 100,
+        columnLimits: [
+          {
+            colId: 'Actions',
+            minWidth: 900,
+          },
+        ],
+      };
+    });
     const onGridReady = async (params: any) => {
       gridApi.value = params.api;
 
@@ -54,10 +68,10 @@ export default {
           return params.value ? 'Active' : 'Deactivated'
         }
       },
-      { headerName: 'Status', field: '', sortable: true, filter: true, resizable: true },
+      { headerName: 'Network Status', field: 'status', sortable: true, filter: true, resizable: true },
       { headerName: 'Name', field: 'name', sortable: true, filter: true, resizable: true },
-      { headerName: 'Activation Date', field: 'createdAt', sortable: true, filter: true, resizable: true },
-      { headerName: 'Usage', field: 'dataUsage', sortable: true, filter: true, resizable: true },
+      { headerName: 'Activation Date', field: 'created_at', sortable: true, filter: true, resizable: true },
+      { headerName: 'Usage', field: 'data_usage', sortable: true, filter: true, resizable: true },
       { headerName: 'Cap', field: '', sortable: true, filter: true, resizable: true },
       { headerName: 'Plan', field: '', sortable: true, filter: true, resizable: true },
       { headerName: 'ICCID', field: 'iccid', sortable: true, filter: true, resizable: true },
@@ -68,6 +82,7 @@ export default {
         cellRenderer: 'ActionsComponent',
         sortable: false,
         filter: false,
+        width: 300,
         cellRendererParams: function (params: any) {
           return {
             data: params.data,
@@ -84,8 +99,9 @@ export default {
       defaultColDef,
       gridApi,
       columnDefs,
-      rowData
-
+      rowData,
+      demoCode,
+      autoSizeStrategy,
     }
   },
 }

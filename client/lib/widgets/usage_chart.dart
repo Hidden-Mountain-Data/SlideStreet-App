@@ -212,83 +212,94 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
       }
     }
     final Map<String, Color> routerColorMap = {};
-
-    return Expanded(
-      child: Column(
-        children: [
-          Expanded(
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceEvenly,
-                maxY: getMaxUsageValue(totalUsagePerRouterAndGroup),
-                gridData: const FlGridData(
-                  drawHorizontalLine: false,
-                  drawVerticalLine: false,
-                ),
-                titlesData: _buildTitlesData(totalUsagePerRouterAndGroup),
-                borderData: _buildBorderData(themeNotifier),
-                barGroups:
-                    getBarGroups(totalUsagePerRouterAndGroup, routerColorMap),
-                groupsSpace: 16,
-                barTouchData: BarTouchData(
-                  touchTooltipData: BarTouchTooltipData(
-                    tooltipPadding: const EdgeInsets.all(8.0),
-                    tooltipMargin: 8.0,
-                    tooltipRoundedRadius: 8.0,
-                    maxContentWidth: 500.0,
-                    tooltipBgColor: themeNotifier.isDarkMode
-                        ? const Color(0xFF1E1E1E)
-                        : const Color(0xFFEFEFEF),
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      String routerName = '';
-                      if (usageValueToNameMap.containsKey(rod.toY)) {
-                        routerName = usageValueToNameMap[rod.toY]!.join(', ');
-                      }
-
-                      return BarTooltipItem(
-                        '',
-                        GoogleFonts.montserrat(
-                          color: themeNotifier.isDarkMode
-                              ? const Color.fromARGB(255, 255, 255, 255)
-                              : const Color.fromARGB(255, 0, 0, 0),
-                          fontSize: 14.0,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: '$routerName: ',
-                            style: GoogleFonts.montserrat(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: '${rod.toY.toStringAsFixed(2)} Mb',
-                          ),
-                        ],
-                      );
-                    },
+    if (getMaxUsageValue(totalUsagePerRouterAndGroup) != 0.0) {
+      return Expanded(
+        child: Column(
+          children: [
+            Expanded(
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceEvenly,
+                  maxY: getMaxUsageValue(totalUsagePerRouterAndGroup),
+                  gridData: const FlGridData(
+                    drawHorizontalLine: false,
+                    drawVerticalLine: false,
                   ),
-                  handleBuiltInTouches: true,
+                  titlesData: _buildTitlesData(totalUsagePerRouterAndGroup),
+                  borderData: _buildBorderData(themeNotifier),
+                  barGroups:
+                      getBarGroups(totalUsagePerRouterAndGroup, routerColorMap),
+                  groupsSpace: 16,
+                  barTouchData: BarTouchData(
+                    touchTooltipData: BarTouchTooltipData(
+                      tooltipPadding: const EdgeInsets.all(8.0),
+                      tooltipMargin: 8.0,
+                      tooltipRoundedRadius: 8.0,
+                      maxContentWidth: 500.0,
+                      tooltipBgColor: themeNotifier.isDarkMode
+                          ? const Color(0xFF1E1E1E)
+                          : const Color(0xFFEFEFEF),
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        String routerName = '';
+                        if (usageValueToNameMap.containsKey(rod.toY)) {
+                          routerName = usageValueToNameMap[rod.toY]!.join(', ');
+                        }
+
+                        return BarTooltipItem(
+                          '',
+                          GoogleFonts.montserrat(
+                            color: themeNotifier.isDarkMode
+                                ? const Color.fromARGB(255, 255, 255, 255)
+                                : const Color.fromARGB(255, 0, 0, 0),
+                            fontSize: 14.0,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: '$routerName: ',
+                              style: GoogleFonts.montserrat(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: '${rod.toY.toStringAsFixed(2)} Mb',
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    handleBuiltInTouches: true,
+                  ),
                 ),
               ),
             ),
-          ),
-          Wrap(
-            direction: Axis.horizontal,
-            alignment: WrapAlignment.spaceBetween,
-            spacing: 4.0,
-            runSpacing: 8.0,
-            children: List.generate(
-              widget.routerData.length,
-              (index) => _buildLegendItem(
-                routerName: widget.routerData[index].name,
-                routerColor: routerColorMap[widget.routerData[index].name] ??
-                    Colors.grey,
+            Wrap(
+              direction: Axis.horizontal,
+              alignment: WrapAlignment.spaceBetween,
+              spacing: 4.0,
+              runSpacing: 8.0,
+              children: List.generate(
+                widget.routerData.length,
+                (index) => _buildLegendItem(
+                  routerName: widget.routerData[index].name,
+                  routerColor: routerColorMap[widget.routerData[index].name] ??
+                      Colors.grey,
+                ),
               ),
             ),
+          ],
+        ),
+      );
+    } else {
+      return Center(
+        child: Text(
+          'No usage data available',
+          style: GoogleFonts.openSans(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
-    );
+        ),
+      );
+    }
   }
 
   Widget _buildLegendItem({
@@ -527,7 +538,7 @@ class _RouterUsageCardState extends State<RouterUsageCard> {
   }
 
   bool _isColorSimilar(Color color1, Color color2) {
-    final double threshold = 30.0;
+    const double threshold = 30.0;
 
     // Calculate the difference in hue
     double hueDifference =

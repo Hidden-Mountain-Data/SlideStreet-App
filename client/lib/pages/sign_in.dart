@@ -15,7 +15,7 @@ final emailController = TextEditingController();
 final passwordController = TextEditingController();
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key});
+  const LoginPage({super.key});
   @override
   LoginPageState createState() => LoginPageState();
 }

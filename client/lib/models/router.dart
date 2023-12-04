@@ -9,6 +9,7 @@ class Routers {
   final String imei;
   final String? createdAt;
   final String? updatedAt;
+  final String model;
   final List<Sim> sims;
 
   Routers({
@@ -20,6 +21,7 @@ class Routers {
     required this.imei,
     this.createdAt,
     this.updatedAt,
+    required this.model,
     required this.sims,
   });
 
@@ -34,6 +36,7 @@ class Routers {
       name: json['name'],
       notes: json['notes'],
       imei: json['imei'],
+      model: json['model'],
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       sims: simList,

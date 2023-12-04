@@ -133,7 +133,7 @@ class UsagePageState extends State<UsagePage> {
                                         } else if (usageSnapshot.hasError) {
                                           return Center(
                                               child: Text(
-                                                  'Error: ${usageSnapshot.error}'));
+                                                  'Errors: $usageSnapshot'));
                                         } else {
                                           // Use fetchRouterById to get router details
                                           return FutureBuilder(

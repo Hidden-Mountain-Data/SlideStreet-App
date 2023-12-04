@@ -1,8 +1,10 @@
+import { Model } from "@prisma/client";
 export class RouterDto {
   routerId: number;
   simId: number;
   userId: number;
   name: string;
+  model: Model;
   notes: string;
   imei: string;
   iccid: string;

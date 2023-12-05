@@ -74,7 +74,7 @@ export class TealPollingService {
               dataType: 'DAILY',
               periodStart: periodStart,
               periodEnd: periodEnd,
-              callbackUrl: process.env.TEAL_DATAUSAGE_CALLBACK_URL,
+              callbackUrl: process.env.TEAL_CALLBACK_URL + '/update-data-usage',
             }
           });
 
@@ -98,11 +98,11 @@ export class TealPollingService {
       this.logger.log('Error polling Teal API:', error);
     }
   }
-  @Cron('*/5 * * * *')
+  @Cron('*/30 * * * *')
   async geteSIMS() {
-    // if(process.env.stage === 'dev') {
-    //   return
-    // }
+    if(process.env.stage === 'dev') {
+      return
+    }
     try {
 
       const requestId = this.generateUUID()
@@ -116,8 +116,6 @@ export class TealPollingService {
         }
       });
 
-
-
       // response should be 200 ok if the request was successful
       if(response.status === 200) {
         this.logger.log('Successfully sent get request to Teal API');
@@ -127,6 +125,44 @@ export class TealPollingService {
 
     } catch(error) {
       this.logger.log('Error polling Teal API:', error);
+    }
+  }
+  @Cron('0 24 * * *')
+  async getTealPlans(nextRequestId: string | null, offset: number | null, limit: number | null) {
+    if(process.env.stage === 'dev') {
+      return
+    }
+    try {
+
+      let requestId = this.generateUUID()
+      if(nextRequestId != null) {
+        // requestId = nextRequestId
+        console.log('requestId:', requestId);
+        console.log('Offset:', offset);
+        console.log('Limit:', limit);
+      }
+      this.logger.log('Get Plans from Teal API', requestId, offset, limit)
+
+      const response = await this.tealAxiosInstance.get('/api/v1/plans', {
+        params: {
+          requestId,
+          limit: limit ? limit : 50,
+          offset: offset ? offset : 0,
+          callbackUrl: process.env.TEAL_CALLBACK_URL + '/plans',
+        }
+      });
+
+
+
+      // response should be 200 ok if the request was successful
+      if(response.status === 200) {
+        this.logger.log('Successfully sent get Plans request to Teal API');
+      } else {
+        throw new Error('Error sending get Plans request to Teal API' + response);
+      }
+
+    } catch(error) {
+      this.logger.log('Error polling Teal API for get PLans:', error);
     }
   }
 

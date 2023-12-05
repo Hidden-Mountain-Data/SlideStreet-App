@@ -12,16 +12,19 @@ export class DeviceActionsService {
   async getDevices(): Promise<RouterDto[]> {
     const routers = await this.prisma.routers.findMany({
       include: {
-        sims: true,
-        dataUsageEntries: true
+        sims: {
+          include: {
+            dataUsageEntries: true
+          }
+        },
       }
     });
 
     const routersConversion = routers.map((router) => {
-      const totalDataUsage = router.dataUsageEntries.reduce((total, entry) => {
+      //NOTE Update this for each sim
+      let totalDataUsage = router.sims[0].dataUsageEntries.reduce((total, entry) => {
         return total + Number(entry.dataUsage)
       }, 0);
-
       return {
         routerId: router.routerId,
         simId: router.simId,
@@ -36,11 +39,15 @@ export class DeviceActionsService {
         updatedAt: router.updatedAt,
         deletedAt: router.deletedAt,
         //This assumes that there is only one sim per router
+        status: router.sims[0].status,
         eid: router.sims[0].eid,
         active: router.sims[0].active,
         embedded: router.sims[0].embedded,
         provider: router.sims[0].provider,
+        cap: router.sims[0].cap,
+        plan: router.sims[0].tealPlanId,
         dataUsage: totalDataUsage.toString(),
+
         //NOTE Needed fields
         //Activation Date
         //Network Plan and Rate

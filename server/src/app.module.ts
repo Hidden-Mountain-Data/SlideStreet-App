@@ -24,6 +24,9 @@ import { DeviceActionsController } from './modules/device-actions/device-actions
 import { TealController } from './modules/teal/teal.controller';
 import { TealService } from './modules/teal/teal.service';
 import { TealModule } from './modules/teal/teal.module';
+import { PlansService } from './modules/plans/plans.service';
+import { PlansController } from './modules/plans/plans.controller';
+import { PlansModule } from './modules/plans/plans.module';
 
 @Module({
   imports: [
@@ -40,9 +43,10 @@ import { TealModule } from './modules/teal/teal.module';
     TealWebhooksModule,
     DeviceActionsModule,
     TealModule,
-    DeviceActionsModule
+    DeviceActionsModule,
+    PlansModule
   ],
-  controllers: [AppController, DeviceActionsController, TealController],
+  controllers: [AppController, DeviceActionsController, TealController, PlansController],
   providers: [
     AppService,
     FileService,
@@ -62,6 +66,7 @@ import { TealModule } from './modules/teal/teal.module';
     PrismaService,
     SessionService,
     TealService,
+    PlansService,
   ],
   exports: [PrismaService],
 })

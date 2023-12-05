@@ -94,7 +94,7 @@ export class RoutersService {
           routerId,
           iccid: 'some-sim-iccid', // TODO: Adjust accordingly
           active: true,
-          status: 'ACTIVE',
+          status: 'ONLINE',
           embedded: true,
         },
       });

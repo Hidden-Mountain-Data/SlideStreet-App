@@ -20,9 +20,9 @@ model DataUsages {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
   date        Dates     @relation("DataUsageDate", fields: [dateId], references: [dateId])
-  router      Routers?  @relation("DataUsageRouter", fields: [routerId], references: [routerId])
+  // router      Routers?  @relation("DataUsageRouter", fields: [routerId], references: [routerId])
   sim         Sims      @relation("DataUsageSim", fields: [simId], references: [simId])
-  user        Users     @relation("DataUsageUser", fields: [userId], references: [userId])
+  // user        Users     @relation("DataUsageUser", fields: [userId], references: [userId])
 
   // @@index([dateId])
   // @@index([simId])
@@ -47,26 +47,99 @@ model Dates {
   @@map("dates")
 }
 
+
+model TealPlans {
+  planId   Int      @id @default(autoincrement()) @map("plan_id")
+  tealPlanId Int?   @map("teal_plan_id") @unique
+  name     String   @unique
+  price    Float?  @map("price")
+  smsPrice Float?   @map("sms_price")
+  volume   Int?    @map("volume")
+  volumeUnit String? @map("volume_unit")
+  validityTime Int? @map("validity_time")
+  validityTimeUnit String? @map("validity_time_unit")
+  maxReliability Int? @map("max_reliability")
+  reliability Int?  @map("reliability")
+  networkTechType String? @map("network_tech_type")
+  networkTechTypeTitle String? @map("network_tech_type_title")
+  uuid String?  @map("uuid")
+  profilePools String[] @map("profile_pools")
+  skus String[] @map("skus")
+  minUnitPriceBilling Boolean @map("min_unit_price_billing")
+  minUnitPrice Float? @map("min_unit_price")
+  minUnitVolume Int?   @map("min_unit_volume")
+  minUnitVolumeUnit String?  @map("min_unit_volume_unit")
+  coverageCountries String[] @map("coverage_countries")
+  meerkatEnabled Boolean @map("meerkat_enabled")
+  networkTechTypes String[] @map("network_tech_types")
+  coverageType String? @map("coverage_type")
+  credentialsType String?
+  networkType String? @map("network_type")
+  ssplans SSPlans[] @relation("TealPlanSSPlan") 
+  @@map("teal_plans")
+}
+
+model SSPlans {
+  ssPlanId   Int      @id @default(autoincrement()) @map("plan_id")
+  name     String   @unique
+  cap      Int
+  rate    Float
+  tealPlanId Int?   @map("teal_plan_id")
+  tealPlan TealPlans? @relation("TealPlanSSPlan", fields: [tealPlanId], references: [planId])
+  sims Sims[] @relation("SSPlans")
+  @@map("ss_plans")
+}
 model Sims {
   simId            Int          @id @default(autoincrement()) @map("sim_id")
   userId           Int          @map("user_id")
   routerId         Int?         @map("router_id")
-  iccid            String       @db.VarChar(50)
+  iccid            String       @db.VarChar(50) 
+  imsi           String?      @db.VarChar(50)
+  imei             String?      @db.VarChar(50)
+  msisdn         String?      @db.VarChar(50)
   eid              String?      @db.VarChar(50) @unique
+  ssPlanId         Int?         @map("ss_plan_id")
+  tealPlanId       Int?         @map("teal_plan_id")
+  planUuid         String?      @map("plan_uuid")
+  planName         String?      @map("plan_name")
+  planVolumeUnit   String?      @map("plan_volume_unit")
+  planPrice        String?      @map("plan_price")
+  deviceName       String?      @map("device_name")
+  planChangeStatus String?      @map("plan_change_status")
+  clientId         Int?         @map("client_id")
+  clientName       String?      @map("client_name")
+  clientTitle      String?      @map("client_title")
+  clientUuid       String?      @map("client_uuid")
+  sku              String?      @map("sku")
+  batchNumber      String?      @map("batch_number")
+  deviceGroupName  String?      @map("device_group_name")
+  clientChangeTimestamp String? @map("client_change_timestamp")
+  profileChangeStatus String?   @map("profile_change_status")
+  flowType         String?      @map("flow_type")
+  bootstrapIccid   String?      @map("bootstrap_iccid")
+  initialBootstrapIccid String? @map("initial_bootstrap_iccid")
+  bootstrapImsi    String?      @map("bootstrap_imsi")
+  cap              Int?         @default(0)
+  usage            Int?         @default(0)
+  capped           Boolean?     @default(false)
+  meerkatPublicIpEnabled Boolean? @default(false) @map("meerkat_public_ip_enabled")
+  meerkatPrivateIpEnabled Boolean? @default(false) @map("meerkat_private_ip_enabled")
+  lastConnectedNetwork Json?  @map("last_connected_network") //JSON Stringify this object?
+  meerkatIpEntries String[]      @map("meerkat_ip_entries")
+  profileOnly      Boolean?     @default(false) @map("profile_only")
+  status           TealSimStatus @default(ONLINE)// deviceStatus from Teal  
   provider         Provider     @default(TEAL)
-  active           Boolean?
-  ipAddress        String?      @map("ip_address") @db.VarChar(50)
-  status           SimStatus    @default(ACTIVE)
+  ipAddress        String?      @map("ip_address")
+  active           Boolean?   //suspened from Teal, we'll flip value in import
   embedded         Boolean?     @default(true)
   notes            String?      @db.VarChar(500)
-  imei             String?      @db.VarChar(50)
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
   deletedAt        DateTime?    @map("deleted_at")
   dataUsageEntries DataUsages[] @relation("DataUsageSim")
   router           Routers?     @relation("RouterSims", fields: [routerId], references: [routerId])
   user             Users        @relation("UserSim", fields: [userId], references: [userId])
-
+  ssPlan           SSPlans?     @relation("SSPlans", fields: [ssPlanId], references: [ssPlanId])
   @@index([simId])
   @@index([userId])
   @@index([routerId])
@@ -86,7 +159,7 @@ model Routers {
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
   deletedAt        DateTime?        @map("deleted_at")
-  dataUsageEntries DataUsages[]     @relation("DataUsageRouter")
+  // dataUsageEntries DataUsages[]     @relation("DataUsageRouter")
   routerLocation   RouterLocations?
   sims             Sims[]           @relation("RouterSims")
   user             Users            @relation("UserRouter", fields: [userId], references: [userId])
@@ -116,7 +189,7 @@ model Users {
   imageUrl         String?      @map("image_url") @db.VarChar(250)
   role             Roles?       @default(USER)
   address          Addresses?   @relation("UserAddress")
-  dataUsages       DataUsages[] @relation("DataUsageUser")
+  // dataUsages       DataUsages[] @relation("DataUsageUser")
   routers          Routers[]    @relation("UserRouter")
   sims             Sims[]       @relation("UserSim")
 
@@ -175,7 +248,17 @@ enum SimStatus {
   SUSPENDED
   PREACTIVE
   PENDING
+  WAITING
   UNKNOWN
+}
+enum TealSimStatus {
+  ONLINE
+  STOPPED
+  WAITING
+  UNACTIVATED
+  ACTIVATING
+  DEACTIVATED
+  DEACTIVATING
 }
 
 enum Provider { //NOTE We probably need a carriers model when we get more

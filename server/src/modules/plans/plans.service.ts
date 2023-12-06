@@ -1,4 +1,3 @@
-import { UserProvider } from '../users/user.provider';
 import { SimsService } from '../sims/sims.service';
 import {
   HttpException,
@@ -17,7 +16,6 @@ export class PlansService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly plansService: PlansService,
   ) { }
 
   async getPlans(): Promise<SSPlans[]> {

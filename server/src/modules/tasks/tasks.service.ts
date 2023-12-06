@@ -127,7 +127,7 @@ export class TealPollingService {
       this.logger.log('Error polling Teal API:', error);
     }
   }
-  @Cron('0 24 * * *')
+  @Cron('0 0 * * *')
   async getTealPlans(nextRequestId: string | null, offset: number | null, limit: number | null) {
     if(process.env.stage === 'dev') {
       return
